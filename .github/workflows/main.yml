@@ -9,8 +9,9 @@ jobs:
         with:
           node-version: 20
       - run: npm install @capacitor/cli @capacitor/core @capacitor/android
-      - run: npx cap init "HashNode" com.minersim.hash --web-dir "."
-      - run: mkdir -p www && cp index.html www/
+      - run: mkdir www
+      - run: cp index.html www/
+      - run: npx cap init "HashNode" com.minersim.hash --web-dir www
       - run: npx cap add android
       - run: npx cap sync android
       - run: cd android && ./gradlew assembleDebug
