@@ -1,33 +1,19 @@
 name: Build
 on: [push]
 jobs:
-  android_build:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
-
-      - name: Install Ionic and Capacitor
-        run: npm install @capacitor/cli @capacitor/core @capacitor/android
-
-      - name: Sync Android
-        run: |
-          npx cap init "HashNode Pro" com.minersimstudio.hashnode --web-dir .
-          npx cap add android
-          npx cap copy android
-
-      - name: Build APK
-        run: |
-          cd android
-          ./gradlew assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+      - run: npm install @capacitor/cli @capacitor/core @capacitor/android
+      - run: npx cap init "HashNode" com.minersim.hash --web-dir .
+      - run: npx cap add android
+      - run: npx cap copy android
+      - run: cd android && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v3
         with:
           name: HashNode-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
