@@ -373,7 +373,14 @@ canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-event
 .abtn-red{background:rgba(255,68,68,0.2);color:#fff;border:1px solid rgba(255,68,68,0.4);}
 .abtn-green{background:rgba(0,255,136,0.15);color:#000;background:linear-gradient(135deg,#00ff88,#00cc6a);font-weight:900;}
 .abtn-yellow{background:linear-gradient(135deg,#f0b429,#d69e0b);color:#000;font-weight:900;}
-/* Settings */
+  .user-row-id {
+    font-size: 10px;
+    color: #ff4444;
+    font-family: monospace;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    display: block;
+}/* Settings */
 .asetting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
 .asetting-row:last-child{border-bottom:none;}
 .asetting-lbl{font-size:14px;font-weight:700;}
@@ -1094,7 +1101,18 @@ canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-event
           <div style="font-size:11px;color:#00ff88;display:none;margin-bottom:8px;" id="pwChangeOk">✓ Şifre başarıyla değiştirildi!</div>
           <button class="abtn abtn-yellow" style="width:100%;padding:12px;" onclick="changeAdminPw()">🔐 ŞİFREYİ GÜNCELLE</button>
         </div>
-
+<div class="acard">
+          <div class="acard-title" style="color: #f0b429;">📢 ADMOB REKLAM YÖNETİMİ</div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; color: rgba(255,255,255,0.5);">Yayıncı (Publisher) ID:</label>
+            <input class="ainp" type="text" id="admin-pub-id" placeholder="ca-app-pub-xxxxxxxxxxxxxxxx" style="margin-top:5px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; color: rgba(255,255,255,0.5);">Reklam Birimi (Unit) ID:</label>
+            <input class="ainp" type="text" id="admin-unit-id" placeholder="xxxxxxxxxx" style="margin-top:5px;">
+          </div>
+          <button class="abtn abtn-yellow" style="width:100%;margin-top:5px;height:38px;" onclick="saveAdMobSettings()">AYARLARI SİSTEME KAYDET</button>
+</div>
         <div class="acard">
           <div class="acard-title">⚙️ UYGULAMA AYARLARI</div>
           <div class="asetting-row">
@@ -2429,6 +2447,7 @@ function renderAdminUsers(){
             <span class="user-status ${statusCls}">${statusTxt}</span>
             ${u.social?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">${u.social}</span>`:''}
           </div>
+          <div class="user-row-id">UID: ${u.id || 'N/A'}</div>
           <div class="user-row-email">${u.email} · Kayıt: ${u.since||'?'}</div>
           <div style="font-size:11px;color:rgba(0,255,136,0.6);margin-top:2px;">💰 ${(userData.coins||0).toFixed(6)} sBTC · 🔲 ${userData.blocks||0} blok</div>
         </div>
@@ -3130,21 +3149,15 @@ function renderContestHistory(){
       <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">${cntTypeLabel[c.type]||c.type} · ${new Date(c.created).toLocaleDateString('tr-TR')} · ${c.winners?.length||0} kazanan</div>
     </div>`).join('');
 }
-
-// ════════════════════════════════════════════════
-// UYGULAMA AÇILIŞINDA TÜM ADMİN AYARLARINI UYGULA
-// ════════════════════════════════════════════════
-function applyAllAdminSettings(){
-  applyPageBanners();
-  applyHeroText();
-  loadActiveCampaigns();
-}
-// startApp içinde çağırılmak üzere
-const _adminApplyHook=setInterval(()=>{
-  if(typeof applyAllAdminSettings==='function'&&typeof applyPageBanners==='function'){
-    clearInterval(_adminApplyHook);
-  }
 },50);
+  function saveAdMobSettings() {
+    const p = document.getElementById('admin-pub-id').value;
+    const u = document.getElementById('admin-unit-id').value;
+    if(!p || !u) return alert("Lütfen boş bırakmayın!");
+    localStorage.setItem('saved_pub_id', p);
+    localStorage.setItem('saved_unit_id', u);
+    alert("✅ AdMob ID'leri başarıyla kaydedildi!");
+}
 </script>
 </body>
 </html>
