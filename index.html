@@ -2404,6 +2404,23 @@ function saveAdminAds(a){ localStorage.setItem(ADMIN_ADS_KEY,JSON.stringify(a));
 
 function renderAdminAds(){
   const ads=getAdminAds();
+  // --- ADMOB AYAR KUTUSU BAŞLANGIÇ ---
+  const admobArea = document.getElementById('page-admin-ads');
+  const admobHtml = `
+    <div class="card" style="border: 1px solid #f1c40f55; margin-bottom: 20px; background: rgba(241, 196, 15, 0.05);">
+      <div class="card-title" style="color: #f1c40f;">📺 ADMOB BANNER AYARI</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+        <input type="text" id="admin-pub-id" class="cnt-input" placeholder="Yayıncı ID (ca-app-pub-...)">
+        <input type="text" id="admin-unit-id" class="cnt-input" placeholder="Reklam Birimi ID">
+        <button onclick="saveAdMobSettings()" class="btn-primary" style="background:#f1c40f; color:#000; font-weight:bold;">💾 REKLAMI KAYDET VE AKTİF ET</button>
+      </div>
+    </div>`;
+    
+  // Eğer kutu daha önce eklenmediyse en üste ekle
+  if(!document.getElementById('admin-pub-id')){
+    admobArea.insertAdjacentHTML('afterbegin', admobHtml);
+  }
+  // --- ADMOB AYAR KUTUSU BİTİŞ ---
   document.getElementById('adSlotList').innerHTML=ads.map(ad=>`
     <div class="ad-slot">
       <div class="ad-slot-info">
