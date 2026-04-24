@@ -1,3 +1,10 @@
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  CI: false
 name: Build
 on: [push]
 jobs:
