@@ -675,7 +675,31 @@ canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-event
       <div class="home-logo">⬡ HASHNODE GLOBAL</div>
       <div class="home-sub">Sanal Madencilik Terminali · Simülasyon</div>
     </div>
+<div id="ad-wrapper" style="width:100%; margin:10px 0; display:none; justify-content:center;">
+    <div style="background:rgba(255,255,255,0.05); border-radius:10px; padding:5px; width:320px; min-height:50px; border:1px solid rgba(255,255,255,0.1);">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             id="dynamic-ad-unit"
+             data-ad-client=""
+             data-ad-slot=""></ins>
+        <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script>
+    </div>
+</div>
 
+<script>
+  function activateAds() {
+      const p = localStorage.getItem('saved_pub_id');
+      const u = localStorage.getItem('saved_unit_id');
+      if(p && u) {
+          const ad = document.getElementById('dynamic-ad-unit');
+          ad.setAttribute('data-ad-client', p);
+          ad.setAttribute('data-ad-slot', u);
+          document.getElementById('ad-wrapper').style.display = 'flex';
+      }
+  }
+  // Uygulama açıldıktan 2 saniye sonra reklamı göster
+  setTimeout(activateAds, 2000);
+</script>
     <div class="card">
       <div class="coin-display" id="coinDisplay">0.000000</div>
       <div class="coin-lbl">SANAL BTC (GERÇEK DEĞİL)</div>
