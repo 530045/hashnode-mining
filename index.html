@@ -2402,38 +2402,45 @@ function getAdminAds(){
 }
 function saveAdminAds(a){ localStorage.setItem(ADMIN_ADS_KEY,JSON.stringify(a)); }
 
-function renderAdminAds(){
-  const ads=getAdminAds();
-  // --- ADMOB AYAR KUTUSU BAŞLANGIÇ ---
-  const admobArea = document.getElementById('page-admin-ads');
-  const admobHtml = `
+function renderAdminAds() {
+  const ads = getAdminAds();
+  const el = document.getElementById('page-admin-ads');
+  if(!el) return;
+
+  // Sayfayı temizleyip en başa AdMob kutusunu, altına kampanya listesini koyuyoruz
+  el.innerHTML = `
     <div class="card" style="border: 1px solid #f1c40f55; margin-bottom: 20px; background: rgba(241, 196, 15, 0.05);">
       <div class="card-title" style="color: #f1c40f;">📺 ADMOB BANNER AYARI</div>
       <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-        <input type="text" id="admin-pub-id" class="cnt-input" placeholder="Yayıncı ID (ca-app-pub-...)">
-        <input type="text" id="admin-unit-id" class="cnt-input" placeholder="Reklam Birimi ID">
-        <button onclick="saveAdMobSettings()" class="btn-primary" style="background:#f1c40f; color:#000; font-weight:bold;">💾 REKLAMI KAYDET VE AKTİF ET</button>
+        <input type="text" id="admin-pub-id" class="ainp" placeholder="Yayıncı ID (ca-app-pub-...)">
+        <input type="text" id="admin-unit-id" class="ainp" placeholder="Reklam Birimi ID">
+        <button onclick="saveAdMobSettings()" class="abtn abtn-yellow" style="width:100%; cursor:pointer;">💾 REKLAMI KAYDET VE AKTİF ET</button>
       </div>
-    </div>`;
-    
-  // Eğer kutu daha önce eklenmediyse en üste ekle
-  if(!document.getElementById('admin-pub-id')){
-    admobArea.insertAdjacentHTML('afterbegin', admobHtml);
-  }
-  // --- ADMOB AYAR KUTUSU BİTİŞ ---
-  document.getElementById('adSlotList').innerHTML=ads.map(ad=>`
-    <div class="ad-slot">
-      <div class="ad-slot-info">
-        <div class="ad-slot-name">${ad.name}</div>
-        <div class="ad-slot-desc">${ad.text.substring(0,50)}... · <span style="color:#a855f7;">${ad.type}</span> · Ödül: ${ad.reward}</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
-        <div class="ad-slot-toggle ${ad.active?'on':''}" onclick="toggleAdSlot('${ad.id}')"></div>
-        <button class="abtn abtn-ban" style="padding:5px 10px;font-size:11px;" onclick="removeAdSlot('${ad.id}')">✕</button>
-      </div>
-    </div>`).join('');
-}
+    </div>
+    <div class="card-title">🎁 MEVCUT KAMPANYALAR</div>
+    <div id="adSlotList"></div>
+  `;
 
+  // Kayıtlı ID'leri kutulara doldur
+  document.getElementById('admin-pub-id').value = localStorage.getItem('saved_pub_id') || '';
+  document.getElementById('admin-unit-id').value = localStorage.getItem('saved_unit_id') || '';
+
+  // Kampanya listesini (adSlotList) içine doldur
+  const listEl = document.getElementById('adSlotList');
+  if(listEl) {
+    listEl.innerHTML = ads.map(ad => `
+      <div class="ad-slot">
+        <div class="ad-slot-info">
+          <div class="ad-slot-name">${ad.name}</div>
+          <div class="ad-slot-desc">${ad.text.substring(0,50)}...</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="ad-slot-toggle ${ad.active?'on':''}" onclick="toggleAdSlot('${ad.id}')"></div>
+          <button class="abtn abtn-ban" style="padding:5px 10px; font-size:11px;" onclick="removeAdSlot('${ad.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+}
 function toggleAdSlot(id){
   const ads=getAdminAds();
   const ad=ads.find(a=>a.id===id);
