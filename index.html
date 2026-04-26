@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-3940256099942544" crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>HASHNODE GLOBAL | Mining Simulator</title>
@@ -420,6 +420,7 @@ canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-event
 .banner-edit-row{background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.15);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
 .banner-page-lbl{font-size:10px;font-weight:700;color:#f0b429;background:rgba(240,180,41,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;}
 </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
 </head>
 <body>
 <canvas id="bgMatrix"></canvas>
@@ -1025,7 +1026,7 @@ canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-event
     </div>
 
     <div class="admin-tabs">
-      <div class="admin-atab active" onclick="goAdminTab('stats')">📊 İSTATİSTİK</div>
+    <div class="admin-atab active" onclick="goAdminTab('stats')">📊 İSTATİSTİK</div>
       <div class="admin-atab" onclick="goAdminTab('ads')">📺 REKLAMLAR</div>
       <div class="admin-atab" onclick="goAdminTab('pages')">🖥 SAYFALAR</div>
       <div class="admin-atab" onclick="goAdminTab('mining')">⛏ MADENCİLİK</div>
@@ -1037,6 +1038,20 @@ canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-event
     </div>
 
     <div class="admin-body">
+    <div id="reklam-cercevesi" style="width: 100%; text-align: center; margin: 10px 0; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+    <ins class="adsbygoogle"
+         id="ana-reklam"
+         style="display:block"
+         data-ad-client="ca-pub-3940256099942544" 
+         data-ad-slot="6300978111"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+         } catch (e) { console.error("Reklam yükleme hatası:", e); }
+    </script>
+</div>
 
       <!-- ── STATS ── -->
       <div class="admin-page active" id="atab-stats">
@@ -3218,6 +3233,28 @@ function renderContestHistory(){
     localStorage.setItem('saved_pub_id', p);
     localStorage.setItem('saved_unit_id', u);
     alert("✅ AdMob ID'leri başarıyla kaydedildi!");
+    // Sayfa yüklendiğinde kayıtlı ID varsa reklamı onunla başlat
+window.addEventListener('load', () => {
+    const savedPubId = localStorage.getItem('saved_pub_id');
+    if (savedPubId) {
+        const adEl = document.getElementById('ana-reklam');
+        if (adEl) {
+            adEl.setAttribute('data-ad-client', savedPubId.trim());
+        }
+    }
+});
+
+// Kaydet butonuna basıldığında reklamı anlık güncellemek için fonksiyonu genişlet
+function applyAdChanges() {
+    saveAdMobSettings(); // Mevcut kaydetme işlemin
+    const newId = localStorage.getItem('saved_pub_id');
+    if (newId) {
+        const adEl = document.getElementById('ana-reklam');
+        adEl.setAttribute('data-ad-client', newId.trim());
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        alert("Reklam birimi yeni ID ile güncellendi.");
+    }
+}
 }
 </script>
 </body>
