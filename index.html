@@ -1,1 +1,3260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HASHNODE GLOBAL | Mining Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00ff88; --yellow:#f0b429; --blue:#00b4ff;
+  --red:#ff4444; --purple:#a855f7; --orange:#ff6b35;
+  --bg:#02040c; --bg2:#0a0f1e; --card:rgba(10,18,40,0.95);
+  --border:rgba(0,255,136,0.18); --border2:rgba(0,255,136,0.08);
+  --text:#e2e8f0; --muted:rgba(255,255,255,0.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);overflow-x:hidden;min-height:100vh;}
+canvas#bgMatrix{position:fixed;top:0;left:0;z-index:0;opacity:0.07;pointer-events:none;}
 
+/* ══════════ ANIMATIONS ══════════ */
+@keyframes pulse{0%,100%{text-shadow:0 0 20px rgba(0,255,136,0.5);}50%{text-shadow:0 0 50px rgba(0,255,136,1),0 0 80px rgba(0,255,136,0.3);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes scanline{0%{top:-10%;}100%{top:110%;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(0,255,136,0.2);}50%{box-shadow:0 0 30px rgba(0,255,136,0.5),0 0 60px rgba(0,255,136,0.2);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes ripple{0%{transform:scale(0);opacity:1;}100%{transform:scale(4);opacity:0;}}
+
+/* ══════════ SCREEN SYSTEM ══════════ */
+.screen{display:none;position:fixed;inset:0;z-index:10;overflow-y:auto;overflow-x:hidden;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ══════════ SPLASH SCREEN ══════════ */
+#splash{background:var(--bg);align-items:center;justify-content:center;z-index:9999;}
+.splash-inner{text-align:center;position:relative;z-index:2;}
+.splash-hex{font-size:5rem;animation:float 3s ease-in-out infinite;display:block;margin-bottom:20px;filter:drop-shadow(0 0 20px rgba(0,255,136,0.6));}
+.splash-logo{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;color:var(--green);letter-spacing:5px;animation:pulse 2s infinite;}
+.splash-tagline{color:var(--muted);font-size:13px;letter-spacing:3px;margin-top:8px;}
+.splash-bar-wrap{width:260px;height:3px;background:rgba(255,255,255,0.08);border-radius:3px;margin:32px auto 12px;overflow:hidden;}
+.splash-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--green));background-size:200%;animation:none;border-radius:3px;width:0%;transition:width 0.15s linear;}
+.splash-status{font-size:11px;color:var(--muted);letter-spacing:2px;}
+.splash-scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0.3;animation:scanline 2s linear infinite;}
+.splash-version{position:absolute;bottom:30px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,0.15);letter-spacing:2px;}
+
+/* ══════════ AUTH SCREEN (LOGIN + REGISTER) ══════════ */
+#authScreen{background:var(--bg);min-height:100vh;}
+.auth-bg-deco{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.auth-circle{position:absolute;border-radius:50%;opacity:0.04;}
+.auth-c1{width:500px;height:500px;background:var(--green);top:-150px;right:-150px;}
+.auth-c2{width:400px;height:400px;background:var(--blue);bottom:-100px;left:-100px;}
+.auth-c3{width:200px;height:200px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);}
+.auth-wrap{position:relative;z-index:1;padding:20px 16px 40px;min-height:100vh;display:flex;flex-direction:column;}
+.auth-header{text-align:center;padding:30px 0 24px;}
+.auth-logo{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:var(--green);letter-spacing:3px;animation:pulse 3s infinite;}
+.auth-sub{color:var(--muted);font-size:12px;letter-spacing:2px;margin-top:6px;}
+.auth-hex{font-size:2.5rem;display:block;margin-bottom:12px;filter:drop-shadow(0 0 15px rgba(0,255,136,0.5));animation:float 3s ease-in-out infinite;}
+.auth-tabs{display:flex;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:14px;padding:4px;margin-bottom:20px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:var(--muted);transition:all 0.25s;letter-spacing:1px;}
+.auth-tab.active{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.25);}
+.auth-panel{display:none;animation:slideUp 0.3s ease;}
+.auth-panel.active{display:block;}
+.auth-card{background:rgba(10,18,40,0.9);border:1px solid var(--border);border-radius:20px;padding:20px;}
+
+/* FORM ELEMENTS */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--muted);letter-spacing:1.5px;display:block;margin-bottom:7px;font-weight:600;}
+.form-input{width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,136,0.15);color:#fff;padding:13px 14px;border-radius:12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--green);}
+.form-input::placeholder{color:rgba(255,255,255,0.2);}
+.form-input.error{border-color:var(--red);}
+.form-err{font-size:11px;color:var(--red);margin-top:5px;display:none;}
+.form-err.show{display:block;}
+.input-icon-wrap{position:relative;}
+.input-icon-wrap .form-input{padding-left:42px;}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;opacity:0.5;}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;opacity:0.5;background:none;border:none;color:#fff;}
+.strength-bar{display:flex;gap:4px;margin-top:8px;}
+.strength-seg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,0.1);transition:background 0.3s;}
+.strength-seg.weak{background:var(--red);}
+.strength-seg.medium{background:var(--yellow);}
+.strength-seg.strong{background:var(--green);}
+.form-check{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.form-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px;}
+.form-check-txt{font-size:13px;color:var(--muted);line-height:1.5;}
+.form-check-txt a{color:var(--green);text-decoration:none;}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;}
+.divider-line{flex:1;height:1px;background:rgba(255,255,255,0.08);}
+.divider-txt{font-size:12px;color:var(--muted);}
+.social-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.social-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--text);font-family:'Rajdhani',sans-serif;}
+.social-btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);}
+.social-icon{font-size:18px;}
+.forgot-link{text-align:center;margin-top:14px;font-size:13px;color:var(--muted);}
+.forgot-link a{color:var(--green);text-decoration:none;}
+.auth-features{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px;}
+.auth-feat{text-align:center;padding:12px 8px;background:rgba(0,255,136,0.04);border:1px solid var(--border2);border-radius:12px;}
+.auth-feat-icon{font-size:1.4rem;margin-bottom:4px;}
+.auth-feat-txt{font-size:10px;color:var(--muted);line-height:1.3;}
+
+/* ══════════ TERMS SCREEN ══════════ */
+#termsScreen{background:var(--bg);z-index:9998;}
+.terms-wrap{padding:20px 16px;padding-bottom:100px;flex:1;}
+.terms-header{text-align:center;padding:20px 0 24px;border-bottom:1px solid var(--border2);margin-bottom:20px;}
+.terms-logo{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:var(--green);letter-spacing:2px;}
+.terms-icon{font-size:3rem;display:block;margin-bottom:12px;}
+.terms-title{font-size:1.1rem;font-weight:700;color:var(--yellow);margin-bottom:6px;font-family:'Orbitron',sans-serif;}
+.terms-date{font-size:11px;color:var(--muted);}
+.terms-section{margin-bottom:20px;}
+.terms-section-title{font-size:14px;font-weight:700;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:8px;letter-spacing:1px;}
+.terms-section-num{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);color:var(--green);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.terms-text{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.8;background:rgba(255,255,255,0.02);border-left:2px solid rgba(0,255,136,0.2);padding:10px 14px;border-radius:0 8px 8px 0;}
+.terms-highlight{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.2);border-radius:10px;padding:12px 14px;margin-bottom:20px;}
+.terms-highlight-txt{font-size:12px;color:var(--yellow);line-height:1.7;}
+.terms-footer{position:fixed;bottom:0;left:0;right:0;background:rgba(2,4,12,0.97);border-top:1px solid var(--border);padding:14px 16px;z-index:10;backdrop-filter:blur(12px);}
+.terms-check-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.terms-check-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--green);cursor:pointer;}
+.terms-check-row label{font-size:13px;color:var(--muted);cursor:pointer;}
+
+/* ══════════ MAIN APP ══════════ */
+#mainApp{background:var(--bg);z-index:1;display:none;}
+#mainApp.active{display:flex;flex-direction:column;min-height:100vh;}
+
+/* TOP NAV */
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(2,4,12,0.92);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:.95rem;font-weight:900;color:var(--green);letter-spacing:2px;}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.lang-btn{background:rgba(0,255,136,0.07);border:1px solid var(--border);color:var(--green);padding:5px 10px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:13px;cursor:pointer;font-weight:600;}
+.lang-dropdown{position:absolute;top:52px;right:16px;background:#0d1a30;border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:200;display:none;min-width:140px;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.lang-dropdown.open{display:block;}
+.lang-item{padding:10px 16px;font-size:14px;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;gap:8px;}
+.lang-item:hover{background:rgba(0,255,136,0.08);}
+.lang-item.active{color:var(--green);font-weight:700;}
+.nav-wallet{font-size:11px;color:var(--yellow);font-weight:700;background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.2);padding:5px 10px;border-radius:8px;cursor:pointer;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000;cursor:pointer;flex-shrink:0;}
+
+/* BANNER AD */
+.banner-ad{background:linear-gradient(135deg,rgba(240,180,41,0.12),rgba(0,180,255,0.08));border:1px solid rgba(240,180,41,0.25);margin:10px 12px 0;border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;}
+.banner-ad:hover{background:linear-gradient(135deg,rgba(240,180,41,0.18),rgba(0,180,255,0.12));}
+.banner-ad-txt{font-size:13px;color:var(--yellow);font-weight:600;}
+.banner-ad-sub{font-size:11px;color:var(--muted);}
+.banner-ad-btn{background:var(--yellow);color:#000;font-weight:700;font-size:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;font-family:'Rajdhani',sans-serif;}
+
+/* BOTTOM NAV */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:rgba(2,4,12,0.97);border-top:1px solid var(--border);display:flex;z-index:100;backdrop-filter:blur(12px);}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;transition:all 0.2s;position:relative;}
+.nav-tab.active .nticon{color:var(--green);}
+.nav-tab.active .ntlabel{color:var(--green);}
+.nav-tab.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--green);border-radius:0 0 4px 4px;}
+.nticon{font-size:20px;margin-bottom:3px;color:var(--muted);}
+.ntlabel{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.5px;}
+
+/* PAGES */
+.page{display:none;padding:10px 12px 85px;animation:fadeIn 0.3s ease;}
+.page.active{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border-radius:18px;border:1px solid var(--border);padding:14px;margin-bottom:12px;}
+.card-title{font-size:10px;color:var(--muted);letter-spacing:2px;font-weight:700;margin-bottom:12px;text-transform:uppercase;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.1);border-radius:12px;padding:10px;}
+.stat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.stat-val{font-size:16px;font-weight:700;color:var(--green);margin-top:3px;font-family:'Orbitron',sans-serif;font-size:14px;}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:700;font-size:15px;cursor:pointer;font-family:'Rajdhani',sans-serif;letter-spacing:1px;transition:transform 0.1s,filter 0.2s;position:relative;overflow:hidden;}
+.btn:active{transform:scale(0.97);}
+.btn::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);width:100%;height:100%;background:rgba(255,255,255,0.2);border-radius:50%;animation:none;}
+.btn-green{background:linear-gradient(135deg,#00ff88,#00cc6a);color:#000;}
+.btn-stop{background:linear-gradient(135deg,#ff4444,#cc2222);color:#fff;}
+.btn-yellow{background:linear-gradient(135deg,#f0b429,#d69e0b);color:#000;}
+.btn-blue{background:linear-gradient(135deg,#00b4ff,#0080cc);color:#000;}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;}
+.btn-outline{background:transparent;border:1px solid var(--green);color:var(--green);}
+.btn-sm{padding:8px 16px;width:auto;font-size:13px;border-radius:10px;}
+.btn-xs{padding:5px 12px;width:auto;font-size:12px;border-radius:8px;}
+.btn-disabled{opacity:0.35;pointer-events:none;}
+
+/* LOG */
+.sys-log{background:rgba(0,0,0,0.5);border-radius:10px;padding:10px;font-family:'Courier New',monospace;font-size:11px;color:var(--green);max-height:100px;overflow-y:auto;border:1px solid rgba(0,255,136,0.08);}
+.sys-log p{margin:2px 0;}
+
+/* BADGE */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-g{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.25);}
+.badge-y{background:rgba(240,180,41,0.15);color:var(--yellow);border:1px solid rgba(240,180,41,0.3);}
+.badge-b{background:rgba(0,180,255,0.1);color:var(--blue);border:1px solid rgba(0,180,255,0.25);}
+.badge-r{background:rgba(255,68,68,0.1);color:var(--red);border:1px solid rgba(255,68,68,0.2);}
+.badge-p{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.25);}
+
+/* HOME HERO */
+.home-hero{text-align:center;padding:16px 0 8px;}
+.home-logo{font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;color:var(--green);letter-spacing:3px;animation:pulse 3s infinite;}
+.home-sub{color:var(--muted);font-size:12px;margin-top:5px;letter-spacing:1px;}
+.coin-display{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:700;color:var(--yellow);text-align:center;margin:8px 0 4px;text-shadow:0 0 20px rgba(240,180,41,0.4);}
+.coin-lbl{text-align:center;color:var(--muted);font-size:11px;letter-spacing:1px;}
+
+/* PROGRESS */
+.progress-wrap{width:100%;height:5px;background:rgba(255,255,255,0.08);border-radius:4px;margin:8px 0;overflow:hidden;}
+.progress-bar{height:100%;border-radius:4px;transition:width 0.5s;}
+.pb-green{background:linear-gradient(90deg,#00cc6a,#00ff88);}
+.pb-yellow{background:linear-gradient(90deg,#d69e0b,#f0b429);}
+.pb-blue{background:linear-gradient(90deg,#0080cc,#00b4ff);}
+.pb-purple{background:linear-gradient(90deg,#7c3aed,#a855f7);}
+
+/* FARM */
+.farm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.farm-card{background:rgba(10,18,40,0.9);border:1px solid var(--border2);border-radius:16px;padding:12px;text-align:center;transition:all 0.25s;}
+.farm-card:hover{border-color:rgba(0,255,136,0.3);}
+.farm-card.owned{border-color:rgba(0,255,136,0.35);background:rgba(0,255,136,0.03);box-shadow:0 0 15px rgba(0,255,136,0.07);}
+.farm-icon{font-size:1.9rem;margin-bottom:6px;display:block;}
+.farm-name{font-size:12px;font-weight:700;margin-bottom:3px;}
+.farm-rate{font-size:11px;color:var(--green);}
+.farm-cost{font-size:11px;color:var(--yellow);margin-top:2px;}
+.farm-lv{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* DEVICES */
+.device-card{display:flex;align-items:center;gap:12px;background:rgba(10,18,40,0.9);border:1px solid var(--border2);border-radius:16px;padding:14px;margin-bottom:10px;transition:all 0.2s;}
+.device-card:hover{border-color:rgba(0,255,136,0.25);}
+.device-card.owned{border-color:rgba(0,255,136,0.4);background:rgba(0,255,136,0.03);}
+.dev-icon{font-size:2rem;width:48px;text-align:center;flex-shrink:0;}
+.dev-info{flex:1;}
+.dev-name{font-size:14px;font-weight:700;}
+.dev-specs{font-size:11px;color:var(--muted);margin-top:2px;}
+.dev-price{font-size:12px;color:var(--yellow);font-weight:700;margin-top:4px;}
+.dev-owned{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.25);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;}
+
+/* WITHDRAW */
+.wm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.wm-card{background:rgba(10,18,40,0.9);border:1px solid var(--border2);border-radius:12px;padding:10px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.wm-card:hover,.wm-card.sel{border-color:rgba(0,255,136,0.35);background:rgba(0,255,136,0.05);}
+.wm-icon{font-size:1.5rem;margin-bottom:4px;}
+.wm-name{font-size:11px;font-weight:700;}
+.wm-min{font-size:10px;color:var(--muted);}
+.form-inp{width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,136,0.15);color:#fff;padding:12px 14px;border-radius:12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;transition:border-color 0.2s;}
+.form-inp:focus{border-color:var(--green);}
+.wi-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;}
+.wi-val{font-weight:700;color:var(--green);}
+
+/* MARKET */
+.coin-ticker{display:flex;align-items:center;gap:12px;background:rgba(10,18,40,0.9);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;margin-bottom:8px;transition:border-color 0.2s;}
+.coin-ticker:hover{border-color:rgba(0,180,255,0.25);}
+.clogo{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;flex-shrink:0;}
+.cinfo{flex:1;}
+.cname{font-size:14px;font-weight:700;}
+.csym{font-size:11px;color:var(--muted);}
+.cprice{text-align:right;}
+.cusd{font-size:13px;font-weight:700;font-family:'Orbitron',sans-serif;}
+.cchange{font-size:12px;font-weight:700;}
+.up{color:#00ff88;} .dn{color:#ff4444;}
+.sparkline{display:flex;align-items:flex-end;gap:2px;height:26px;margin-top:5px;}
+.sp-bar{width:4px;border-radius:2px;transition:height 0.4s;}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Rajdhani',sans-serif;font-weight:600;transition:all 0.2s;}
+.filter-btn.active,.filter-btn:hover{background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.3);color:var(--green);}
+
+/* PROFILE */
+.profile-hero{text-align:center;padding:20px 0 16px;}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#000;margin:0 auto 12px;border:3px solid rgba(0,255,136,0.3);animation:glow 3s ease-in-out infinite;}
+.profile-name{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.profile-email{font-size:12px;color:var(--muted);margin-top:4px;}
+.profile-since{font-size:11px;color:var(--muted);margin-top:3px;}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;}
+.pstat{text-align:center;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.1);border-radius:12px;padding:12px 8px;}
+.pstat-val{font-size:16px;font-weight:700;color:var(--green);font-family:'Orbitron',sans-serif;font-size:14px;}
+.pstat-lbl{font-size:10px;color:var(--muted);margin-top:3px;}
+.pref-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.pref-row:last-child{border-bottom:none;}
+.pref-lbl{font-size:14px;font-weight:600;}
+.pref-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle{width:44px;height:24px;background:rgba(255,255,255,0.1);border-radius:12px;position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left 0.3s;}
+.toggle.on::after{left:23px;}
+.ref-box{background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:14px;text-align:center;margin-bottom:12px;}
+.ref-code{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:var(--purple);letter-spacing:4px;margin:8px 0;}
+.logout-btn{background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);color:var(--red);width:100%;padding:13px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;font-family:'Rajdhani',sans-serif;letter-spacing:1px;margin-top:8px;transition:all 0.2s;}
+.logout-btn:hover{background:rgba(255,68,68,0.15);}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-bg.open{display:flex;}
+.modal{background:#0d1a30;border-radius:22px;border:1px solid var(--border);padding:24px;width:90%;max-width:380px;text-align:center;}
+.modal h3{font-family:'Orbitron',sans-serif;font-size:.95rem;color:var(--yellow);margin-bottom:14px;}
+.modal p{font-size:13px;color:#ccc;line-height:1.7;margin-bottom:10px;}
+.ad-prog-wrap{width:100%;height:7px;background:rgba(255,255,255,0.1);border-radius:4px;margin:14px 0;overflow:hidden;}
+.ad-prog-bar{height:100%;background:linear-gradient(90deg,var(--yellow),#ffdd00);border-radius:4px;transition:width 0.2s;}
+.ad-timer{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:700;color:var(--yellow);margin-bottom:14px;}
+
+/* TOAST */
+#toast{position:fixed;top:70px;right:14px;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;}
+#toast.show{opacity:1;}
+
+/* NOTIF BADGE */
+.notif-dot{width:7px;height:7px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:calc(50% - 14px);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.25);border-radius:4px;}
+
+/* DISCLAIMER */
+.disclaimer{text-align:center;font-size:10px;color:rgba(255,255,255,0.15);padding:8px;border-top:1px solid rgba(255,255,255,0.04);margin-top:4px;}
+/* ══════════ MAINTENANCE SCREEN ══════════ */
+#maintenanceScreen{background:#02040c;align-items:center;justify-content:center;z-index:99998;position:fixed;}
+.maint-inner{text-align:center;padding:30px 20px;}
+.maint-icon{font-size:5rem;display:block;margin-bottom:20px;animation:float 3s ease-in-out infinite;}
+.maint-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#f0b429;letter-spacing:3px;margin-bottom:12px;}
+.maint-msg{font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;max-width:320px;margin:0 auto;}
+.maint-time{font-size:12px;color:rgba(255,255,255,0.3);margin-top:16px;letter-spacing:1px;}
+.maint-admin-exit{margin-top:24px;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.2);font-size:10px;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;}
+
+/* ══════════ ADMIN PANEL ══════════ */
+#adminPanel{position:fixed;inset:0;background:#020408;z-index:99999;display:none;flex-direction:column;overflow:hidden;}
+#adminPanel.open{display:flex;}
+#adminDashboard{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.admin-topbar{background:rgba(255,68,68,0.08);border-bottom:1px solid rgba(255,68,68,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;}
+.admin-logo{font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:900;color:#ff4444;letter-spacing:2px;}
+.admin-close{background:rgba(255,68,68,0.15);border:1px solid rgba(255,68,68,0.3);color:#ff4444;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;}
+.admin-tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,0.06);overflow-x:auto;scrollbar-width:none;background:rgba(0,0,0,0.3);flex-shrink:0;}
+.admin-tabs::-webkit-scrollbar{display:none;}
+.admin-atab{padding:12px 16px;font-size:12px;font-weight:700;cursor:pointer;color:rgba(255,255,255,0.4);white-space:nowrap;letter-spacing:1px;border-bottom:2px solid transparent;transition:all 0.2s;}
+.admin-atab.active{color:#ff4444;border-bottom-color:#ff4444;}
+.admin-body{padding:14px 14px 80px;overflow-y:auto;flex:1;}
+#adminPanel .admin-page{display:none!important;}
+#adminPanel .admin-page.active{display:block!important;}
+.acard{background:rgba(12,8,20,0.9);border:1px solid rgba(255,68,68,0.15);border-radius:16px;padding:14px;margin-bottom:12px;}
+.acard-title{font-size:10px;color:rgba(255,68,68,0.7);letter-spacing:2px;font-weight:700;margin-bottom:12px;text-transform:uppercase;}
+.astat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.astat{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px;text-align:center;}
+.astat-val{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:700;color:#ff4444;}
+.astat-lbl{font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;}
+.astat.green .astat-val{color:#00ff88;}
+.astat.yellow .astat-val{color:#f0b429;}
+.astat.blue .astat-val{color:#00b4ff;}
+.astat.purple .astat-val{color:#a855f7;}
+.chart-bar-wrap{margin-top:8px;}
+.chart-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.chart-lbl{font-size:12px;color:rgba(255,255,255,0.5);width:80px;flex-shrink:0;font-weight:600;}
+.chart-bar-bg{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+.chart-bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.chart-pct{font-size:11px;color:rgba(255,255,255,0.4);width:36px;text-align:right;flex-shrink:0;}
+/* Ads */
+.ad-slot{background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.15);border-radius:12px;padding:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.ad-slot-info{flex:1;}
+.ad-slot-name{font-size:13px;font-weight:700;color:#f0b429;}
+.ad-slot-desc{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;}
+.ad-slot-toggle{width:44px;height:24px;background:rgba(255,255,255,0.1);border-radius:12px;position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;}
+.ad-slot-toggle.on{background:#00ff88;}
+.ad-slot-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left 0.3s;}
+.ad-slot-toggle.on::after{left:23px;}
+/* Users */
+.user-row{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:8px;}
+.user-row-top{display:flex;align-items:center;gap:10px;}
+.user-avatar-sm{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00ff88,#00b4ff);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000;flex-shrink:0;}
+.user-row-info{flex:1;}
+.user-row-name{font-size:13px;font-weight:700;}
+.user-row-email{font-size:11px;color:rgba(255,255,255,0.35);}
+.user-row-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.user-status{font-size:10px;padding:3px 8px;border-radius:10px;}
+.us-ok{background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.2);}
+.us-warn{background:rgba(240,180,41,0.1);color:#f0b429;border:1px solid rgba(240,180,41,0.2);}
+.us-ban{background:rgba(255,68,68,0.1);color:#ff4444;border:1px solid rgba(255,68,68,0.2);}
+.abtn{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Rajdhani',sans-serif;border:none;letter-spacing:0.5px;}
+.abtn-warn{background:rgba(240,180,41,0.15);color:#f0b429;border:1px solid rgba(240,180,41,0.25);}
+.abtn-ban{background:rgba(255,68,68,0.15);color:#ff4444;border:1px solid rgba(255,68,68,0.25);}
+.abtn-unban{background:rgba(0,255,136,0.12);color:#00ff88;border:1px solid rgba(0,255,136,0.2);}
+.abtn-msg{background:rgba(0,180,255,0.12);color:#00b4ff;border:1px solid rgba(0,180,255,0.2);}
+.abtn-red{background:rgba(255,68,68,0.2);color:#fff;border:1px solid rgba(255,68,68,0.4);}
+.abtn-green{background:rgba(0,255,136,0.15);color:#000;background:linear-gradient(135deg,#00ff88,#00cc6a);font-weight:900;}
+.abtn-yellow{background:linear-gradient(135deg,#f0b429,#d69e0b);color:#000;font-weight:900;}
+  .user-row-id {
+    font-size: 10px;
+    color: #ff4444;
+    font-family: monospace;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    display: block;
+}/* Settings */
+.asetting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.asetting-row:last-child{border-bottom:none;}
+.asetting-lbl{font-size:14px;font-weight:700;}
+.asetting-sub{font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;}
+.ainp{width:100%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,68,68,0.2);color:#fff;padding:11px 14px;border-radius:10px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;}
+.ainp:focus{border-color:#ff4444;}
+/* Panic */
+.panic-btn{width:100%;padding:20px;border-radius:18px;border:none;background:linear-gradient(135deg,#ff0000,#cc0000);color:#fff;font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;cursor:pointer;letter-spacing:2px;animation:glow 2s ease-in-out infinite;box-shadow:0 0 30px rgba(255,0,0,0.3);}
+.panic-btn.active-maint{background:linear-gradient(135deg,#00ff88,#00cc6a);color:#000;animation:none;box-shadow:0 0 20px rgba(0,255,136,0.3);}
+.country-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.country-flag{font-size:1.2rem;width:28px;}
+.country-name{font-size:13px;font-weight:600;flex:1;}
+.country-count{font-size:12px;color:#f0b429;font-weight:700;margin-right:8px;}
+.country-revenue{font-size:11px;color:rgba(255,255,255,0.35);}
+/* Admin login */
+#adminLoginWrap{display:flex;align-items:center;justify-content:center;flex:1;padding:20px;overflow-y:auto;}
+.admin-login-box{background:rgba(12,4,20,0.98);border:1px solid rgba(255,68,68,0.25);border-radius:22px;padding:28px;width:90%;max-width:360px;text-align:center;}
+.admin-login-icon{font-size:3rem;margin-bottom:14px;filter:drop-shadow(0 0 12px rgba(255,68,68,0.5));}
+.admin-login-title{font-family:'Orbitron',sans-serif;font-size:1rem;color:#ff4444;letter-spacing:2px;margin-bottom:20px;}
+.admin-tap-flash{position:fixed;inset:0;background:rgba(255,68,68,0.08);z-index:99997;pointer-events:none;opacity:0;transition:opacity 0.2s;}
+.abtn-purple{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border:none;}
+.abtn-blue2{background:rgba(0,180,255,0.15);color:#00b4ff;border:1px solid rgba(0,180,255,0.3);}
+.winner-card{background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:12px;margin-bottom:10px;}
+.winner-rank{font-size:1.5rem;margin-right:8px;}
+.winner-name{font-size:14px;font-weight:700;}
+.winner-prize{font-size:12px;color:#a855f7;margin-top:2px;}
+.camp-card{background:rgba(240,180,41,0.06);border:1px solid rgba(240,180,41,0.2);border-radius:12px;padding:12px;margin-bottom:8px;}
+.camp-card.active-camp{border-color:rgba(240,180,41,0.5);box-shadow:0 0 12px rgba(240,180,41,0.1);}
+.camp-name{font-size:14px;font-weight:700;color:#f0b429;}
+.camp-badge{display:inline-block;font-size:10px;padding:3px 8px;border-radius:8px;background:rgba(240,180,41,0.15);color:#f0b429;border:1px solid rgba(240,180,41,0.25);margin-left:6px;}
+.camp-active-badge{background:rgba(0,255,136,0.12);color:#00ff88;border-color:rgba(0,255,136,0.25);}
+.cnt-card{background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:12px;margin-bottom:8px;}
+.device-edit-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;background:rgba(255,255,255,0.02);border-radius:10px;padding:8px 10px;}
+.device-edit-name{font-size:12px;font-weight:700;flex:1;}
+.device-edit-inp{background:rgba(0,0,0,0.4);border:1px solid rgba(255,68,68,0.2);color:#fff;padding:6px 8px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:12px;width:70px;outline:none;}
+.banner-edit-row{background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.15);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
+.banner-page-lbl{font-size:10px;font-weight:700;color:#f0b429;background:rgba(240,180,41,0.1);padding:3px 8px;border-radius:6px;white-space:nowrap;}
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
+</head>
+<body>
+<canvas id="bgMatrix"></canvas>
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     SPLASH SCREEN
+═══════════════════════════════════════════ -->
+<div class="screen active" id="splash" style="align-items:center;justify-content:center;position:fixed;">
+  <div class="splash-scanline"></div>
+  <div class="splash-inner">
+    <span class="splash-hex">⬡</span>
+    <div class="splash-logo">HASHNODE GLOBAL</div>
+    <div class="splash-tagline">PROFESSIONAL MINING SIMULATOR</div>
+    <div class="splash-bar-wrap"><div class="splash-bar" id="splashBar"></div></div>
+    <div class="splash-status" id="splashStatus">SİSTEM BAŞLATILIYOR...</div>
+  </div>
+  <div class="splash-version">v3.0.0 · SIMULATION · NOT REAL CRYPTO</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TERMS SCREEN
+═══════════════════════════════════════════ -->
+<div class="screen" id="termsScreen">
+  <div class="terms-wrap">
+    <div class="terms-header">
+      <span class="terms-icon">📋</span>
+      <div class="terms-logo">HASHNODE GLOBAL</div>
+      <div class="terms-title">KULLANICI SÖZLEŞMESİ</div>
+      <div class="terms-date">Son güncelleme: Ocak 2025 · Sürüm 3.0</div>
+    </div>
+
+    <div class="terms-highlight">
+      <div class="terms-highlight-txt">⚠️ <strong>ÖNEMLİ UYARI:</strong> Bu uygulama tamamen bir simülasyon ve eğlence aracıdır. Gerçek kripto para madenciliği veya finansal işlem içermez. Devam etmeden önce lütfen aşağıdaki koşulları okuyun.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">1</span> SİMÜLASYON BEYANI</div>
+      <div class="terms-text">Bu uygulama ("Hashnode Global"), yalnızca eğlence amaçlı bir madencilik simülasyonudur. Uygulama içindeki tüm "sanal BTC", "sBTC" ve diğer sanal para birimleri gerçek ekonomik değer taşımaz. Bu uygulama gerçek Bitcoin (BTC), Ethereum (ETH) veya herhangi bir kripto para birimi üretmez, çıkarmaz veya transfer etmez.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">2</span> DONANIM KULLANIMI</div>
+      <div class="terms-text">Uygulama, cihazınızın CPU'sunu, GPU'sunu veya diğer donanım bileşenlerini madencilik amacıyla kullanmaz. Pil ömrüne, cihaz performansına veya donanım bütünlüğüne zarar vermez. Tüm hesaplamalar tamamen simüle edilmektedir.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">3</span> VERİ GİZLİLİĞİ</div>
+      <div class="terms-text">Oluşturduğunuz kullanıcı hesabı ve oyun verileri yalnızca cihazınızın yerel depolama alanında (localStorage) saklanır. Herhangi bir sunucuya gönderilmez. E-posta adresiniz şifrelenmeden saklanır — gerçek bir kişisel veri işleme söz konusu değildir. Uygulama verilerini silmeniz durumunda tüm kayıtlarınız kalıcı olarak silinir.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">4</span> REKLAM POLİTİKASI</div>
+      <div class="terms-text">Uygulama, ücretsiz hizmet sunabilmek amacıyla simüle edilmiş ödüllü reklam sistemi kullanmaktadır. Bu reklamlar gerçek bir reklam ağına bağlı değildir ve herhangi bir üçüncü taraf reklam kodu içermez. Reklam izleme ödülleri yalnızca uygulama içinde geçerlidir.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">5</span> ÇEKİM SİSTEMİ</div>
+      <div class="terms-text">Uygulama içindeki "çekim" özelliği tamamen simüle edilmiştir. Gerçek bir ödeme, transfer veya kripto para gönderimi gerçekleşmez. Çekim talepleri yalnızca simülasyon amaçlı log kaydı olarak saklanır. Gerçek para transferi kesinlikle yapılmamaktadır.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">6</span> FİNANSAL UYARI</div>
+      <div class="terms-text">Bu uygulama herhangi bir yatırım tavsiyesi, finansal rehberlik veya kripto para önerisi sunmaz. Uygulama içindeki borsa verileri tamamen simüle edilmiş değerlerdir ve gerçek piyasa verilerini yansıtmaz. Gerçek kripto para yatırımı için lisanslı finansal danışmanlara başvurun.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">7</span> SORUMLULUK REDDİ</div>
+      <div class="terms-text">Hashnode Global ve geliştiricileri, bu uygulamanın kullanımından doğabilecek herhangi bir doğrudan veya dolaylı zarardan sorumlu tutulamaz. Uygulama "olduğu gibi" sunulmakta olup herhangi bir garanti verilmemektedir.</div>
+    </div>
+
+    <div class="terms-section">
+      <div class="terms-section-title"><span class="terms-section-num">8</span> DEĞİŞİKLİKLER</div>
+      <div class="terms-text">Bu sözleşme önceden bildirim yapılmaksızın değiştirilebilir. Uygulamayı kullanmaya devam etmeniz, güncel koşulları kabul ettiğiniz anlamına gelir.</div>
+    </div>
+  </div>
+
+  <div class="terms-footer">
+    <div class="terms-check-row">
+      <input type="checkbox" id="termsCheck1">
+      <label for="termsCheck1">Kullanıcı Sözleşmesini okudum ve kabul ediyorum.</label>
+    </div>
+    <div class="terms-check-row" style="margin-bottom:12px;">
+      <input type="checkbox" id="termsCheck2">
+      <label for="termsCheck2">Bu bir simülasyon olduğunu ve gerçek kripto para içermediğini anlıyorum.</label>
+    </div>
+    <button class="btn btn-green" id="termsAcceptBtn" onclick="acceptTerms()">✔ KABUL EDİYORUM VE DEVAM ET</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     AUTH SCREEN (GİRİŞ / KAYIT)
+═══════════════════════════════════════════ -->
+<div class="screen" id="authScreen">
+  <div class="auth-bg-deco">
+    <div class="auth-circle auth-c1"></div>
+    <div class="auth-circle auth-c2"></div>
+    <div class="auth-circle auth-c3"></div>
+  </div>
+  <div class="auth-wrap">
+    <div class="auth-header">
+      <span class="auth-hex">⬡</span>
+      <div class="auth-logo">HASHNODE GLOBAL</div>
+      <div class="auth-sub">PROFESSIONAL MINING SIMULATOR</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">GİRİŞ YAP</div>
+      <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">KAYIT OL</div>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div class="auth-panel active" id="panelLogin">
+      <div class="auth-card">
+        <div class="form-group">
+          <label class="form-label">E-POSTA ADRESİ</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">✉</span>
+            <input class="form-input" type="email" id="loginEmail" placeholder="ornek@email.com" autocomplete="email">
+          </div>
+          <div class="form-err" id="loginEmailErr">Geçerli bir e-posta girin.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ŞİFRE</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" id="loginPw" placeholder="Şifreniz" autocomplete="current-password">
+            <button class="pw-toggle" onclick="togglePw('loginPw',this)">👁</button>
+          </div>
+          <div class="form-err" id="loginPwErr">Şifre boş bırakılamaz.</div>
+        </div>
+        <button class="btn btn-green" onclick="doLogin()" style="margin-top:6px;">⚡ GİRİŞ YAP</button>
+        <div class="forgot-link"><a href="#" onclick="showForgot()">Şifremi Unuttum?</a></div>
+        <div class="divider"><div class="divider-line"></div><div class="divider-txt">veya ile giriş yap</div><div class="divider-line"></div></div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="socialLogin('Google')"><span class="social-icon">G</span> Google</button>
+          <button class="social-btn" onclick="socialLogin('Apple')"><span class="social-icon">🍎</span> Apple</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTER PANEL -->
+    <div class="auth-panel" id="panelRegister">
+      <div class="auth-card">
+        <div class="form-group">
+          <label class="form-label">KULLANICI ADI</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">👤</span>
+            <input class="form-input" type="text" id="regName" placeholder="HashMaster42" maxlength="20">
+          </div>
+          <div class="form-err" id="regNameErr">En az 3 karakter olmalı.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-POSTA ADRESİ</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">✉</span>
+            <input class="form-input" type="email" id="regEmail" placeholder="ornek@email.com">
+          </div>
+          <div class="form-err" id="regEmailErr">Geçerli bir e-posta girin.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ŞİFRE</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" id="regPw" placeholder="En az 8 karakter" oninput="checkStrength(this.value)" autocomplete="new-password">
+            <button class="pw-toggle" onclick="togglePw('regPw',this)">👁</button>
+          </div>
+          <div class="strength-bar"><div class="strength-seg" id="s1"></div><div class="strength-seg" id="s2"></div><div class="strength-seg" id="s3"></div><div class="strength-seg" id="s4"></div></div>
+          <div class="form-err" id="regPwErr">En az 8 karakter olmalı.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ŞİFRE TEKRAR</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" id="regPw2" placeholder="Şifreyi tekrar girin" autocomplete="new-password">
+          </div>
+          <div class="form-err" id="regPw2Err">Şifreler eşleşmiyor.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">REFERANS KODU (opsiyonel)</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🎁</span>
+            <input class="form-input" type="text" id="regRef" placeholder="HN-XXXX" maxlength="7" style="text-transform:uppercase;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" id="regTerms">
+            <span class="form-check-txt">Kullanıcı Sözleşmesi'ni okudum ve kabul ediyorum. <a href="#" onclick="showTermsAgain()">Sözleşmeyi Görüntüle</a></span>
+          </label>
+          <div class="form-err" id="regTermsErr">Sözleşmeyi kabul etmelisiniz.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" id="regNews">
+            <span class="form-check-txt">Kampanya ve bildirim e-postalarını almak istiyorum. (opsiyonel)</span>
+          </label>
+        </div>
+        <button class="btn btn-green" onclick="doRegister()" style="margin-top:6px;">🚀 HESAP OLUŞTUR</button>
+        <div class="divider"><div class="divider-line"></div><div class="divider-txt">veya ile kayıt ol</div><div class="divider-line"></div></div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="socialLogin('Google')"><span class="social-icon">G</span> Google</button>
+          <button class="social-btn" onclick="socialLogin('Apple')"><span class="social-icon">🍎</span> Apple</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="auth-features">
+      <div class="auth-feat"><div class="auth-feat-icon">⛏</div><div class="auth-feat-txt">Sanal Madencilik</div></div>
+      <div class="auth-feat"><div class="auth-feat-icon">📈</div><div class="auth-feat-txt">Canlı Borsa</div></div>
+      <div class="auth-feat"><div class="auth-feat-icon">🌾</div><div class="auth-feat-txt">Çiftlik Sistemi</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════ -->
+<div id="mainApp">
+
+  <!-- TOP NAV -->
+  <div class="topnav" style="position:relative;">
+    <div class="nav-logo" id="navLogo" onclick="adminTap()" style="cursor:default;user-select:none;">⬡ HASHNODE</div>
+    <div class="nav-right">
+      <div class="nav-wallet" id="navWallet" onclick="goPage('withdraw',document.querySelectorAll('.nav-tab')[3])">0.000000 sBTC</div>
+      <button class="lang-btn" onclick="toggleLang()">🌐 <span id="langLabel">TR</span> ▾</button>
+      <div class="nav-avatar" id="navAvatar" onclick="goPage('profile',document.querySelectorAll('.nav-tab')[4])">?</div>
+    </div>
+    <div class="lang-dropdown" id="langDrop">
+      <div class="lang-item active" onclick="setLang('tr')">🇹🇷 Türkçe</div>
+      <div class="lang-item" onclick="setLang('en')">🇺🇸 English</div>
+      <div class="lang-item" onclick="setLang('de')">🇩🇪 Deutsch</div>
+      <div class="lang-item" onclick="setLang('fr')">🇫🇷 Français</div>
+      <div class="lang-item" onclick="setLang('ar')">🇸🇦 العربية</div>
+      <div class="lang-item" onclick="setLang('ru')">🇷🇺 Русский</div>
+      <div class="lang-item" onclick="setLang('zh')">🇨🇳 中文</div>
+    </div>
+  </div>
+
+  <!-- BANNER AD -->
+  <div class="banner-ad" onclick="openAdModal('boost')">
+    <div>
+      <div class="banner-ad-txt">⚡ ÖZEL TEKLİF — Bugün Sona Eriyor!</div>
+      <div class="banner-ad-sub">Reklam izle → 2× madencilik hızı kazan</div>
+    </div>
+    <button class="banner-ad-btn">İZLE</button>
+  </div>
+
+  <!-- ── PAGE: HOME ── -->
+  <div class="page active" id="page-home">
+    <div class="home-hero">
+      <div class="home-logo">⬡ HASHNODE GLOBAL</div>
+      <div class="home-sub">Sanal Madencilik Terminali · Simülasyon</div>
+    </div>
+<div id="ad-wrapper" style="width:100%; margin:10px 0; display:none; justify-content:center;">
+    <div style="background:rgba(255,255,255,0.05); border-radius:10px; padding:5px; width:320px; min-height:50px; border:1px solid rgba(255,255,255,0.1);">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             id="dynamic-ad-unit"
+             data-ad-client=""
+             data-ad-slot=""></ins>
+        <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script>
+    </div>
+</div>
+
+<script>
+  function activateAds() {
+      const p = localStorage.getItem('saved_pub_id');
+      const u = localStorage.getItem('saved_unit_id');
+      if(p && u) {
+          const ad = document.getElementById('dynamic-ad-unit');
+          ad.setAttribute('data-ad-client', p);
+          ad.setAttribute('data-ad-slot', u);
+          document.getElementById('ad-wrapper').style.display = 'flex';
+      }
+  }
+  // Uygulama açıldıktan 2 saniye sonra reklamı göster
+  setTimeout(activateAds, 2000);
+</script>
+    <div class="card">
+      <div class="coin-display" id="coinDisplay">0.000000</div>
+      <div class="coin-lbl">SANAL BTC (GERÇEK DEĞİL)</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;">
+        <span id="boostBadge" class="badge badge-g">1× HIZ</span>
+        <span class="badge" style="background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid rgba(255,255,255,0.06);">Oturum: <span id="sessCount">0</span></span>
+      </div>
+      <!-- AKTİF MADENCİ SAYACI -->
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;gap:16px;">
+        <div style="text-align:center;">
+          <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+            <span style="width:7px;height:7px;background:#00ff88;border-radius:50%;display:inline-block;box-shadow:0 0 6px #00ff88;animation:pulse 2s infinite;"></span>
+            <span style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green);" id="activeMinerCount">0</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1px;">AKTİF MADENCİ</div>
+        </div>
+        <div style="width:1px;height:36px;background:rgba(255,255,255,0.08);"></div>
+        <div style="text-align:center;">
+          <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--yellow);" id="globalHashRate">0 GH/s</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1px;">GLOBAL HASH/S</div>
+        </div>
+        <div style="width:1px;height:36px;background:rgba(255,255,255,0.08);"></div>
+        <div style="text-align:center;">
+          <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--blue);" id="globalBlocks">0</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1px;">GLOBAL BLOK</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 MADENCİLİK İSTATİSTİKLERİ</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-lbl">HASH/S</div><div class="stat-val" id="hashRate">0 H/s</div></div>
+        <div class="stat-box"><div class="stat-lbl">TOPLAM BLOK</div><div class="stat-val" id="blockCount">0</div></div>
+        <div class="stat-box"><div class="stat-lbl">GÜÇ TÜKETİMİ</div><div class="stat-val" id="powerStat">— W</div></div>
+        <div class="stat-box"><div class="stat-lbl">VERİMLİLİK</div><div class="stat-val" id="effStat">—</div></div>
+      </div>
+    </div>
+
+    <!-- COUNTDOWN TIMER -->
+    <div id="mineTimerWrap" style="display:none;margin-bottom:10px;">
+      <div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:16px;padding:14px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;font-weight:700;">⏱ OTURUM SÜRESİ</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;color:var(--green);letter-spacing:2px;" id="mineCountdown">60:00</div>
+        </div>
+        <div style="width:100%;height:4px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+          <div id="mineTimerBar" style="height:100%;background:linear-gradient(90deg,#00ff88,#00b4ff);border-radius:4px;width:100%;transition:width 1s linear;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;">Süre dolduğunda madencilik otomatik durur</div>
+      </div>
+    </div>
+
+    <button class="btn btn-green" id="btnMine" onclick="toggleMining()" style="margin-bottom:8px;">⛏ MADENCİLİĞİ BAŞLAT</button>
+    <button class="btn btn-yellow" onclick="openAdModal('boost')" style="margin-bottom:8px;">📺 Reklam İzle → 2× Hız Kazan</button>
+    <button class="btn btn-blue" onclick="openAdModal('energy')" style="margin-bottom:12px;">⚡ Enerji Yenile (Reklam İzle)</button>
+
+    <div class="card">
+      <div class="card-title">💻 SİSTEM LOG</div>
+      <div class="sys-log" id="sysLog"><p>> Sistem hazır. Madencilik başlatmayı bekliyor...</p></div>
+    </div>
+
+    <div class="ref-box">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;">REFERANS KODUNUZ</div>
+      <div class="ref-code" id="refCode">HN-XXXX</div>
+      <button class="btn btn-purple btn-sm" onclick="copyRef()">📋 Kodu Kopyala</button>
+    </div>
+    <div class="disclaimer">* Bu bir simülasyon oyunudur. Gerçek madencilik içermez. Cihaz donanımı kullanılmaz.</div>
+  </div>
+
+  <!-- ── PAGE: FARM ── -->
+  <div class="page" id="page-farm">
+    <div class="card">
+      <div class="card-title">🌾 MADENCİLİK ÇİFTLİĞİ</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <div><div style="font-size:11px;color:var(--muted);">Toplam Güç</div><div style="font-size:17px;font-weight:700;color:var(--green);" id="totalPower">0 TH/s</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">Günlük Kazanç</div><div style="font-size:17px;font-weight:700;color:var(--yellow);" id="dailyEarn">0.000 sBTC</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">Aktif Makine</div><div style="font-size:17px;font-weight:700;color:var(--blue);" id="activeWorkers">0</div></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar pb-green" id="farmProgress" style="width:0%"></div></div>
+    </div>
+
+    <div class="banner-ad" onclick="openAdModal('farm')" style="margin:0 0 12px;">
+      <div><div class="banner-ad-txt">🔥 ÇİFTLİK BOOSTER!</div><div class="banner-ad-sub">Reklam izle → 3× çiftlik hızı kazan</div></div>
+      <button class="banner-ad-btn">KAZAN</button>
+    </div>
+
+    <div class="card-title" style="padding-left:2px;">MAKİNELER</div>
+    <div class="farm-grid" id="farmGrid"></div>
+  </div>
+
+  <!-- ── PAGE: DEVICES ── -->
+  <div class="page" id="page-devices">
+    <div class="card">
+      <div class="card-title">💻 DONANIM MAĞAZASI</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="badge badge-g">Sahip Olunan: <span id="ownedCount">0</span></span>
+        <span class="badge badge-y">Toplam Güç: <span id="devTotalPower">0 TH/s</span></span>
+      </div>
+    </div>
+    <div class="banner-ad" onclick="openAdModal('energy')" style="margin:0 0 12px;">
+      <div><div class="banner-ad-txt">💡 Ücretsiz Donanım Ödülü!</div><div class="banner-ad-sub">Reklam izle → başlangıç cihazı kazan</div></div>
+      <button class="banner-ad-btn">AL</button>
+    </div>
+    <div id="deviceList"></div>
+  </div>
+
+  <!-- ── PAGE: WITHDRAW ── -->
+  <div class="page" id="page-withdraw">
+    <div class="card">
+      <div class="card-title">💸 ÇEKİM MERKEZİ</div>
+      <div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.1);border-radius:12px;padding:12px;">
+        <div class="wi-row"><span>Bakiye</span><span class="wi-val" id="wBalance">0.000000 sBTC</span></div>
+        <div class="wi-row"><span>Min. Çekim</span><span class="wi-val">0.01 sBTC</span></div>
+        <div class="wi-row" style="margin:0;"><span>İşlem Ücreti</span><span class="wi-val" style="color:var(--red);">%2</span></div>
+      </div>
+    </div>
+
+    <div class="banner-ad" onclick="openAdModal('boost')" style="margin:0 0 12px;">
+      <div><div class="banner-ad-txt">✨ Ücretsiz Çekim Fırsatı!</div><div class="banner-ad-sub">Reklam izle → bu çekim ücretsiz olsun</div></div>
+      <button class="banner-ad-btn">KAZAN</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ÖDEME YÖNTEMİ</div>
+      <div class="wm-grid">
+        <div class="wm-card sel" onclick="selWM(this,'BTC')"><div class="wm-icon">₿</div><div class="wm-name">Bitcoin</div><div class="wm-min">Min:0.01</div></div>
+        <div class="wm-card" onclick="selWM(this,'ETH')"><div class="wm-icon">Ξ</div><div class="wm-name">Ethereum</div><div class="wm-min">Min:0.05</div></div>
+        <div class="wm-card" onclick="selWM(this,'USDT')"><div class="wm-icon">₮</div><div class="wm-name">USDT</div><div class="wm-min">Min:10</div></div>
+        <div class="wm-card" onclick="selWM(this,'BNB')"><div class="wm-icon">🔶</div><div class="wm-name">BNB</div><div class="wm-min">Min:0.1</div></div>
+        <div class="wm-card" onclick="selWM(this,'TRX')"><div class="wm-icon">♦</div><div class="wm-name">TRON</div><div class="wm-min">Min:50</div></div>
+        <div class="wm-card" onclick="selWM(this,'PP')"><div class="wm-icon">🅿</div><div class="wm-name">PayPal</div><div class="wm-min">Min:20$</div></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="card-title" style="display:block;margin-bottom:6px;">CÜZDAN ADRESİ</label>
+        <input class="form-inp" type="text" id="wAddress" placeholder="bc1q...">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="card-title" style="display:block;margin-bottom:6px;">MİKTAR (sBTC)</label>
+        <input class="form-inp" type="number" id="wAmount" placeholder="0.00" step="0.001">
+      </div>
+      <button class="btn btn-yellow" onclick="doWithdraw()" style="margin-top:4px;">💸 ÇEKİM TALEP ET</button>
+      <div class="disclaimer" style="margin-top:10px;">* Simülasyon parası gerçek değildir. Çekim talebi simüle edilmektedir.</div>
+    </div>
+
+    <div class="card" id="withdrawHistCard">
+      <div class="card-title">GEÇMİŞ İŞLEMLER</div>
+      <div id="wHistList" style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0;">Henüz işlem yok.</div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: MARKET ── -->
+  <div class="page" id="page-market">
+    <div class="card" style="padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="card-title" style="margin:0;">📈 KRİPTO BORSA</div>
+        <div style="font-size:11px;color:var(--muted);" id="marketTime">Güncelleniyor...</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterMarket('all',this)">Tümü</button>
+      <button class="filter-btn" onclick="filterMarket('top',this)">Top 10</button>
+      <button class="filter-btn" onclick="filterMarket('up',this)">Yükselenler</button>
+      <button class="filter-btn" onclick="filterMarket('down',this)">Düşenler</button>
+      <button class="filter-btn" onclick="filterMarket('defi',this)">DeFi</button>
+      <button class="filter-btn" onclick="filterMarket('layer1',this)">Layer 1</button>
+    </div>
+    <div id="marketList"></div>
+    <div class="banner-ad" onclick="openAdModal('boost')" style="margin:0 0 12px;">
+      <div><div class="banner-ad-txt">📊 Premium Borsa Analizi</div><div class="banner-ad-sub">Reklam izle → detaylı analiz raporunu gör</div></div>
+      <button class="banner-ad-btn">GÖRÜNTÜLE</button>
+    </div>
+  </div>
+
+  <!-- ── PAGE: PROFILE ── -->
+  <div class="page" id="page-profile">
+    <div class="card">
+      <div class="profile-hero">
+        <div class="profile-avatar" id="profAvatar">?</div>
+        <div class="profile-name" id="profName">Kullanıcı</div>
+        <div class="profile-email" id="profEmail">-</div>
+        <div class="profile-since" id="profSince">Üyelik: -</div>
+        <div style="display:flex;gap:6px;justify-content:center;margin-top:10px;">
+          <span class="badge badge-g">MINER</span>
+          <span class="badge badge-y" id="profBoostBadge">1× HIZ</span>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-val" id="ps-coins">0</div><div class="pstat-lbl">sBTC</div></div>
+        <div class="pstat"><div class="pstat-val" id="ps-blocks">0</div><div class="pstat-lbl">BLOK</div></div>
+        <div class="pstat"><div class="pstat-val" id="ps-devices">0</div><div class="pstat-lbl">CİHAZ</div></div>
+      </div>
+    </div>
+
+    <div class="ref-box">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;">REFERANS KODUNUZ</div>
+      <div class="ref-code" id="profRefCode">HN-XXXX</div>
+      <button class="btn btn-purple btn-sm" onclick="copyRef()">📋 Paylaş</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">AYARLAR VE TERCİHLER</div>
+      <div class="pref-row">
+        <div><div class="pref-lbl">🔔 Bildirimler</div><div class="pref-sub">Blok bulunduğunda bildir</div></div>
+        <div class="toggle on" id="tog-notif" onclick="togPref(this,'notif')"></div>
+      </div>
+      <div class="pref-row">
+        <div><div class="pref-lbl">🌙 Koyu Tema</div><div class="pref-sub">Her zaman aktif</div></div>
+        <div class="toggle on" style="pointer-events:none;opacity:0.5;"></div>
+      </div>
+      <div class="pref-row">
+        <div><div class="pref-lbl">📧 E-posta Bildirimleri</div><div class="pref-sub">Kampanya e-postaları</div></div>
+        <div class="toggle" id="tog-email" onclick="togPref(this,'email')"></div>
+      </div>
+      <div class="pref-row" style="border-bottom:none;">
+        <div><div class="pref-lbl">💡 Otomatik Madencilik</div><div class="pref-sub">Uygulama açıkken otomatik başlat</div></div>
+        <div class="toggle" id="tog-automine" onclick="togPref(this,'automine')"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">HESAP İŞLEMLERİ</div>
+      <button class="btn btn-outline" onclick="showTermsAgain()" style="margin-bottom:8px;">📋 Sözleşmeyi Görüntüle</button>
+      <button class="btn btn-blue" onclick="shareApp()" style="margin-bottom:8px;">📤 Uygulamayı Paylaş</button>
+      <button class="logout-btn" onclick="doLogout()">🚪 ÇIKIŞ YAP</button>
+    </div>
+    <div class="disclaimer">v3.0.0 · HASHNODE GLOBAL · Simülasyon</div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav">
+    <div class="nav-tab active" onclick="goPage('home',this)"><div class="nticon">⛏</div><div class="ntlabel">MADEN</div></div>
+    <div class="nav-tab" onclick="goPage('farm',this)"><div class="nticon">🌾</div><div class="ntlabel">ÇİFTLİK</div></div>
+    <div class="nav-tab" onclick="goPage('devices',this)"><div class="nticon">💻</div><div class="ntlabel">CİHAZLAR</div></div>
+    <div class="nav-tab" onclick="goPage('withdraw',this)"><div class="nticon">💸</div><div class="ntlabel">ÇEKİM</div></div>
+    <div class="nav-tab" onclick="goPage('market',this)"><div class="nticon">📈</div><div class="ntlabel">BORSA</div></div>
+    <div class="nav-tab" onclick="goPage('profile',this)"><div class="nticon">👤</div><div class="ntlabel">PROFİL</div></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="adModal">
+  <div class="modal">
+    <div style="font-size:2.5rem;margin-bottom:8px;" id="adIcon">📺</div>
+    <h3 id="adTitle">ÖDÜLLÜ REKLAM</h3>
+    <p id="adDesc">30 saniye bekle ve ödülünü al!</p>
+    <div class="ad-prog-wrap"><div class="ad-prog-bar" id="adProg" style="width:0%"></div></div>
+    <div class="ad-timer" id="adTimerTxt">30</div>
+    <button class="btn btn-yellow btn-disabled" id="adClaimBtn" onclick="claimReward()">🎁 Ödülü Al</button>
+    <button onclick="closeAdModal()" style="background:none;border:none;color:var(--muted);margin-top:12px;cursor:pointer;text-decoration:underline;display:block;width:100%;font-size:12px;font-family:Rajdhani,sans-serif;">Daha Sonra</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="wSuccessModal">
+  <div class="modal">
+    <div style="font-size:3rem;margin-bottom:10px;">✅</div>
+    <h3>TALEBİNİZ ALINDI</h3>
+    <p>Çekim talebiniz işleme alındı. Bu bir simülasyondur — gerçek ödeme yapılmaz.</p>
+    <button class="btn btn-green" onclick="document.getElementById('wSuccessModal').classList.remove('open')" style="margin-top:10px;">Tamam</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="forgotModal">
+  <div class="modal">
+    <div style="font-size:2.5rem;margin-bottom:10px;">🔑</div>
+    <h3>ŞİFRE SIFIRLAMA</h3>
+    <p>E-posta adresinizi girin, sıfırlama bağlantısı gönderelim.</p>
+    <input class="form-input" type="email" id="forgotEmail" placeholder="ornek@email.com" style="margin:10px 0;text-align:center;">
+    <button class="btn btn-green" onclick="sendForgot()" style="margin-top:4px;">📧 Gönder</button>
+    <button onclick="document.getElementById('forgotModal').classList.remove('open')" style="background:none;border:none;color:var(--muted);margin-top:12px;cursor:pointer;text-decoration:underline;display:block;width:100%;font-size:12px;font-family:Rajdhani,sans-serif;">Geri Dön</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     BAKIM EKRANI
+═══════════════════════════════════════════ -->
+<div id="maintenanceScreen" style="display:none;position:fixed;inset:0;z-index:99998;background:#02040c;align-items:center;justify-content:center;flex-direction:column;">
+  <div class="maint-inner">
+    <span class="maint-icon">🔧</span>
+    <div class="maint-title" id="maintTitle">SİSTEM BAKIMDA</div>
+    <div class="maint-msg" id="maintMsg">Sistem şu anda bakım çalışması yapılmaktadır. En kısa sürede hizmetinize devam edeceğiz. Sabırlı olduğunuz için teşekkürler.</div>
+    <div class="maint-time" id="maintTime">Bakım başlangıcı: —</div>
+    <button class="maint-admin-exit" onclick="adminExitMaintenance()">⬡</button>
+  </div>
+</div>
+
+<!-- Admin tap flash -->
+<div class="admin-tap-flash" id="adminTapFlash"></div>
+
+<!-- ═══════════════════════════════════════════
+     ADMİN PANELİ
+═══════════════════════════════════════════ -->
+<div id="adminPanel">
+
+  <!-- ADMİN GİRİŞ -->
+  <div id="adminLoginWrap">
+    <div class="admin-login-box">
+      <div class="admin-login-icon">🛡️</div>
+      <div class="admin-login-title">YÖNETİCİ PANELİ</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:20px;letter-spacing:1px;">HASHNODE GLOBAL · ADMIN ACCESS</div>
+      <div style="margin-bottom:14px;position:relative;">
+        <input class="ainp" type="password" id="adminPwInput" placeholder="Yönetici Şifresi" onkeydown="if(event.key==='Enter')checkAdminPw()">
+        <button onclick="toggleAdminPwVis()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:14px;" id="adminPwEye">👁</button>
+      </div>
+      <div style="font-size:11px;color:#ff4444;display:none;margin-bottom:10px;" id="adminPwErr">Şifre yanlış!</div>
+      <button class="abtn abtn-red" style="width:100%;padding:13px;font-size:14px;" onclick="checkAdminPw()">🔓 GİRİŞ YAP</button>
+      <button onclick="closeAdmin()" style="background:none;border:none;color:rgba(255,255,255,0.25);margin-top:14px;cursor:pointer;font-size:12px;font-family:Rajdhani,sans-serif;display:block;width:100%;">← Geri Dön</button>
+    </div>
+  </div>
+
+  <!-- ADMİN DASHBOARD (giriş sonrası) -->
+  <div id="adminDashboard" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-logo">🛡️ ADMİN PANELİ</div>
+        <div style="font-size:10px;color:rgba(255,68,68,0.5);margin-top:2px;">HASHNODE GLOBAL · YÖNETİCİ</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="panicBtnTop" onclick="goAdminTab('panic')" style="background:rgba(255,0,0,0.2);border:1px solid rgba(255,0,0,0.4);color:#ff4444;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;animation:glow 2s infinite;">🚨 PANİK</button>
+        <button class="admin-close" onclick="closeAdmin()">✕ ÇIKIŞ</button>
+      </div>
+    </div>
+<div id="reklam-ust-sabit" style="display: block !important; width: 100%; min-height: 120px !important; background: #1a1a1a; border-bottom: 2px solid #333; margin: 0; padding: 10px 0; text-align: center; overflow: visible !important; position: relative; visibility: visible !important;">
+    <p style="color: #444; font-size: 9px; margin: 0;">AD UNIT INITIALIZING...</p>
+    <ins class="adsbygoogle"
+         id="ana-reklam"
+         style="display:block !important; width:320px !important; height:100px !important; margin: 0 auto;"
+         data-ad-client="ca-pub-3940256099942544" 
+         data-ad-slot="6300978111"></ins>
+    <script>
+         window.onload = function() {
+            try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) { console.error("AdMob Init Error"); }
+         };
+    </script>
+
+    <div class="admin-tabs">
+    <div class="admin-atab active" onclick="goAdminTab('stats')">📊 İSTATİSTİK</div>
+      <div class="admin-atab" onclick="goAdminTab('ads')">📺 REKLAMLAR</div>
+      <div class="admin-atab" onclick="goAdminTab('pages')">🖥 SAYFALAR</div>
+      <div class="admin-atab" onclick="goAdminTab('mining')">⛏ MADENCİLİK</div>
+      <div class="admin-atab" onclick="goAdminTab('campaign')">🎯 KAMPANYA</div>
+      <div class="admin-atab" onclick="goAdminTab('contest')">🏆 YARIŞMA</div>
+      <div class="admin-atab" onclick="goAdminTab('users')">👥 KULLANICILAR</div>
+      <div class="admin-atab" onclick="goAdminTab('settings')">⚙️ AYARLAR</div>
+      <div class="admin-atab" onclick="goAdminTab('panic')">🚨 PANİK</div>
+    </div>
+
+    <div class="admin-body">
+    
+
+      <!-- ── STATS ── -->
+      <div class="admin-page active" id="atab-stats">
+        <div class="acard">
+          <div class="acard-title">📊 GENEL İSTATİSTİKLER</div>
+          <div class="astat-grid">
+            <div class="astat green"><div class="astat-val" id="as-downloads">0</div><div class="astat-lbl">TOPLAM İNDİRME</div></div>
+            <div class="astat blue"><div class="astat-val" id="as-active">0</div><div class="astat-lbl">ANLİK AKTİF</div></div>
+            <div class="astat yellow"><div class="astat-val" id="as-adwatched">0</div><div class="astat-lbl">REKLAM İZLENME</div></div>
+            <div class="astat purple"><div class="astat-val" id="as-revenue">$0.00</div><div class="astat-lbl">TAHMİNİ GELİR</div></div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">📱 KULLANICI SAYISI</div>
+          <div class="astat-grid">
+            <div class="astat"><div class="astat-val" id="as-regusers">0</div><div class="astat-lbl">KAYITLI USER</div></div>
+            <div class="astat green"><div class="astat-val" id="as-miners">0</div><div class="astat-lbl">AKTİF MADENCİ</div></div>
+            <div class="astat yellow"><div class="astat-val" id="as-banned">0</div><div class="astat-lbl">BANLANAN</div></div>
+            <div class="astat blue"><div class="astat-val" id="as-newtoday">0</div><div class="astat-lbl">BUGÜN YENİ</div></div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">📈 SAYFA KULLANIM ORANLARI</div>
+          <div class="chart-bar-wrap" id="pageUsageChart"></div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">🌍 ÜLKELERE GÖRE REKLAM İZLEME</div>
+          <div id="countryAdChart"></div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">💰 REKLAM GELİR DETAYI</div>
+          <div style="background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.1);border-radius:10px;padding:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span style="color:rgba(255,255,255,0.5);">Rewarded Reklam (CPM $8)</span><span style="color:#f0b429;font-weight:700;" id="rev-rewarded">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span style="color:rgba(255,255,255,0.5);">Banner Reklam (CPM $2)</span><span style="color:#f0b429;font-weight:700;" id="rev-banner">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span style="color:rgba(255,255,255,0.5);">Interstitial (CPM $5)</span><span style="color:#f0b429;font-weight:700;" id="rev-interstitial">$0.00</span></div>
+            <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:8px;display:flex;justify-content:space-between;font-size:15px;"><span style="font-weight:700;">TOPLAM TAHMİNİ GELİR</span><span style="color:#00ff88;font-weight:700;font-family:'Orbitron',sans-serif;font-size:13px;" id="rev-total">$0.00</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADS ── -->
+      <div class="admin-page" id="atab-ads">
+        <div class="acard">
+          <div class="acard-title">📺 REKLAM YUVASI YÖNETİMİ</div>
+          <div id="adSlotList"></div>
+        </div>
+        <div class="acard">
+          <div class="acard-title">➕ YENİ REKLAM EKLE</div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">REKLAM ADI</label><input class="ainp" type="text" id="newAdName" placeholder="Ör: Kampanya Banner"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">REKLAM METNİ</label><input class="ainp" type="text" id="newAdText" placeholder="Ör: Bugün kayıt ol, 2× hız kazan!"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">REKLAM TÜRÜ</label>
+            <select class="ainp" id="newAdType"><option value="banner">Banner</option><option value="rewarded">Ödüllü Video</option><option value="interstitial">Interstitial</option></select>
+          </div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">ÖDÜL MİKTARI</label><input class="ainp" type="text" id="newAdReward" placeholder="Ör: 2× HIZ, 1000 sBTC"></div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:12px;font-size:14px;" onclick="addAdSlot()">➕ REKLAM EKLE</button>
+        </div>
+      </div>
+
+      <!-- ── USERS ── -->
+      <div class="admin-page" id="atab-users">
+        <div class="acard" style="padding:10px 14px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="ainp" type="text" id="userSearchInp" placeholder="Kullanıcı ara..." style="flex:1;padding:9px 12px;" oninput="renderAdminUsers()">
+            <select class="ainp" id="userFilterSel" style="width:110px;padding:9px 10px;font-size:12px;" onchange="renderAdminUsers()">
+              <option value="all">Tümü</option>
+              <option value="active">Aktif</option>
+              <option value="warned">Uyarılmış</option>
+              <option value="banned">Banlı</option>
+            </select>
+          </div>
+        </div>
+        <div id="adminUserList"></div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="admin-page" id="atab-settings">
+        <div class="acard">
+          <div class="acard-title">🔐 ŞİFRE DEĞİŞTİR</div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">MEVCUT ŞİFRE</label><input class="ainp" type="password" id="oldAdminPw" placeholder="Mevcut şifre"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">YENİ ŞİFRE</label><input class="ainp" type="password" id="newAdminPw1" placeholder="Yeni şifre (min 6 karakter)"></div>
+          <div style="margin-bottom:12px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">YENİ ŞİFRE TEKRAR</label><input class="ainp" type="password" id="newAdminPw2" placeholder="Yeni şifreyi tekrar girin"></div>
+          <div style="font-size:11px;color:#ff4444;display:none;margin-bottom:8px;" id="pwChangeErr">Hata mesajı</div>
+          <div style="font-size:11px;color:#00ff88;display:none;margin-bottom:8px;" id="pwChangeOk">✓ Şifre başarıyla değiştirildi!</div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:12px;" onclick="changeAdminPw()">🔐 ŞİFREYİ GÜNCELLE</button>
+        </div>
+<div class="acard">
+          <div class="acard-title" style="color: #f0b429;">📢 ADMOB REKLAM YÖNETİMİ</div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; color: rgba(255,255,255,0.5);">Yayıncı (Publisher) ID:</label>
+            <input class="ainp" type="text" id="admin-pub-id" placeholder="ca-app-pub-xxxxxxxxxxxxxxxx" style="margin-top:5px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; color: rgba(255,255,255,0.5);">Reklam Birimi (Unit) ID:</label>
+            <input class="ainp" type="text" id="admin-unit-id" placeholder="xxxxxxxxxx" style="margin-top:5px;">
+          </div>
+          <button class="abtn abtn-yellow" style="width:100%;margin-top:5px;height:38px;" onclick="saveAdMobSettings()">AYARLARI SİSTEME KAYDET</button>
+</div>
+        <div class="acard">
+          <div class="acard-title">⚙️ UYGULAMA AYARLARI</div>
+          <div class="asetting-row">
+            <div><div class="asetting-lbl">🌍 Kayıt Açık</div><div class="asetting-sub">Yeni kullanıcı kayıt olabilir</div></div>
+            <div class="ad-slot-toggle on" id="tog-registration" onclick="this.classList.toggle('on');saveAdminSettings()"></div>
+          </div>
+          <div class="asetting-row">
+            <div><div class="asetting-lbl">⛏ Madencilik Aktif</div><div class="asetting-sub">Kullanıcılar madencilik yapabilir</div></div>
+            <div class="ad-slot-toggle on" id="tog-mining-enabled" onclick="this.classList.toggle('on');saveAdminSettings()"></div>
+          </div>
+          <div class="asetting-row">
+            <div><div class="asetting-lbl">💸 Çekim Aktif</div><div class="asetting-sub">Kullanıcılar çekim talep edebilir</div></div>
+            <div class="ad-slot-toggle on" id="tog-withdraw-enabled" onclick="this.classList.toggle('on');saveAdminSettings()"></div>
+          </div>
+          <div class="asetting-row" style="border-bottom:none;">
+            <div><div class="asetting-lbl">📊 İstatistik Toplama</div><div class="asetting-sub">Anonim kullanım verisi topla</div></div>
+            <div class="ad-slot-toggle on" id="tog-analytics" onclick="this.classList.toggle('on');saveAdminSettings()"></div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">📢 DUYURU YAYINLA</div>
+          <div style="margin-bottom:10px;"><input class="ainp" type="text" id="announceTxt" placeholder="Tüm kullanıcılara duyuru mesajı..."></div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:12px;" onclick="sendAnnouncement()">📢 DUYURUYU YAYINLA</button>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">🗑️ TEHLİKELİ BÖLGE</div>
+          <button class="abtn abtn-ban" style="width:100%;padding:12px;margin-bottom:8px;" onclick="clearAllStats()">🗑️ TÜM İSTATİSTİKLERİ SİL</button>
+          <button class="abtn abtn-ban" style="width:100%;padding:12px;" onclick="resetAdminPw()">🔄 ŞİFREYİ VARSAYILANA SİFIRLA</button>
+        </div>
+      </div>
+
+      <!-- ── PAGES EDITOR ── -->
+      <div class="admin-page" id="atab-pages">
+        <div class="acard">
+          <div class="acard-title">🖥 SAYFA & BANNER YÖNETİMİ</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:14px;">Her sayfadaki banner metnini, rengini ve aktifliğini buradan yönetin.</div>
+          <div id="pageBannerList"></div>
+        </div>
+        <div class="acard">
+          <div class="acard-title">➕ YENİ SAYFA BANNERI</div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">SAYFA SEÇ</label>
+            <select class="ainp" id="newBannerPage">
+              <option value="home">Ana Sayfa</option>
+              <option value="farm">Çiftlik</option>
+              <option value="devices">Cihazlar</option>
+              <option value="withdraw">Çekim</option>
+              <option value="market">Borsa</option>
+              <option value="profile">Profil</option>
+            </select>
+          </div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BAŞLIK METNİ</label><input class="ainp" type="text" id="newBannerTitle" placeholder="Ör: 🔥 ÖZEL KAMPANYA!"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">ALT METİN</label><input class="ainp" type="text" id="newBannerSub" placeholder="Ör: Bugün madencilik yap, 2× kazan"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BUTON METNİ</label><input class="ainp" type="text" id="newBannerBtn" placeholder="Ör: KATIL"></div>
+          <div style="margin-bottom:12px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">RENK TEMASI</label>
+            <select class="ainp" id="newBannerColor">
+              <option value="yellow">Altın (Varsayılan)</option>
+              <option value="green">Yeşil</option>
+              <option value="blue">Mavi</option>
+              <option value="purple">Mor</option>
+              <option value="red">Kırmızı</option>
+            </select>
+          </div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:12px;" onclick="addPageBanner()">➕ BANNER EKLE</button>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">🏠 ANA SAYFA HERO METNİ</div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BAŞLIK</label><input class="ainp" type="text" id="heroTitleInp" placeholder="HASHNODE GLOBAL"></div>
+          <div style="margin-bottom:12px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">ALT BAŞLIK</label><input class="ainp" type="text" id="heroSubInp" placeholder="Sanal Madencilik Terminali · Simülasyon"></div>
+          <button class="abtn abtn-green" style="width:100%;padding:12px;" onclick="saveHeroText()">💾 KAYDET</button>
+        </div>
+      </div>
+
+      <!-- ── MİNİNG EDITOR ── -->
+      <div class="admin-page" id="atab-mining">
+        <div class="acard">
+          <div class="acard-title">⛏ MADENCİLİK ORANLARI</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BAZ HASH ORANI (GH/s)</label><input class="ainp" type="number" id="cfg-hashRate" value="13" min="1" max="10000" step="0.1"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">OTURUM SÜRESİ (dk)</label><input class="ainp" type="number" id="cfg-sessionMin" value="60" min="1" max="1440"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">TICK BAŞI KAZANÇ</label><input class="ainp" type="number" id="cfg-earnPerTick" value="0.0000008" step="0.0000001"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BLOK BULMA OLASILIK (%)</label><input class="ainp" type="number" id="cfg-blockChance" value="4" min="1" max="100"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">PASİF KAZANÇ ORANI (%)</label><input class="ainp" type="number" id="cfg-passiveRate" value="30" min="0" max="100"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BOOST ÇARPANI (2× sonrası)</label><input class="ainp" type="number" id="cfg-boostMult" value="2" min="1.1" max="10" step="0.1"></div>
+          </div>
+          <button class="abtn abtn-green" style="width:100%;padding:12px;" onclick="saveMiningConfig()">💾 MADENCİLİK AYARLARINI KAYDET</button>
+          <div style="font-size:11px;color:rgba(0,255,136,0.4);margin-top:8px;text-align:center;" id="miningCfgSaved"></div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">💻 CİHAZ FİYATLARI & BONUSLARI</div>
+          <div id="devicePriceList"></div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:11px;margin-top:10px;" onclick="saveDevicePrices()">💾 CİHAZ FİYATLARINI KAYDET</button>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">🌾 ÇIFTLIK MAKİNE AYARLARI</div>
+          <div id="farmRateList"></div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:11px;margin-top:10px;" onclick="saveFarmRates()">💾 ÇIFTLIK AYARLARINI KAYDET</button>
+        </div>
+      </div>
+
+      <!-- ── CAMPAIGN ── -->
+      <div class="admin-page" id="atab-campaign">
+        <div class="acard" style="border-color:rgba(240,180,41,0.25);">
+          <div class="acard-title" style="color:rgba(240,180,41,0.8);">🎯 AKTİF KAMPANYA</div>
+          <div id="activeCampaignBox">
+            <div style="text-align:center;color:rgba(255,255,255,0.25);padding:16px;font-size:13px;">Aktif kampanya yok.</div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">➕ YENİ KAMPANYA OLUŞTUR</div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">KAMPANYA ADI</label><input class="ainp" type="text" id="camp-name" placeholder="Ör: Yılbaşı Özel Kampanya"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">AÇIKLAMA</label><input class="ainp" type="text" id="camp-desc" placeholder="Ör: 48 saat boyunca 3× madencilik hızı!"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">TÜR</label>
+              <select class="ainp" id="camp-type">
+                <option value="boost">Hash Hız Artışı</option>
+                <option value="earn">Kazanç Artışı</option>
+                <option value="free_withdraw">Ücretsiz Çekim</option>
+                <option value="double_block">Çift Blok Ödülü</option>
+                <option value="special">Özel Ödül</option>
+              </select>
+            </div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">ÇARPAN / DEĞER</label><input class="ainp" type="number" id="camp-value" value="2" min="1" step="0.1" placeholder="Ör: 3"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BAŞLANGIÇ</label><input class="ainp" type="datetime-local" id="camp-start"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BİTİŞ</label><input class="ainp" type="datetime-local" id="camp-end"></div>
+          </div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">ÖZEL GÜN ETİKETİ (opsiyonel)</label>
+            <select class="ainp" id="camp-tag">
+              <option value="">— Seç —</option>
+              <option value="yilbasi">🎄 Yılbaşı</option>
+              <option value="cumhuriyet">🇹🇷 Cumhuriyet Bayramı</option>
+              <option value="ramazan">🌙 Ramazan</option>
+              <option value="bayram">🎉 Bayram</option>
+              <option value="sevgililer">💕 Sevgililer Günü</option>
+              <option value="anneler">🌹 Anneler Günü</option>
+              <option value="flash">⚡ Flash Kampanya</option>
+              <option value="custom">✏️ Özel</option>
+            </select>
+          </div>
+          <div style="margin-bottom:12px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">ÖZEL ÖDÜL METNİ (opsiyonel)</label><input class="ainp" type="text" id="camp-reward" placeholder="Ör: 500 sBTC + Özel Rozet"></div>
+          <button class="abtn abtn-yellow" style="width:100%;padding:13px;font-size:14px;" onclick="createCampaign()">🚀 KAMPANYAYI BAŞLAT</button>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">📋 KAMPANYA GEÇMİŞİ</div>
+          <div id="campaignHistoryList"></div>
+        </div>
+      </div>
+
+      <!-- ── CONTEST ── -->
+      <div class="admin-page" id="atab-contest">
+        <div class="acard" style="border-color:rgba(168,85,247,0.3);">
+          <div class="acard-title" style="color:rgba(168,85,247,0.9);">🏆 AKTİF YARIŞMA</div>
+          <div id="activeContestBox">
+            <div style="text-align:center;color:rgba(255,255,255,0.25);padding:16px;font-size:13px;">Aktif yarışma yok.</div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">➕ YENİ YARIŞMA OLUŞTUR</div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">YARIŞMA ADI</label><input class="ainp" type="text" id="cnt-name" placeholder="Ör: En Çok Blok Yarışması"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">AÇIKLAMA</label><input class="ainp" type="text" id="cnt-desc" placeholder="Ör: En çok blok bulan ilk 3 kişi ödül kazanır"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">YARIŞMA TÜRÜ</label>
+            <select class="ainp" id="cnt-type">
+              <option value="most_blocks">En Çok Blok</option>
+              <option value="most_coins">En Çok sBTC</option>
+              <option value="most_ads">En Çok Reklam İzleme</option>
+              <option value="most_referrals">En Çok Referans</option>
+              <option value="first_milestone">İlk Milestone Yarışı</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BAŞLANGIÇ</label><input class="ainp" type="datetime-local" id="cnt-start"></div>
+            <div><label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:5px;">BİTİŞ</label><input class="ainp" type="datetime-local" id="cnt-end"></div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:6px;font-weight:700;letter-spacing:1px;">ÖDÜLLER</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div><label style="font-size:10px;color:rgba(240,180,41,0.6);display:block;margin-bottom:4px;">🥇 BİRİNCİ</label><input class="ainp" type="text" id="cnt-prize1" placeholder="Ör: 0.01 BTC" style="font-size:13px;padding:9px;"></div>
+            <div><label style="font-size:10px;color:rgba(200,200,200,0.6);display:block;margin-bottom:4px;">🥈 İKİNCİ</label><input class="ainp" type="text" id="cnt-prize2" placeholder="Ör: 500 sBTC" style="font-size:13px;padding:9px;"></div>
+            <div><label style="font-size:10px;color:rgba(205,127,50,0.7);display:block;margin-bottom:4px;">🥉 ÜÇÜNCÜ</label><input class="ainp" type="text" id="cnt-prize3" placeholder="Ör: 200 sBTC" style="font-size:13px;padding:9px;"></div>
+          </div>
+          <button class="abtn abtn-purple" style="width:100%;padding:13px;font-size:14px;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border:none;" onclick="createContest()">🏆 YARIŞMAYI BAŞLAT</button>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">🏅 ÖDÜL KAZANANLAR</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:12px;">Yarışmayı kazanan kullanıcılara buradan ödüllerini verin.</div>
+          <div id="contestWinnersList"></div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">📋 YARIŞMA GEÇMİŞİ</div>
+          <div id="contestHistoryList"></div>
+        </div>
+      </div>
+
+      <!-- ── PANİK ── -->
+      <div class="admin-page" id="atab-panic">
+        <div class="acard" style="border-color:rgba(255,0,0,0.3);">
+          <div class="acard-title" style="color:rgba(255,68,68,0.9);">🚨 PANİK BUTONU — SİSTEM BAKIMI</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;line-height:1.7;">Panik butonunu aktifleştirince tüm kullanıcılar bakım ekranı görür. Yönetici gizli butonla bakım modundan çıkabilir.</div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:6px;">BAKIM MESAJI</label>
+            <textarea class="ainp" id="maintMsgInput" rows="3" placeholder="Kullanıcılara gösterilecek mesaj..." style="resize:none;">Sistem şu anda bakım çalışması yapılmaktadır. En kısa sürede hizmetinize devam edeceğiz.</textarea>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:6px;">BAKIM BAŞLIĞI</label>
+            <input class="ainp" type="text" id="maintTitleInput" value="SİSTEM BAKIMDA">
+          </div>
+          <button id="panicMainBtn" class="panic-btn" onclick="toggleMaintenance()">🚨 BAKIM MODUNU AKTİFLEŞTİR</button>
+          <div style="font-size:11px;color:rgba(255,255,255,0.25);text-align:center;margin-top:12px;" id="panicStatus">Bakım modu: KAPALI</div>
+        </div>
+
+        <div class="acard">
+          <div class="acard-title">📋 OLAY KAYITLARI</div>
+          <div id="panicLog" style="font-family:'Courier New',monospace;font-size:11px;color:rgba(255,68,68,0.7);max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.4);border-radius:8px;padding:10px;">
+            <p>> Sistem normal çalışıyor...</p>
+          </div>
+        </div>
+      </div>
+
+   <div style="text-align: center; margin: 20px 0; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; border: 1px dashed var(--border);">
+    <p style="font-size: 10px; color: var(--muted); margin-bottom: 5px;">SPONSORLU İÇERİK</p>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3940256099942544"
+         data-ad-slot="6300978111"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+    </div><!-- admin-body -->
+  </div><!-- adminDashboard -->
+</div><!-- adminPanel -->
+
+<!-- USER MSG MODAL -->
+<div class="modal-bg" id="userMsgModal">
+  <div class="modal">
+    <div style="font-size:2rem;margin-bottom:10px;">✉️</div>
+    <h3 style="color:#00b4ff;">KULLANICIYA MESAJ GÖNDER</h3>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px;" id="msgTargetName">Kullanıcı</div>
+    <textarea class="ainp" id="userMsgTxt" rows="4" placeholder="Mesajınızı yazın..." style="resize:none;margin-bottom:12px;"></textarea>
+    <button class="abtn abtn-msg" style="width:100%;padding:12px;font-size:14px;" onclick="sendUserMsg()">📨 MESAJ GÖNDER</button>
+    <button onclick="document.getElementById('userMsgModal').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.3);margin-top:10px;cursor:pointer;text-decoration:underline;display:block;width:100%;font-size:12px;font-family:Rajdhani,sans-serif;">İptal</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// MATRIX BG
+// ════════════════════════════════════════════════
+(function(){
+  const c=document.getElementById('bgMatrix'),ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  const chars='01アイウエオ#$HASHNODE%&@'.split('');
+  const cols=Math.floor(window.innerWidth/16);
+  const drops=Array(cols).fill(1);
+  setInterval(()=>{
+    ctx.fillStyle='rgba(2,4,12,0.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#00ff88';ctx.font='12px monospace';
+    drops.forEach((y,i)=>{
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,y*16);
+      if(y*16>c.height&&Math.random()>0.975)drops[i]=0;
+      drops[i]++;
+    });
+  },55);
+})();
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let currentUser=null;
+let coins=0,boost=1,blocks=0,sessions=0;
+let mining=false,mineIv=null,adIv=null,boostTO=null,marketIv=null;
+let adType='boost',adSec=30;
+let ownedDevices=[],farmWorkers={},withdrawHistory=[],prefs={};
+let selectedWM='BTC',allCoins=[],filteredCoins=[],coinPrices={},coinChanges={},coinSparks={};
+let refCode='';
+
+// ════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════
+function save(){
+  if(!currentUser)return;
+  const key='hn_'+currentUser.id;
+  localStorage.setItem(key,JSON.stringify({coins,boost,blocks,sessions,ownedDevices,farmWorkers,withdrawHistory,prefs,refCode,mining,mineSecsLeft}));
+  // Zaman damgası — pasif kazanç için
+  if(mining) localStorage.setItem('hn_lastSave_'+currentUser.id, Date.now().toString());
+}
+function loadUser(){
+  if(!currentUser)return;
+  const key='hn_'+currentUser.id;
+  const d=localStorage.getItem(key);
+  if(d){
+    const p=JSON.parse(d);
+    coins=p.coins||0; boost=p.boost||1; blocks=p.blocks||0; sessions=p.sessions||0;
+    ownedDevices=p.ownedDevices||[]; farmWorkers=p.farmWorkers||{};
+    withdrawHistory=p.withdrawHistory||[]; prefs=p.prefs||{};
+    refCode=p.refCode||genRef();
+    // Önceki oturumda mining aktifse pasif kazanç hesapla
+    if(p.mining){
+      calcPassiveEarnings();
+    }
+  } else {
+    refCode=genRef();
+  }
+  save();
+}
+function getUsers(){return JSON.parse(localStorage.getItem('hn_users')||'[]');}
+function saveUsers(u){localStorage.setItem('hn_users',JSON.stringify(u));}
+
+// ════════════════════════════════════════════════
+// SPLASH
+// ════════════════════════════════════════════════
+const splashMsgs=['SİSTEM BAŞLATILIYOR...','BLOCKCHAIN BAĞLANILIYOR...','CÜZDAN HAZIRLANIYORDU...','GÜVENLİK DOĞRULANIYORDU...','HAZİNE AKTİF!'];
+let splashPct=0;
+const splashIv=setInterval(()=>{
+  splashPct+=Math.floor(Math.random()*14)+6;
+  document.getElementById('splashBar').style.width=Math.min(splashPct,100)+'%';
+  document.getElementById('splashStatus').textContent=splashMsgs[Math.min(Math.floor(splashPct/22),4)];
+  if(splashPct>=100){
+    clearInterval(splashIv);
+    setTimeout(()=>{
+      document.getElementById('splash').classList.remove('active');
+      // Check if user already logged in
+      const saved=localStorage.getItem('hn_session');
+      if(saved){
+        const u=JSON.parse(saved);
+        currentUser=u;
+        startApp();
+      } else if(!localStorage.getItem('hn_terms_accepted')){
+        showScreen('termsScreen');
+      } else {
+        showScreen('authScreen');
+      }
+    },500);
+  }
+},120);
+
+// ════════════════════════════════════════════════
+// SCREEN MANAGER
+// ════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const sc=document.getElementById(id);
+  if(sc)sc.classList.add('active');
+}
+
+// ════════════════════════════════════════════════
+// TERMS
+// ════════════════════════════════════════════════
+function acceptTerms(){
+  const c1=document.getElementById('termsCheck1').checked;
+  const c2=document.getElementById('termsCheck2').checked;
+  if(!c1||!c2){showToast('Lütfen her iki kutuyu da işaretleyin!','var(--red)');return;}
+  localStorage.setItem('hn_terms_accepted','1');
+  showScreen('authScreen');
+}
+function showTermsAgain(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('termsScreen').classList.add('active');
+}
+
+// ════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════
+function switchAuthTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active',tab==='register');
+  document.getElementById('panelLogin').classList.toggle('active',tab==='login');
+  document.getElementById('panelRegister').classList.toggle('active',tab==='register');
+}
+
+function togglePw(id,btn){
+  const inp=document.getElementById(id);
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+
+function checkStrength(pw){
+  const segs=[document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3'),document.getElementById('s4')];
+  segs.forEach(s=>{s.className='strength-seg';});
+  if(!pw)return;
+  let score=0;
+  if(pw.length>=8)score++;
+  if(/[A-Z]/.test(pw))score++;
+  if(/[0-9]/.test(pw))score++;
+  if(/[^A-Za-z0-9]/.test(pw))score++;
+  for(let i=0;i<score;i++){
+    segs[i].classList.add(score<=1?'weak':score<=2?'medium':'strong');
+  }
+}
+
+function showErr(id,msg){
+  const el=document.getElementById(id);
+  if(el){el.textContent=msg||el.textContent;el.classList.add('show');}
+}
+function clearErr(id){const el=document.getElementById(id);if(el)el.classList.remove('show');}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pw=document.getElementById('loginPw').value;
+  let ok=true;
+  clearErr('loginEmailErr');clearErr('loginPwErr');
+  if(!email||!/\S+@\S+\.\S+/.test(email)){showErr('loginEmailErr');ok=false;}
+  if(!pw){showErr('loginPwErr');ok=false;}
+  if(!ok)return;
+  const users=getUsers();
+  const user=users.find(u=>u.email===email&&u.pw===btoa(pw));
+  if(!user){showErr('loginEmailErr','E-posta veya şifre yanlış.');return;}
+  currentUser=user;
+  localStorage.setItem('hn_session',JSON.stringify(user));
+  startApp();
+}
+
+function doRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const pw=document.getElementById('regPw').value;
+  const pw2=document.getElementById('regPw2').value;
+  const ref=document.getElementById('regRef').value.trim().toUpperCase();
+  const agreed=document.getElementById('regTerms').checked;
+  let ok=true;
+  ['regNameErr','regEmailErr','regPwErr','regPw2Err','regTermsErr'].forEach(clearErr);
+  if(name.length<3){showErr('regNameErr');ok=false;}
+  if(!email||!/\S+@\S+\.\S+/.test(email)){showErr('regEmailErr');ok=false;}
+  if(pw.length<8){showErr('regPwErr');ok=false;}
+  if(pw!==pw2){showErr('regPw2Err');ok=false;}
+  if(!agreed){showErr('regTermsErr','Sözleşmeyi kabul etmelisiniz.');ok=false;}
+  if(!ok)return;
+  const users=getUsers();
+  if(users.find(u=>u.email===email)){showErr('regEmailErr','Bu e-posta zaten kayıtlı.');return;}
+  const newUser={id:'u'+Date.now(),name,email,pw:btoa(pw),since:new Date().toLocaleDateString('tr-TR'),ref};
+  users.push(newUser);
+  saveUsers(users);
+  currentUser=newUser;
+  localStorage.setItem('hn_session',JSON.stringify(newUser));
+  showToast('Hoş geldin, '+name+'! 🎉');
+  startApp();
+}
+
+function socialLogin(provider){
+  const fakeName=provider==='Google'?'Google Kullanıcısı':'Apple Kullanıcısı';
+  const fakeEmail='user_'+Date.now()+'@'+provider.toLowerCase()+'.sim';
+  const user={id:'u'+Date.now(),name:fakeName,email:fakeEmail,pw:'',since:new Date().toLocaleDateString('tr-TR'),social:provider};
+  const users=getUsers();
+  users.push(user);saveUsers(users);
+  currentUser=user;
+  localStorage.setItem('hn_session',JSON.stringify(user));
+  showToast(provider+' ile giriş başarılı!');
+  startApp();
+}
+
+function showForgot(){document.getElementById('forgotModal').classList.add('open');}
+function sendForgot(){
+  const e=document.getElementById('forgotEmail').value;
+  if(!e){return;}
+  document.getElementById('forgotModal').classList.remove('open');
+  showToast('📧 Sıfırlama bağlantısı simüle edildi!');
+}
+
+function doLogout(){
+  if(mining)stopMining();
+  clearInterval(globalMinerIv); globalMinerIv=null;
+  clearInterval(marketIv); marketIv=null;
+  localStorage.removeItem('hn_session');
+  currentUser=null;
+  coins=0;boost=1;blocks=0;sessions=0;ownedDevices=[];farmWorkers={};withdrawHistory=[];
+  allCoins=[];filteredCoins=[];
+  document.getElementById('mainApp').classList.remove('active');
+  document.getElementById('mainApp').style.display='none';
+  showScreen('authScreen');
+}
+
+// ════════════════════════════════════════════════
+// START APP
+// ════════════════════════════════════════════════
+function startApp(){
+  // Ban kontrolü
+  if(currentUser&&checkIfBanned(currentUser)){
+    localStorage.removeItem('hn_session');
+    currentUser=null;
+    showScreen('authScreen');
+    showToast('🚫 Hesabınız yasaklandı.','#ff4444');
+    return;
+  }
+  showScreen(null);
+  document.getElementById('mainApp').style.display='flex';
+  document.getElementById('mainApp').classList.add('active');
+  loadUser();
+  updateUI();
+  renderWithdrawHistory();
+  // Avatar
+  const initials=(currentUser.name||'U').substring(0,2).toUpperCase();
+  document.getElementById('navAvatar').textContent=initials;
+  document.getElementById('profAvatar').textContent=initials;
+  document.getElementById('profName').textContent=currentUser.name||'Kullanıcı';
+  document.getElementById('profEmail').textContent=currentUser.email||'-';
+  document.getElementById('profSince').textContent='Üyelik: '+(currentUser.since||'-');
+  document.getElementById('profRefCode').textContent=refCode;
+  document.getElementById('refCode').textContent=refCode;
+  applyPrefs();
+  initGlobalMiner();
+  if(typeof applyAllAdminSettings==='function') setTimeout(applyAllAdminSettings,300);
+  if(prefs.automine)setTimeout(()=>{if(!mining)startMining();},1500);
+  addLog('Hoş geldin, '+(currentUser.name||'Miner')+'! Sistem aktif.');
+}
+
+// ════════════════════════════════════════════════
+// UI
+// ════════════════════════════════════════════════
+function updateUI(){
+  document.getElementById('coinDisplay').textContent=coins.toFixed(8);
+  document.getElementById('navWallet').textContent=coins.toFixed(6)+' sBTC';
+  document.getElementById('blockCount').textContent=blocks;
+  document.getElementById('sessCount').textContent=sessions;
+  document.getElementById('wBalance').textContent=coins.toFixed(8)+' sBTC';
+  document.getElementById('ps-coins').textContent=coins.toFixed(6);
+  document.getElementById('ps-blocks').textContent=blocks;
+  document.getElementById('ps-devices').textContent=ownedDevices.length;
+  const bb=document.getElementById('boostBadge');
+  bb.textContent=boost+'× HIZ';
+  bb.className='badge '+(boost>1?'badge-y':'badge-g');
+  const pbb=document.getElementById('profBoostBadge');
+  if(pbb){pbb.textContent=boost+'× HIZ';pbb.className='badge '+(boost>1?'badge-y':'badge-g');}
+  updateGlobalMinerUI();
+}
+
+function addLog(msg){
+  const log=document.getElementById('sysLog');
+  const ts=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const p=document.createElement('p');
+  p.textContent='>['+ts+'] '+msg;
+  log.appendChild(p);
+  log.scrollTop=log.scrollHeight;
+}
+
+function showToast(msg,color){
+  const t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=msg;
+  t.style.background=color||'#00ff88';
+  t.style.color=(color&&color!=='#00ff88'&&color!=='var(--green)')?'#fff':'#000';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function rand(a,b){return Math.floor(Math.random()*(b-a)+a);}
+
+// ════════════════════════════════════════════════
+// PAGES
+// ════════════════════════════════════════════════
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  if(id==='market')initMarket();
+  if(id==='farm')renderFarm();
+  if(id==='devices')renderDevices();
+  if(typeof trackPageVisit==='function') trackPageVisit(id);
+}
+
+// ════════════════════════════════════════════════
+// MINING — 13 GH/s sabit hız, 60 dk sayaç, pasif kazanç
+// ════════════════════════════════════════════════
+const BASE_HASH_GH = 13;          // GH/s sabit başlangıç
+const SESSION_SECS = 3600;        // 60 dakika = 3600 saniye
+// Kazanç: 13 GH/s * oran → her 1.2s'de hesap: earn = 0.0000008 * boost * devBonus
+const BASE_EARN_PER_TICK = 0.0000008; // 1.2s başına ~0.0024/saat (yönetilebilir hız)
+
+let mineSecsLeft = SESSION_SECS;
+let mineTimerIv = null;
+let globalMinerBase = 0;          // simüle global madenci sayısı
+let globalMinerIv = null;
+let passiveStartTime = null;      // pasif kazanç için çıkış zamanı
+
+function toggleMining(){
+  mining?stopMining():startMining();
+}
+
+function startMining(){
+  mining=true; sessions++;
+  mineSecsLeft = getEffectiveSessionSecs();
+  const btn=document.getElementById('btnMine');
+  btn.textContent='⏹ MADENCİLİĞİ DURDUR'; btn.className='btn btn-stop';
+  const devBonus=1+ownedDevices.length*0.15;
+  const ghRate=(getEffectiveHashGH()*boost*devBonus).toFixed(2);
+  addLog('Madencilik başlatıldı. '+ghRate+' GH/s · Boost:'+boost+'x · Cihaz:+'+Math.round(ownedDevices.length*15)+'%');
+  document.getElementById('hashRate').textContent=ghRate+' GH/s';
+  document.getElementById('powerStat').textContent=Math.round(120*devBonus)+' W';
+  document.getElementById('effStat').textContent=boost>1?'YÜKSEK':'NORMAL';
+  document.getElementById('mineTimerWrap').style.display='block';
+  updateTimerUI();
+
+  mineIv=setInterval(()=>{
+    const dB=1+ownedDevices.length*0.15;
+    const earn=getEffectiveEarnPerTick()*boost*dB*(0.92+Math.random()*0.16);
+    coins+=earn;
+    const displayGH=((getEffectiveHashGH()*boost*dB)*(0.96+Math.random()*0.08)).toFixed(2);
+    document.getElementById('hashRate').textContent=displayGH+' GH/s';
+    if(Math.random()<getEffectiveBlockChance()){
+      blocks++;
+      addLog('Blok bulundu! +'+earn.toFixed(8)+' sBTC');
+      showToast('+'+earn.toFixed(8)+' sBTC');
+    }
+    updateUI(); save();
+  },1200);
+
+  mineTimerIv=setInterval(()=>{
+    mineSecsLeft--;
+    updateTimerUI();
+    if(mineSecsLeft<=0){
+      const mins=Math.round(getEffectiveSessionSecs()/60);
+      addLog(mins+' dakikalık oturum tamamlandı! Madencilik otomatik durduruldu.');
+      showToast('⏱ OTURUM TAMAMLANDI!','#f0b429');
+      stopMining();
+    }
+  },1000);
+
+  passiveStartTime=null;
+  save();
+}
+
+function stopMining(){
+  mining=false;
+  clearInterval(mineIv); mineIv=null;
+  clearInterval(mineTimerIv); mineTimerIv=null;
+  const btn=document.getElementById('btnMine');
+  btn.textContent='⛏ MADENCİLİĞİ BAŞLAT'; btn.className='btn btn-green';
+  document.getElementById('hashRate').textContent='0 GH/s';
+  document.getElementById('powerStat').textContent='— W';
+  document.getElementById('effStat').textContent='—';
+  document.getElementById('mineTimerWrap').style.display='none';
+  addLog('Madencilik durduruldu. Toplam:'+coins.toFixed(8)+' sBTC');
+  save();
+}
+
+function updateTimerUI(){
+  const m=Math.floor(mineSecsLeft/60);
+  const s=mineSecsLeft%60;
+  const txt=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  const el=document.getElementById('mineCountdown');
+  const bar=document.getElementById('mineTimerBar');
+  if(el) el.textContent=txt;
+  if(bar) bar.style.width=(mineSecsLeft/SESSION_SECS*100)+'%';
+  // Renk: son 10 dk sarı, son 5 dk kırmızı
+  if(el){
+    if(mineSecsLeft<=300) el.style.color='#ff4444';
+    else if(mineSecsLeft<=600) el.style.color='#f0b429';
+    else el.style.color='#00ff88';
+  }
+  if(bar){
+    if(mineSecsLeft<=300) bar.style.background='linear-gradient(90deg,#ff4444,#ff8844)';
+    else if(mineSecsLeft<=600) bar.style.background='linear-gradient(90deg,#f0b429,#ffdd00)';
+    else bar.style.background='linear-gradient(90deg,#00ff88,#00b4ff)';
+  }
+}
+
+// ── GLOBAL MADENCİ SAYACI (simüle) ──────────────────
+function initGlobalMiner(){
+  // Gerçekçi başlangıç: 8000-15000 arası
+  globalMinerBase=8000+Math.floor(Math.random()*7000);
+  updateGlobalMinerUI();
+  globalMinerIv=setInterval(()=>{
+    // Her 5s'de ±20-80 dalgalanma
+    const delta=Math.floor(Math.random()*100)-40;
+    globalMinerBase=Math.max(5000,globalMinerBase+delta);
+    // Eğer kendi kullanıcı aktif mininglendaysa ona da ekle
+    if(mining) globalMinerBase=Math.max(globalMinerBase,globalMinerBase);
+    updateGlobalMinerUI();
+  },5000);
+}
+
+function updateGlobalMinerUI(){
+  const active=globalMinerBase+(mining?1:0);
+  const el=document.getElementById('activeMinerCount');
+  const gh=document.getElementById('globalHashRate');
+  const gb=document.getElementById('globalBlocks');
+  if(el) el.textContent=active.toLocaleString('tr-TR');
+  if(gh){
+    const totalGH=(active*BASE_HASH_GH*(1+Math.random()*0.1)).toFixed(0);
+    gh.textContent=Math.round(totalGH/1000)+' TH/s';
+  }
+  if(gb){
+    // global blok sayısı: her aktif kullanıcının katkısıyla artar
+    const gblocks=Math.floor(active*0.003*(Date.now()-1700000000000)/1000);
+    gb.textContent=(gblocks).toLocaleString('tr-TR');
+  }
+}
+
+// ── PASİF KAZANÇ (arka planda geçen süre) ───────────
+function calcPassiveEarnings(){
+  const lastTs=parseInt(localStorage.getItem('hn_lastSave_'+(currentUser?currentUser.id:''))||'0');
+  if(!lastTs||!mining) return;
+  const now=Date.now();
+  const elapsed=Math.floor((now-lastTs)/1000); // saniye
+  if(elapsed<10) return; // 10s altı ignore
+  const maxPassive=Math.min(elapsed,3600); // max 1 saatlik pasif
+  const dB=1+ownedDevices.length*0.15;
+  // Pasif kazanç aktif kazancın %30'u
+  const passiveEarn=(BASE_EARN_PER_TICK/1.2)*maxPassive*boost*dB*0.30;
+  if(passiveEarn>0){
+    coins+=passiveEarn;
+    addLog('📴 Pasif kazanç: +'+passiveEarn.toFixed(8)+' sBTC ('+Math.round(maxPassive/60)+' dk kapalıydı)');
+    showToast('📴 +'+passiveEarn.toFixed(8)+' sBTC (pasif)','#a855f7');
+    updateUI(); save();
+  }
+}
+
+function saveWithTimestamp(){
+  if(!currentUser)return;
+  save();
+  localStorage.setItem('hn_lastSave_'+currentUser.id, Date.now().toString());
+}
+
+// Sayfa kapanınca timestamp kaydet
+window.addEventListener('beforeunload',()=>{
+  if(mining) saveWithTimestamp();
+});
+
+// ════════════════════════════════════════════════
+// ADS
+// ════════════════════════════════════════════════
+const adCfg={
+  boost:{icon:'📺',title:'ÖDÜLLÜ REKLAM',desc:'30 saniye bekle → <b style="color:#f0b429;">2× Kazım Hızı</b> kazan! (2 dk aktif)'},
+  energy:{icon:'⚡',title:'ENERJİ REKLAMÜ',desc:'30 saniye bekle → <b style="color:#00b4ff;">Enerji Deponu</b> tamamen dolar!'},
+  farm:{icon:'🌾',title:'ÇİFTLİK BOOSTER',desc:'30 saniye bekle → <b style="color:#a855f7;">3× Çiftlik Hızı</b> 4 saat aktif!'}
+};
+function openAdModal(type){
+  adType=type||'boost';
+  const cfg=adCfg[adType]||adCfg.boost;
+  document.getElementById('adIcon').textContent=cfg.icon;
+  document.getElementById('adTitle').textContent=cfg.title;
+  document.getElementById('adDesc').innerHTML=cfg.desc;
+  adSec=30;
+  document.getElementById('adProg').style.width='0%';
+  document.getElementById('adTimerTxt').textContent='30';
+  document.getElementById('adClaimBtn').classList.add('btn-disabled');
+  document.getElementById('adModal').classList.add('open');
+  clearInterval(adIv);
+  adIv=setInterval(()=>{
+    adSec--;
+    document.getElementById('adProg').style.width=((30-adSec)/30*100).toFixed(1)+'%';
+    document.getElementById('adTimerTxt').textContent=adSec>0?adSec:'✓';
+    if(adSec<=0){clearInterval(adIv);document.getElementById('adClaimBtn').classList.remove('btn-disabled');}
+  },1000);
+}
+function closeAdModal(){clearInterval(adIv);document.getElementById('adModal').classList.remove('open');}
+function claimReward(){
+  closeAdModal();
+  if(typeof trackAdWatch==='function') trackAdWatch();
+  if(adType==='boost'){
+    boost=2;addLog('2× Boost aktif! 2 dk geçerli.');showToast('2× HIZ AKTİF!');
+    clearTimeout(boostTO);
+    boostTO=setTimeout(()=>{boost=1;addLog('Boost bitti.');updateUI();save();},120000);
+  }else if(adType==='energy'){
+    addLog('Enerji yenilendi!');showToast('⚡ ENERJİ DOLDU!','#00b4ff');
+  }else if(adType==='farm'){
+    addLog('Çiftlik 3× boost aktif!');showToast('🌾 3× ÇİFTLİK BOOST!','#a855f7');
+  }
+  updateUI();save();
+}
+
+// ════════════════════════════════════════════════
+// FARM
+// ════════════════════════════════════════════════
+const farmData=[
+  {id:'basic',icon:'🖥️',name:'Basic Miner',rate:0.001,cost:0.005,power:50,maxLvl:5},
+  {id:'gpu',icon:'🎮',name:'GPU Rig',rate:0.004,cost:0.02,power:200,maxLvl:5},
+  {id:'asic',icon:'⚡',name:'ASIC Miner',rate:0.012,cost:0.08,power:600,maxLvl:5},
+  {id:'quantum',icon:'🔮',name:'Quantum Node',rate:0.035,cost:0.25,power:1200,maxLvl:3},
+  {id:'solar',icon:'☀️',name:'Solar Farm',rate:0.008,cost:0.06,power:0,maxLvl:5},
+  {id:'hydro',icon:'💧',name:'Hydro Rig',rate:0.018,cost:0.12,power:100,maxLvl:3},
+  {id:'cloud',icon:'☁️',name:'Cloud Mining',rate:0.025,cost:0.15,power:0,maxLvl:3},
+  {id:'nano',icon:'🔬',name:'Nano Cluster',rate:0.05,cost:0.4,power:800,maxLvl:2},
+];
+function renderFarm(){
+  const grid=document.getElementById('farmGrid');
+  grid.innerHTML='';
+  let totalP=0,daily=0,workers=0;
+  farmData.forEach(m=>{
+    const lvl=farmWorkers[m.id]||0;
+    if(lvl>0){totalP+=m.power*lvl;daily+=m.rate*lvl*24;workers+=lvl;}
+    const el=document.createElement('div');
+    el.className='farm-card'+(lvl>0?' owned':'');
+    el.innerHTML=`<span class="farm-icon">${m.icon}</span>
+      <div class="farm-name">${m.name}</div>
+      <div class="farm-rate">${m.rate.toFixed(3)} sBTC/h</div>
+      <div class="farm-cost">Maliyet: ${m.cost} sBTC</div>
+      <div class="farm-lv">Seviye: ${lvl}/${m.maxLvl}</div>
+      <div class="progress-wrap"><div class="progress-bar pb-green" style="width:${lvl/m.maxLvl*100}%"></div></div>
+      <button class="btn ${lvl>=m.maxLvl?'btn-disabled btn-blue':'btn-green'} btn-xs" style="margin-top:6px;width:100%;" onclick="buyFarm('${m.id}')">
+        ${lvl>=m.maxLvl?'MAX':''+lvl>0?'⬆ YÜKSELT':'Satın Al'}</button>`;
+    grid.appendChild(el);
+  });
+  document.getElementById('totalPower').textContent=totalP+' TH/s';
+  document.getElementById('dailyEarn').textContent=daily.toFixed(3)+' sBTC';
+  document.getElementById('activeWorkers').textContent=workers;
+  document.getElementById('farmProgress').style.width=Math.min(100,workers*8)+'%';
+}
+function buyFarm(id){
+  const m=farmData.find(x=>x.id===id);
+  const lvl=farmWorkers[id]||0;
+  if(lvl>=m.maxLvl){showToast('MAX SEVIYE!','#00b4ff');return;}
+  const cost=m.cost*(lvl+1);
+  if(coins<cost){showToast('Yetersiz bakiye!','#ff4444');return;}
+  coins-=cost;farmWorkers[id]=(lvl+1);
+  addLog(m.name+' Lvl '+(lvl+1)+' satın alındı.');
+  showToast(m.icon+' '+m.name+' güçlendirildi!');
+  renderFarm();updateUI();save();
+}
+
+// ════════════════════════════════════════════════
+// DEVICES
+// ════════════════════════════════════════════════
+const devData=[
+  {id:'phone',icon:'📱',name:'Smartphone',specs:'2 GH/s · Düşük Güç',price:0.002,bonus:10},
+  {id:'laptop',icon:'💻',name:'Gaming Laptop',specs:'15 GH/s · RTX 4070',price:0.01,bonus:30},
+  {id:'desktop',icon:'🖥️',name:'Mining Desktop',specs:'45 GH/s · Çift GPU',price:0.03,bonus:60},
+  {id:'asic_s19',icon:'⚡',name:'Antminer S19',specs:'110 TH/s · 3250W',price:0.1,bonus:100},
+  {id:'asic_s21',icon:'🚀',name:'Antminer S21',specs:'200 TH/s · 3550W',price:0.2,bonus:150},
+  {id:'fpga',icon:'🔮',name:'FPGA Cluster',specs:'85 TH/s · Programlanabilir',price:0.15,bonus:120},
+  {id:'rig6',icon:'🎮',name:'6× GPU Rig',specs:'360 MH/s Equivalent',price:0.07,bonus:80},
+  {id:'rig12',icon:'🏭',name:'12× GPU Rig',specs:'720 MH/s · Endüstriyel',price:0.14,bonus:110},
+  {id:'server',icon:'⚙️',name:'Mining Server',specs:'500 TH/s · Veri Merkezi',price:0.35,bonus:200},
+  {id:'quantum',icon:'⚛️',name:'Quantum Chip',specs:'1 PH/s · Geleceğin Teknolojisi',price:1.0,bonus:400},
+];
+function renderDevices(){
+  const list=document.getElementById('deviceList');
+  list.innerHTML='';
+  let owned=0,totalPow=0;
+  devData.forEach(d=>{
+    const isOwned=ownedDevices.includes(d.id);
+    if(isOwned){owned++;totalPow+=d.bonus;}
+    const el=document.createElement('div');
+    el.className='device-card'+(isOwned?' owned':'');
+    el.innerHTML=`<div class="dev-icon">${d.icon}</div>
+      <div class="dev-info">
+        <div class="dev-name">${d.name}</div>
+        <div class="dev-specs">${d.specs}</div>
+        <div class="dev-price">${isOwned?'':'💰 '+d.price+' sBTC '}<span class="badge badge-b" style="font-size:10px;">+${d.bonus}% HIZ</span></div>
+      </div>
+      ${isOwned?'<div class="dev-owned">✓ AKTİF</div>':'<button class="btn btn-yellow btn-xs" onclick="buyDevice(\''+d.id+'\')">Satın Al</button>'}`;
+    list.appendChild(el);
+  });
+  document.getElementById('ownedCount').textContent=owned;
+  document.getElementById('devTotalPower').textContent=totalPow+' TH/s';
+  document.getElementById('ps-devices').textContent=owned;
+}
+function buyDevice(id){
+  const d=devData.find(x=>x.id===id);
+  if(!d||ownedDevices.includes(d.id))return;
+  if(coins<d.price){showToast('Yetersiz bakiye!','#ff4444');return;}
+  coins-=d.price;ownedDevices.push(d.id);
+  addLog(d.name+' satın alındı! +'+d.bonus+'% hız');
+  showToast(d.icon+' '+d.name+' AKTİF!');
+  renderDevices();updateUI();save();
+}
+
+// ════════════════════════════════════════════════
+// WITHDRAW
+// ════════════════════════════════════════════════
+function selWM(el,m){
+  document.querySelectorAll('.wm-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');selectedWM=m;
+}
+function doWithdraw(){
+  const addr=document.getElementById('wAddress').value.trim();
+  const amt=parseFloat(document.getElementById('wAmount').value);
+  if(!addr){showToast('Adres girin!','#ff4444');return;}
+  if(!amt||amt<0.01){showToast('Min 0.01 sBTC!','#ff4444');return;}
+  if(amt>coins){showToast('Yetersiz bakiye!','#ff4444');return;}
+  coins-=amt;
+  withdrawHistory.unshift({method:selectedWM,addr:addr.substring(0,12)+'...',amt:amt.toFixed(6),net:(amt*0.98).toFixed(6),date:new Date().toLocaleDateString('tr-TR')});
+  renderWithdrawHistory();
+  document.getElementById('wAddress').value='';
+  document.getElementById('wAmount').value='';
+  document.getElementById('wSuccessModal').classList.add('open');
+  addLog('Çekim talebi: '+amt.toFixed(6)+' sBTC → '+selectedWM);
+  updateUI();save();
+}
+function renderWithdrawHistory(){
+  const el=document.getElementById('wHistList');
+  if(!withdrawHistory.length){el.innerHTML='<span style="color:var(--muted);font-size:13px;">Henüz işlem yok.</span>';return;}
+  el.innerHTML=withdrawHistory.slice(0,10).map(w=>`
+    <div style="border-bottom:1px solid rgba(255,255,255,0.05);padding:10px 0;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:13px;font-weight:700;">${w.method} — ${w.net} sBTC</div>
+        <div style="font-size:11px;color:var(--muted);">${w.addr} · ${w.date}</div>
+      </div>
+      <span class="badge badge-y" style="font-size:10px;">İşleniyor</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+// MARKET
+// ════════════════════════════════════════════════
+const cryptos=[
+  {sym:'BTC',name:'Bitcoin',icon:'₿',color:'#f7931a',bg:'#2a1a00',cat:['top','layer1'],base:95000},
+  {sym:'ETH',name:'Ethereum',icon:'Ξ',color:'#627eea',bg:'#0d1230',cat:['top','layer1','defi'],base:3200},
+  {sym:'BNB',name:'BNB',icon:'B',color:'#f0b429',bg:'#1a1400',cat:['top','layer1'],base:580},
+  {sym:'SOL',name:'Solana',icon:'◎',color:'#9945ff',bg:'#1a0d30',cat:['top','layer1'],base:165},
+  {sym:'XRP',name:'XRP',icon:'✕',color:'#00aae4',bg:'#001a2a',cat:['top'],base:0.58},
+  {sym:'ADA',name:'Cardano',icon:'⊕',color:'#0033ad',bg:'#00082a',cat:['top','layer1'],base:0.45},
+  {sym:'AVAX',name:'Avalanche',icon:'△',color:'#e84142',bg:'#2a0002',cat:['top','layer1'],base:38},
+  {sym:'DOT',name:'Polkadot',icon:'●',color:'#e6007a',bg:'#2a0015',cat:['top','layer1'],base:8.5},
+  {sym:'DOGE',name:'Dogecoin',icon:'Ð',color:'#c2a633',bg:'#1a1500',cat:['top'],base:0.12},
+  {sym:'SHIB',name:'Shiba Inu',icon:'Ш',color:'#ff5e00',bg:'#2a1000',cat:['top'],base:0.0000085},
+  {sym:'UNI',name:'Uniswap',icon:'U',color:'#ff007a',bg:'#2a0015',cat:['defi'],base:9.5},
+  {sym:'LINK',name:'Chainlink',icon:'⬡',color:'#2a5ada',bg:'#00082a',cat:['defi'],base:15},
+  {sym:'AAVE',name:'Aave',icon:'A',color:'#b6509e',bg:'#1a0015',cat:['defi'],base:92},
+  {sym:'MATIC',name:'Polygon',icon:'⬟',color:'#8247e5',bg:'#100a2a',cat:['layer1','defi'],base:0.85},
+  {sym:'ARB',name:'Arbitrum',icon:'⊙',color:'#28a0f0',bg:'#001a2a',cat:['layer1'],base:1.1},
+  {sym:'OP',name:'Optimism',icon:'O',color:'#ff0420',bg:'#2a0002',cat:['layer1'],base:2.3},
+  {sym:'LTC',name:'Litecoin',icon:'Ł',color:'#bebebe',bg:'#1a1a1a',cat:['top'],base:85},
+  {sym:'ATOM',name:'Cosmos',icon:'⚛',color:'#6f4cff',bg:'#0d0a2a',cat:['layer1'],base:9.2},
+  {sym:'NEAR',name:'NEAR Protocol',icon:'N',color:'#00ec97',bg:'#001a10',cat:['layer1'],base:5.8},
+  {sym:'FTM',name:'Fantom',icon:'F',color:'#1969ff',bg:'#00082a',cat:['layer1'],base:0.55},
+];
+function initMarket(){
+  if(!allCoins.length){
+    allCoins=cryptos.map(c=>{
+      const ch=(Math.random()-0.45)*8;
+      const pr=c.base*(1+ch/100)*(0.98+Math.random()*0.04);
+      coinPrices[c.sym]=pr;coinChanges[c.sym]=ch;
+      coinSparks[c.sym]=Array.from({length:8},()=>Math.random());
+      return{...c,price:pr,change:ch};
+    });
+    filteredCoins=[...allCoins];
+  }
+  renderMarket();
+  if(!marketIv){
+    marketIv=setInterval(()=>{
+      if(!document.getElementById('page-market').classList.contains('active'))return;
+      allCoins.forEach(c=>{
+        const d=(Math.random()-0.49)*0.7;
+        coinPrices[c.sym]*=(1+d/100);coinChanges[c.sym]+=d*0.08;
+        coinSparks[c.sym].shift();coinSparks[c.sym].push(Math.random());
+        c.price=coinPrices[c.sym];c.change=coinChanges[c.sym];
+      });
+      filteredCoins.forEach(c=>{c.price=coinPrices[c.sym];c.change=coinChanges[c.sym];});
+      renderMarket();
+    },3000);
+  }
+}
+function filterMarket(type,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(type==='all')filteredCoins=[...allCoins];
+  else if(type==='top')filteredCoins=allCoins.filter(c=>c.cat.includes('top'));
+  else if(type==='up')filteredCoins=[...allCoins].sort((a,b)=>b.change-a.change).slice(0,10);
+  else if(type==='down')filteredCoins=[...allCoins].sort((a,b)=>a.change-b.change).slice(0,10);
+  else filteredCoins=allCoins.filter(c=>c.cat.includes(type));
+  renderMarket();
+}
+function fmtPrice(p){
+  if(p>=1000)return'$'+p.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  if(p>=1)return'$'+p.toFixed(2);
+  if(p>=0.01)return'$'+p.toFixed(4);
+  return'$'+p.toFixed(8);
+}
+function renderMarket(){
+  const list=document.getElementById('marketList');
+  list.innerHTML=filteredCoins.map(c=>{
+    const up=c.change>=0;
+    const sparks=coinSparks[c.sym]||[];
+    const mx=Math.max(...sparks,0.01);
+    const bars=sparks.map(v=>`<div class="sp-bar" style="height:${Math.max(3,Math.round(v/mx*24))}px;background:${up?'rgba(0,255,136,0.65)':'rgba(255,68,68,0.65)'}"></div>`).join('');
+    return`<div class="coin-ticker">
+      <div class="clogo" style="background:${c.bg};color:${c.color};">${c.icon}</div>
+      <div class="cinfo"><div class="cname">${c.name}</div><div class="csym">${c.sym}/USDT</div><div class="sparkline">${bars}</div></div>
+      <div class="cprice"><div class="cusd" style="color:${c.color};">${fmtPrice(c.price)}</div><div class="cchange ${up?'up':'dn'}">${up?'+':''}${c.change.toFixed(2)}%</div></div>
+    </div>`;
+  }).join('');
+  const now=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('marketTime').textContent='🟢 '+now;
+}
+
+// ════════════════════════════════════════════════
+// PROFILE
+// ════════════════════════════════════════════════
+function togPref(el,key){
+  el.classList.toggle('on');
+  if(!prefs)prefs={};
+  prefs[key]=el.classList.contains('on');
+  save();
+}
+function applyPrefs(){
+  ['notif','email','automine'].forEach(k=>{
+    const el=document.getElementById('tog-'+k);
+    if(el&&prefs[k])el.classList.add('on');
+  });
+}
+function shareApp(){showToast('📤 Paylaşım simüle edildi!');}
+
+// ════════════════════════════════════════════════
+// REFERRAL
+// ════════════════════════════════════════════════
+function genRef(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r='HN-';
+  for(let i=0;i<4;i++)r+=c[rand(0,c.length)];
+  return r;
+}
+function copyRef(){
+  navigator.clipboard.writeText(refCode||document.getElementById('refCode').textContent)
+    .then(()=>showToast('Kod kopyalandı!'))
+    .catch(()=>showToast('Kopyalandı!'));
+}
+
+// ════════════════════════════════════════════════
+// LANG
+// ════════════════════════════════════════════════
+function setLang(l){
+  document.getElementById('langLabel').textContent=l.toUpperCase();
+  toggleLang(true);
+}
+function toggleLang(close){
+  const d=document.getElementById('langDrop');
+  if(close===true){d.classList.remove('open');return;}
+  d.classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.nav-right'))document.getElementById('langDrop').classList.remove('open');
+});
+
+// ════════════════════════════════════════════════
+// ADMİN SİSTEMİ
+// ════════════════════════════════════════════════
+let adminLoggedIn = false;
+let adminTapCount = 0;
+let adminTapTimer = null;
+let maintenanceActive = false;
+let msgTargetId = null;
+
+const ADMIN_PW_KEY = 'hn_admin_pw';
+const ADMIN_STATS_KEY = 'hn_admin_stats';
+const ADMIN_ADS_KEY = 'hn_admin_ads';
+const ADMIN_SETTINGS_KEY = 'hn_admin_settings';
+const ADMIN_MAINT_KEY = 'hn_maintenance';
+
+function getAdminPw(){
+  return localStorage.getItem(ADMIN_PW_KEY) || btoa('Ah224466');
+}
+
+// ── 7 Kez tıklama ──────────────────────────────
+function adminTap(){
+  adminTapCount++;
+  // Flash efekti
+  const fl = document.getElementById('adminTapFlash');
+  fl.style.opacity='1';
+  setTimeout(()=>fl.style.opacity='0',150);
+  // Sayaç sıfırlama timer
+  clearTimeout(adminTapTimer);
+  adminTapTimer = setTimeout(()=>{ adminTapCount=0; },2000);
+  if(adminTapCount>=7){
+    adminTapCount=0;
+    clearTimeout(adminTapTimer);
+    openAdmin();
+  }
+}
+
+function openAdmin(){
+  // Önce bakım modunu kontrol et — admin her zaman girebilir
+  document.getElementById('maintenanceScreen').style.display='none';
+  document.getElementById('adminPanel').classList.add('open');
+  document.getElementById('adminLoginWrap').style.display='flex';
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('adminPwInput').value='';
+  document.getElementById('adminPwErr').style.display='none';
+  adminLoggedIn=false;
+}
+
+function closeAdmin(){
+  document.getElementById('adminPanel').classList.remove('open');
+  adminLoggedIn=false;
+  // Bakım modu hâlâ aktifse geri aç
+  if(maintenanceActive){
+    document.getElementById('maintenanceScreen').style.display='flex';
+  }
+}
+
+function toggleAdminPwVis(){
+  const inp=document.getElementById('adminPwInput');
+  const btn=document.getElementById('adminPwEye');
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+
+function checkAdminPw(){
+  const entered=document.getElementById('adminPwInput').value;
+  if(btoa(entered)===getAdminPw()||entered===atob(getAdminPw())){
+    adminLoggedIn=true;
+    document.getElementById('adminLoginWrap').style.display='none';
+    const dash=document.getElementById('adminDashboard');
+    dash.style.display='flex';
+    dash.style.flexDirection='column';
+    dash.style.flex='1';
+    dash.style.overflow='hidden';
+    dash.style.minHeight='0';
+    document.getElementById('adminPwErr').style.display='none';
+    // Reset to stats tab
+    goAdminTab('stats');
+    loadAdminSettings();
+    checkMaintStatus();
+    addPanicLog('Admin paneline giriş yapıldı.');
+  } else {
+    document.getElementById('adminPwErr').style.display='block';
+    document.getElementById('adminPwInput').value='';
+  }
+}
+
+function goAdminTab(tab){
+  const tabs=['stats','ads','pages','mining','campaign','contest','users','settings','panic'];
+  document.querySelectorAll('.admin-atab').forEach((t,i)=>{
+    t.classList.toggle('active',tabs[i]===tab);
+  });
+  document.querySelectorAll('.admin-page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('atab-'+tab);
+  if(pg) pg.classList.add('active');
+  if(tab==='stats') loadAdminStats();
+  if(tab==='users') renderAdminUsers();
+  if(tab==='ads') renderAdminAds();
+  if(tab==='pages'){renderPageBanners();loadHeroText();}
+  if(tab==='mining'){renderDevicePriceList();renderFarmRateList();loadMiningConfig();}
+  if(tab==='campaign'){renderActiveCampaign();renderCampaignHistory();}
+  if(tab==='contest'){renderActiveContest();renderContestWinners();renderContestHistory();}
+}
+
+// ── İSTATİSTİKLER ──────────────────────────────
+function getAdminStats(){
+  const def={
+    downloads:0, adWatched:0, pageVisits:{home:0,farm:0,devices:0,withdraw:0,market:0,profile:0},
+    countryAds:{TR:0,US:0,DE:0,GB:0,FR:0,SA:0,RU:0,NL:0,BR:0,JP:0},
+    sessionStarts:0, lastReset: Date.now()
+  };
+  const s=localStorage.getItem(ADMIN_STATS_KEY);
+  return s?{...def,...JSON.parse(s)}:def;
+}
+function saveAdminStats(s){ localStorage.setItem(ADMIN_STATS_KEY,JSON.stringify(s)); }
+
+// Sayfa ziyaretini kaydet (normal kullanımdan çağırılır)
+function trackPageVisit(page){
+  const s=getAdminStats();
+  if(!s.pageVisits) s.pageVisits={};
+  s.pageVisits[page]=(s.pageVisits[page]||0)+1;
+  saveAdminStats(s);
+}
+// Reklam izlemeyi kaydet
+function trackAdWatch(){
+  const s=getAdminStats();
+  s.adWatched=(s.adWatched||0)+1;
+  // Simüle ülke dağılımı
+  const countries=['TR','US','DE','GB','FR','SA','RU','NL','BR','JP'];
+  const c=countries[Math.floor(Math.random()*countries.length)];
+  if(!s.countryAds) s.countryAds={};
+  s.countryAds[c]=(s.countryAds[c]||0)+1;
+  saveAdminStats(s);
+}
+// İndirme sayacı simülasyonu
+function simDownloads(){
+  const s=getAdminStats();
+  // Toplam indirme = kayıtlı kullanıcı * simüle çarpan
+  const users=getUsers();
+  const base=users.length*Math.floor(80+Math.random()*40);
+  s.downloads=Math.max(s.downloads||0, base);
+  saveAdminStats(s);
+  return s.downloads;
+}
+
+function loadAdminStats(){
+  const s=getAdminStats();
+  const users=getUsers();
+  const banned=users.filter(u=>u.banned).length;
+  const warned=users.filter(u=>u.warned).length;
+
+  // Simüle edilmiş değerler (gerçekçi görünüm için base değer + gerçek user kayıtları)
+  const dlBase=Math.max(s.downloads||0, users.length*97+Math.floor(Math.random()*500));
+  const activeBase=Math.max(8000+Math.floor(Math.random()*3000), users.length*12);
+  const adBase=s.adWatched||0;
+  const adTotal=adBase+Math.floor(activeBase*0.3);
+
+  // Gelir hesabı (CPM bazlı)
+  const rewardedRev=(adTotal*0.55*8/1000).toFixed(2);
+  const bannerRev=(activeBase*2.2*2/1000).toFixed(2);
+  const intersRev=(adTotal*0.25*5/1000).toFixed(2);
+  const totalRev=(parseFloat(rewardedRev)+parseFloat(bannerRev)+parseFloat(intersRev)).toFixed(2);
+
+  document.getElementById('as-downloads').textContent=dlBase.toLocaleString('tr-TR');
+  document.getElementById('as-active').textContent=activeBase.toLocaleString('tr-TR');
+  document.getElementById('as-adwatched').textContent=adTotal.toLocaleString('tr-TR');
+  document.getElementById('as-revenue').textContent='$'+totalRev;
+  document.getElementById('as-regusers').textContent=users.length;
+  document.getElementById('as-miners').textContent=Math.floor(activeBase*0.6).toLocaleString('tr-TR');
+  document.getElementById('as-banned').textContent=banned;
+  document.getElementById('as-newtoday').textContent=Math.floor(users.length*0.15+Math.random()*10);
+  document.getElementById('rev-rewarded').textContent='$'+rewardedRev;
+  document.getElementById('rev-banner').textContent='$'+bannerRev;
+  document.getElementById('rev-interstitial').textContent='$'+intersRev;
+  document.getElementById('rev-total').textContent='$'+totalRev;
+
+  // Sayfa kullanım grafiği
+  const pv=s.pageVisits||{};
+  const pvTotal=Object.values(pv).reduce((a,b)=>a+b,0)||1;
+  const pages=[
+    {lbl:'Ana Sayfa',key:'home',color:'#00ff88'},
+    {lbl:'Borsa',key:'market',color:'#00b4ff'},
+    {lbl:'Çiftlik',key:'farm',color:'#a855f7'},
+    {lbl:'Cihazlar',key:'devices',color:'#f0b429'},
+    {lbl:'Çekim',key:'withdraw',color:'#ff4444'},
+    {lbl:'Profil',key:'profile',color:'#ff6b35'},
+  ];
+  // Simüle base değerler
+  const simPv={home:45,market:20,farm:14,devices:10,withdraw:7,profile:4};
+  document.getElementById('pageUsageChart').innerHTML=pages.map(p=>{
+    const cnt=(pv[p.key]||0)+simPv[p.key];
+    const total=Object.values(simPv).reduce((a,b)=>a+b,0);
+    const pct=Math.round(cnt/total*100);
+    return`<div class="chart-row">
+      <div class="chart-lbl">${p.lbl}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%;background:${p.color};"></div></div>
+      <div class="chart-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Ülke grafiği
+  const countryData=[
+    {flag:'🇹🇷',name:'Türkiye',code:'TR',cpm:0.8},
+    {flag:'🇺🇸',name:'ABD',code:'US',cpm:8.5},
+    {flag:'🇩🇪',name:'Almanya',code:'DE',cpm:5.2},
+    {flag:'🇬🇧',name:'İngiltere',code:'GB',cpm:6.1},
+    {flag:'🇫🇷',name:'Fransa',code:'FR',cpm:4.8},
+    {flag:'🇸🇦',name:'S. Arabistan',code:'SA',cpm:3.2},
+    {flag:'🇷🇺',name:'Rusya',code:'RU',cpm:1.5},
+    {flag:'🇧🇷',name:'Brezilya',code:'BR',cpm:2.1},
+    {flag:'🇳🇱',name:'Hollanda',code:'NL',cpm:5.5},
+    {flag:'🇯🇵',name:'Japonya',code:'JP',cpm:7.2},
+  ];
+  // Simüle sayılar
+  const cBase={TR:320,US:180,DE:95,GB:88,FR:72,SA:64,RU:55,BR:48,NL:42,JP:38};
+  document.getElementById('countryAdChart').innerHTML=countryData.map(c=>{
+    const cnt=(s.countryAds?.[c.code]||0)+cBase[c.code];
+    const rev=(cnt*c.cpm/1000).toFixed(2);
+    return`<div class="country-row">
+      <div class="country-flag">${c.flag}</div>
+      <div class="country-name">${c.name}</div>
+      <div class="country-count">${cnt.toLocaleString('tr-TR')}</div>
+      <div class="country-revenue">$${rev}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── REKLAMLAR ──────────────────────────────────
+function getAdminAds(){
+  const def=[
+    {id:'ad1',name:'Ana Sayfa Banner',text:'⚡ ÖZEL TEKLİF — Bugün Sona Eriyor! Reklam izle → 2× hız',type:'banner',reward:'2× HIZ',active:true},
+    {id:'ad2',name:'Çiftlik Booster',text:'🔥 ÇİFTLİK BOOSTER! Reklam izle → 3× çiftlik hızı',type:'rewarded',reward:'3× ÇİFTLİK',active:true},
+    {id:'ad3',name:'Cihaz Ödülü',text:'💡 Ücretsiz Donanım! Reklam izle → başlangıç cihazı',type:'rewarded',reward:'Cihaz',active:true},
+    {id:'ad4',name:'Borsa Analizi',text:'📊 Premium Borsa Analizi — Reklam izle',type:'interstitial',reward:'Analiz',active:true},
+    {id:'ad5',name:'Çekim Ücretsiz',text:'✨ Bu çekim ücretsiz olsun → Reklam izle',type:'rewarded',reward:'%0 Fee',active:true},
+  ];
+  const s=localStorage.getItem(ADMIN_ADS_KEY);
+  return s?JSON.parse(s):def;
+}
+function saveAdminAds(a){ localStorage.setItem(ADMIN_ADS_KEY,JSON.stringify(a)); }
+
+function renderAdminAds() {
+  const ads = getAdminAds();
+  const el = document.getElementById('page-admin-ads');
+  if(!el) return;
+
+  // Sayfayı temizleyip en başa AdMob kutusunu, altına kampanya listesini koyuyoruz
+  el.innerHTML = `
+    <div class="card" style="border: 1px solid #f1c40f55; margin-bottom: 20px; background: rgba(241, 196, 15, 0.05);">
+      <div class="card-title" style="color: #f1c40f;">📺 ADMOB BANNER AYARI</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+        <input type="text" id="admin-pub-id" class="ainp" placeholder="Yayıncı ID (ca-app-pub-...)">
+        <input type="text" id="admin-unit-id" class="ainp" placeholder="Reklam Birimi ID">
+        <button onclick="saveAdMobSettings()" class="abtn abtn-yellow" style="width:100%; cursor:pointer;">💾 REKLAMI KAYDET VE AKTİF ET</button>
+      </div>
+    </div>
+    <div class="card-title">🎁 MEVCUT KAMPANYALAR</div>
+    <div id="adSlotList"></div>
+  `;
+
+  // Kayıtlı ID'leri kutulara doldur
+  document.getElementById('admin-pub-id').value = localStorage.getItem('saved_pub_id') || '';
+  document.getElementById('admin-unit-id').value = localStorage.getItem('saved_unit_id') || '';
+
+  // Kampanya listesini (adSlotList) içine doldur
+  const listEl = document.getElementById('adSlotList');
+  if(listEl) {
+    listEl.innerHTML = ads.map(ad => `
+      <div class="ad-slot">
+        <div class="ad-slot-info">
+          <div class="ad-slot-name">${ad.name}</div>
+          <div class="ad-slot-desc">${ad.text.substring(0,50)}...</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="ad-slot-toggle ${ad.active?'on':''}" onclick="toggleAdSlot('${ad.id}')"></div>
+          <button class="abtn abtn-ban" style="padding:5px 10px; font-size:11px;" onclick="removeAdSlot('${ad.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+}
+function toggleAdSlot(id){
+  const ads=getAdminAds();
+  const ad=ads.find(a=>a.id===id);
+  if(ad){ad.active=!ad.active;saveAdminAds(ads);renderAdminAds();}
+}
+function removeAdSlot(id){
+  if(!confirm('Bu reklamı silmek istiyor musunuz?'))return;
+  const ads=getAdminAds().filter(a=>a.id!==id);
+  saveAdminAds(ads);renderAdminAds();
+  addPanicLog('Reklam silindi: '+id);
+}
+function addAdSlot(){
+  const name=document.getElementById('newAdName').value.trim();
+  const text=document.getElementById('newAdText').value.trim();
+  const type=document.getElementById('newAdType').value;
+  const reward=document.getElementById('newAdReward').value.trim();
+  if(!name||!text){showToast('Ad ve metin zorunlu!','#ff4444');return;}
+  const ads=getAdminAds();
+  ads.push({id:'ad'+Date.now(),name,text,type,reward:reward||'Bonus',active:true});
+  saveAdminAds(ads);renderAdminAds();
+  document.getElementById('newAdName').value='';
+  document.getElementById('newAdText').value='';
+  document.getElementById('newAdReward').value='';
+  showToast('✅ Reklam eklendi!','#00ff88');
+  addPanicLog('Yeni reklam eklendi: '+name);
+}
+
+// ── KULLANICILAR ───────────────────────────────
+function renderAdminUsers(){
+  const search=(document.getElementById('userSearchInp')?.value||'').toLowerCase();
+  const filter=document.getElementById('userFilterSel')?.value||'all';
+  let users=getUsers();
+  if(search) users=users.filter(u=>(u.name||'').toLowerCase().includes(search)||(u.email||'').toLowerCase().includes(search));
+  if(filter==='active') users=users.filter(u=>!u.banned&&!u.warned);
+  if(filter==='warned') users=users.filter(u=>u.warned&&!u.banned);
+  if(filter==='banned') users=users.filter(u=>u.banned);
+
+  const list=document.getElementById('adminUserList');
+  if(!users.length){list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:20px;font-size:13px;">Kullanıcı bulunamadı.</div>';return;}
+
+  list.innerHTML=users.map(u=>{
+    const ini=(u.name||'U').substring(0,2).toUpperCase();
+    const statusCls=u.banned?'us-ban':u.warned?'us-warn':'us-ok';
+    const statusTxt=u.banned?'BANLANDI':u.warned?'UYARILDI':'AKTİF';
+    const userData=JSON.parse(localStorage.getItem('hn_'+u.id)||'{}');
+    return`<div class="user-row">
+      <div class="user-row-top">
+        <div class="user-avatar-sm" style="${u.banned?'background:linear-gradient(135deg,#ff4444,#cc2222);':u.warned?'background:linear-gradient(135deg,#f0b429,#d69e0b);':''}">${ini}</div>
+        <div class="user-row-info">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="user-row-name">${u.name||'İsimsiz'}</div>
+            <span class="user-status ${statusCls}">${statusTxt}</span>
+            ${u.social?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">${u.social}</span>`:''}
+          </div>
+          <div class="user-row-id">UID: ${u.id || 'N/A'}</div>
+          <div class="user-row-email">${u.email} · Kayıt: ${u.since||'?'}</div>
+          <div style="font-size:11px;color:rgba(0,255,136,0.6);margin-top:2px;">💰 ${(userData.coins||0).toFixed(6)} sBTC · 🔲 ${userData.blocks||0} blok</div>
+        </div>
+      </div>
+      <div class="user-row-actions">
+        <button class="abtn abtn-msg" onclick="openUserMsg('${u.id}','${(u.name||'Kullanıcı').replace(/'/g,'')}')">✉ Mesaj</button>
+        ${!u.warned&&!u.banned?`<button class="abtn abtn-warn" onclick="warnUser('${u.id}')">⚠ Uyar</button>`:''}
+        ${!u.banned?`<button class="abtn abtn-ban" onclick="banUser('${u.id}')">🚫 Banla</button>`:`<button class="abtn abtn-unban" onclick="unbanUser('${u.id}')">✓ Ban Kaldır</button>`}
+        <button class="abtn" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1);" onclick="viewUserDetail('${u.id}')">👁 Detay</button>
+      </div>
+      ${u.adminMsg?`<div style="background:rgba(0,180,255,0.06);border:1px solid rgba(0,180,255,0.15);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:12px;color:#00b4ff;">📨 Son mesaj: ${u.adminMsg}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function warnUser(id){
+  const users=getUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  u.warned=true;
+  saveUsers(users);
+  renderAdminUsers();
+  addPanicLog('Kullanıcı uyarıldı: '+u.name+' ('+u.email+')');
+  showToast('⚠ Kullanıcı uyarıldı','#f0b429');
+}
+function banUser(id){
+  if(!confirm('Bu kullanıcıyı uygulamadan atmak istediğinizden emin misiniz?'))return;
+  const users=getUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  u.banned=true;u.warned=true;
+  saveUsers(users);
+  // Oturumu sonlandır
+  const sess=localStorage.getItem('hn_session');
+  if(sess&&JSON.parse(sess).id===id) localStorage.removeItem('hn_session');
+  renderAdminUsers();
+  addPanicLog('KULLANICI BANLANDI: '+u.name+' ('+u.email+')');
+  showToast('🚫 Kullanıcı banlandı','#ff4444');
+}
+function unbanUser(id){
+  const users=getUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  u.banned=false;u.warned=false;
+  saveUsers(users);renderAdminUsers();
+  addPanicLog('Ban kaldırıldı: '+u.name);
+  showToast('✅ Ban kaldırıldı','#00ff88');
+}
+function openUserMsg(id,name){
+  msgTargetId=id;
+  document.getElementById('msgTargetName').textContent='→ '+name;
+  document.getElementById('userMsgTxt').value='';
+  document.getElementById('userMsgModal').classList.add('open');
+}
+function sendUserMsg(){
+  if(!msgTargetId)return;
+  const msg=document.getElementById('userMsgTxt').value.trim();
+  if(!msg){showToast('Mesaj boş!','#ff4444');return;}
+  const users=getUsers();
+  const u=users.find(x=>x.id===msgTargetId);
+  if(!u)return;
+  u.adminMsg=msg;
+  saveUsers(users);
+  document.getElementById('userMsgModal').classList.remove('open');
+  renderAdminUsers();
+  addPanicLog('Mesaj gönderildi: '+u.name+' → "'+msg.substring(0,40)+'"');
+  showToast('📨 Mesaj gönderildi!','#00b4ff');
+}
+function viewUserDetail(id){
+  const users=getUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  const ud=JSON.parse(localStorage.getItem('hn_'+id)||'{}');
+  alert(`👤 ${u.name}\n📧 ${u.email}\n📅 Kayıt: ${u.since}\n💰 Bakiye: ${(ud.coins||0).toFixed(6)} sBTC\n🔲 Blok: ${ud.blocks||0}\n🖥 Cihaz: ${(ud.ownedDevices||[]).length}\n${u.banned?'🚫 BANLANDI':u.warned?'⚠ Uyarıldı':'✅ Aktif'}`);
+}
+
+// ── BAKIM MODU ─────────────────────────────────
+function toggleMaintenance(){
+  maintenanceActive=!maintenanceActive;
+  localStorage.setItem(ADMIN_MAINT_KEY,maintenanceActive?'1':'0');
+  checkMaintStatus();
+  if(maintenanceActive){
+    const msg=document.getElementById('maintMsgInput').value||'Sistem bakımda...';
+    const title=document.getElementById('maintTitleInput').value||'SİSTEM BAKIMDA';
+    document.getElementById('maintTitle').textContent=title;
+    document.getElementById('maintMsg').textContent=msg;
+    document.getElementById('maintTime').textContent='Bakım başlangıcı: '+new Date().toLocaleTimeString('tr-TR');
+    localStorage.setItem('hn_maint_msg',msg);
+    localStorage.setItem('hn_maint_title',title);
+    localStorage.setItem('hn_maint_start',new Date().toLocaleTimeString('tr-TR'));
+    addPanicLog('🚨 BAKIM MODU AKTİFLEŞTİRİLDİ! Mesaj: '+msg.substring(0,50));
+    showToast('🚨 BAKIM MODU AKTİF!','#ff4444');
+  } else {
+    addPanicLog('✅ Bakım modu devre dışı bırakıldı.');
+    showToast('✅ BAKIM MODU KAPANDI','#00ff88');
+  }
+}
+function checkMaintStatus(){
+  const btn=document.getElementById('panicMainBtn');
+  const status=document.getElementById('panicStatus');
+  if(maintenanceActive){
+    btn.textContent='✅ BAKIM MODUNU KAPAT';
+    btn.classList.add('active-maint');
+    status.textContent='Bakım modu: AKTİF 🔴';
+    status.style.color='#ff4444';
+  } else {
+    btn.textContent='🚨 BAKIM MODUNU AKTİFLEŞTİR';
+    btn.classList.remove('active-maint');
+    status.textContent='Bakım modu: KAPALI ✅';
+    status.style.color='rgba(0,255,136,0.5)';
+  }
+}
+function adminExitMaintenance(){
+  // Gizli buton — sadece admin logolu varsa
+  if(maintenanceActive){
+    document.getElementById('maintenanceScreen').style.display='none';
+    openAdmin();
+  }
+}
+function checkMaintenanceOnLoad(){
+  const active=localStorage.getItem(ADMIN_MAINT_KEY)==='1';
+  if(active){
+    maintenanceActive=true;
+    const msg=localStorage.getItem('hn_maint_msg')||'Sistem bakımda...';
+    const title=localStorage.getItem('hn_maint_title')||'SİSTEM BAKIMDA';
+    const start=localStorage.getItem('hn_maint_start')||'—';
+    document.getElementById('maintTitle').textContent=title;
+    document.getElementById('maintMsg').textContent=msg;
+    document.getElementById('maintTime').textContent='Bakım başlangıcı: '+start;
+    document.getElementById('maintenanceScreen').style.display='flex';
+    // Splash ve app gizle
+    document.getElementById('splash').classList.remove('active');
+  }
+}
+
+// Banlı kullanıcı kontrolü (giriş sırasında)
+function checkIfBanned(user){
+  const users=getUsers();
+  const fresh=users.find(u=>u.id===user.id);
+  return fresh&&fresh.banned;
+}
+
+// ── AYARLAR ────────────────────────────────────
+function getAdminSettings(){
+  const s=localStorage.getItem(ADMIN_SETTINGS_KEY);
+  return s?JSON.parse(s):{registration:true,miningEnabled:true,withdrawEnabled:true,analytics:true};
+}
+function saveAdminSettings(){
+  const s={
+    registration:document.getElementById('tog-registration').classList.contains('on'),
+    miningEnabled:document.getElementById('tog-mining-enabled').classList.contains('on'),
+    withdrawEnabled:document.getElementById('tog-withdraw-enabled').classList.contains('on'),
+    analytics:document.getElementById('tog-analytics').classList.contains('on'),
+  };
+  localStorage.setItem(ADMIN_SETTINGS_KEY,JSON.stringify(s));
+  showToast('⚙️ Ayarlar kaydedildi','#00ff88');
+}
+function loadAdminSettings(){
+  const s=getAdminSettings();
+  if(s.registration!==false) document.getElementById('tog-registration').classList.add('on');
+  else document.getElementById('tog-registration').classList.remove('on');
+  if(s.miningEnabled!==false) document.getElementById('tog-mining-enabled').classList.add('on');
+  else document.getElementById('tog-mining-enabled').classList.remove('on');
+  if(s.withdrawEnabled!==false) document.getElementById('tog-withdraw-enabled').classList.add('on');
+  else document.getElementById('tog-withdraw-enabled').classList.remove('on');
+  if(s.analytics!==false) document.getElementById('tog-analytics').classList.add('on');
+  else document.getElementById('tog-analytics').classList.remove('on');
+}
+
+function sendAnnouncement(){
+  const txt=document.getElementById('announceTxt').value.trim();
+  if(!txt){showToast('Mesaj boş!','#ff4444');return;}
+  // Tüm kullanıcılara mesaj ekle
+  const users=getUsers();
+  users.forEach(u=>{u.adminMsg='[DUYURU] '+txt;});
+  saveUsers(users);
+  document.getElementById('announceTxt').value='';
+  showToast('📢 Duyuru yayınlandı!','#f0b429');
+  addPanicLog('Duyuru gönderildi: '+txt.substring(0,60));
+}
+function clearAllStats(){
+  if(!confirm('Tüm istatistikler silinecek. Emin misiniz?'))return;
+  localStorage.removeItem(ADMIN_STATS_KEY);
+  showToast('🗑️ İstatistikler silindi','#ff4444');
+  loadAdminStats();
+}
+function resetAdminPw(){
+  if(!confirm('Şifre varsayılan değere sıfırlanacak. Devam?'))return;
+  localStorage.removeItem(ADMIN_PW_KEY);
+  showToast('🔄 Şifre sıfırlandı: Ah224466','#f0b429');
+  addPanicLog('Admin şifresi varsayılana sıfırlandı.');
+}
+function changeAdminPw(){
+  const old=document.getElementById('oldAdminPw').value;
+  const n1=document.getElementById('newAdminPw1').value;
+  const n2=document.getElementById('newAdminPw2').value;
+  const errEl=document.getElementById('pwChangeErr');
+  const okEl=document.getElementById('pwChangeOk');
+  errEl.style.display='none';okEl.style.display='none';
+  if(btoa(old)!==getAdminPw()){errEl.textContent='Mevcut şifre yanlış!';errEl.style.display='block';return;}
+  if(n1.length<6){errEl.textContent='Yeni şifre en az 6 karakter olmalı!';errEl.style.display='block';return;}
+  if(n1!==n2){errEl.textContent='Yeni şifreler eşleşmiyor!';errEl.style.display='block';return;}
+  localStorage.setItem(ADMIN_PW_KEY,btoa(n1));
+  document.getElementById('oldAdminPw').value='';
+  document.getElementById('newAdminPw1').value='';
+  document.getElementById('newAdminPw2').value='';
+  okEl.style.display='block';
+  addPanicLog('Admin şifresi değiştirildi.');
+  showToast('🔐 Şifre güncellendi!','#00ff88');
+}
+
+// ── PANİK LOG ──────────────────────────────────
+function addPanicLog(msg){
+  const log=document.getElementById('panicLog');
+  if(!log)return;
+  const ts=new Date().toLocaleTimeString('tr-TR');
+  const p=document.createElement('p');
+  p.textContent='['+ts+'] '+msg;
+  log.appendChild(p);
+  log.scrollTop=log.scrollHeight;
+  // Admin log kaydet
+  const logs=JSON.parse(localStorage.getItem('hn_admin_log')||'[]');
+  logs.push({ts:Date.now(),msg});
+  if(logs.length>100) logs.shift();
+  localStorage.setItem('hn_admin_log',JSON.stringify(logs));
+}
+
+
+// ── INIT ───────────────────────────────────────
+setTimeout(()=>{
+  if(localStorage.getItem(ADMIN_MAINT_KEY)==='1') checkMaintenanceOnLoad();
+},100);
+
+// ════════════════════════════════════════════════
+// SAYFA BANNER YÖNETİMİ
+// ════════════════════════════════════════════════
+const BANNERS_KEY='hn_admin_banners';
+const colorMap={
+  yellow:{bg:'rgba(240,180,41,0.12)',border:'rgba(240,180,41,0.25)',btn:'#f0b429',text:'#f0b429'},
+  green:{bg:'rgba(0,255,136,0.1)',border:'rgba(0,255,136,0.25)',btn:'#00ff88',text:'#00ff88'},
+  blue:{bg:'rgba(0,180,255,0.1)',border:'rgba(0,180,255,0.25)',btn:'#00b4ff',text:'#00b4ff'},
+  purple:{bg:'rgba(168,85,247,0.1)',border:'rgba(168,85,247,0.25)',btn:'#a855f7',text:'#a855f7'},
+  red:{bg:'rgba(255,68,68,0.1)',border:'rgba(255,68,68,0.25)',btn:'#ff4444',text:'#ff4444'},
+};
+function getPageBanners(){
+  const s=localStorage.getItem(BANNERS_KEY);
+  return s?JSON.parse(s):[];
+}
+function savePageBanners(b){localStorage.setItem(BANNERS_KEY,JSON.stringify(b));}
+
+function addPageBanner(){
+  const page=document.getElementById('newBannerPage').value;
+  const title=document.getElementById('newBannerTitle').value.trim();
+  const sub=document.getElementById('newBannerSub').value.trim();
+  const btn=document.getElementById('newBannerBtn').value.trim()||'KAZAN';
+  const color=document.getElementById('newBannerColor').value;
+  if(!title){showToast('Başlık zorunlu!','#ff4444');return;}
+  const banners=getPageBanners();
+  banners.push({id:'bn'+Date.now(),page,title,sub,btn,color,active:true});
+  savePageBanners(banners);
+  renderPageBanners();
+  applyPageBanners();
+  document.getElementById('newBannerTitle').value='';
+  document.getElementById('newBannerSub').value='';
+  showToast('✅ Banner eklendi!','#00ff88');
+  addPanicLog('Banner eklendi: '+title+' → '+page);
+}
+
+function renderPageBanners(){
+  const banners=getPageBanners();
+  const el=document.getElementById('pageBannerList');
+  if(!banners.length){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.25);padding:12px;font-size:13px;">Henüz banner yok.</div>';return;}
+  const pageNames={home:'Ana Sayfa',farm:'Çiftlik',devices:'Cihazlar',withdraw:'Çekim',market:'Borsa',profile:'Profil'};
+  el.innerHTML=banners.map(b=>`
+    <div class="banner-edit-row">
+      <span class="banner-page-lbl">${pageNames[b.page]||b.page}</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:#f0b429;">${b.title}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);">${b.sub||''} · Buton: ${b.btn}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <div class="ad-slot-toggle ${b.active?'on':''}" onclick="toggleBanner('${b.id}')"></div>
+        <button class="abtn abtn-ban" style="padding:5px 10px;font-size:11px;" onclick="removeBanner('${b.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+function toggleBanner(id){
+  const b=getPageBanners();
+  const bn=b.find(x=>x.id===id);
+  if(bn){bn.active=!bn.active;savePageBanners(b);renderPageBanners();applyPageBanners();}
+}
+function removeBanner(id){
+  const b=getPageBanners().filter(x=>x.id!==id);
+  savePageBanners(b);renderPageBanners();applyPageBanners();
+  addPanicLog('Banner silindi: '+id);
+}
+
+// Sayfaya dinamik banner uygula
+function applyPageBanners(){
+  const banners=getPageBanners().filter(b=>b.active);
+  // Her sayfa için dinamik banner container'larını güncelle
+  ['home','farm','devices','withdraw','market','profile'].forEach(page=>{
+    const containerId='dynbanner-'+page;
+    let el=document.getElementById(containerId);
+    if(!el){
+      // Container yoksa oluştur (ilgili sayfanın başına ekle)
+      const pageEl=document.getElementById('page-'+page);
+      if(!pageEl)return;
+      el=document.createElement('div');
+      el.id=containerId;
+      pageEl.insertBefore(el,pageEl.firstChild);
+    }
+    const pageBanners=banners.filter(b=>b.page===page);
+    el.innerHTML=pageBanners.map(b=>{
+      const c=colorMap[b.color]||colorMap.yellow;
+      return`<div style="background:${c.bg};border:1px solid ${c.border};border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;" onclick="openAdModal('boost')">
+        <div><div style="font-size:13px;color:${c.text};font-weight:700;">${b.title}</div>${b.sub?`<div style="font-size:11px;color:rgba(255,255,255,0.35);">${b.sub}</div>`:''}
+        </div><button style="background:${c.btn};color:#000;font-weight:700;font-size:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;font-family:'Rajdhani',sans-serif;">${b.btn}</button>
+      </div>`;
+    }).join('');
+  });
+}
+
+function loadHeroText(){
+  const h=JSON.parse(localStorage.getItem('hn_hero')||'{}');
+  document.getElementById('heroTitleInp').value=h.title||'';
+  document.getElementById('heroSubInp').value=h.sub||'';
+}
+function saveHeroText(){
+  const title=document.getElementById('heroTitleInp').value.trim();
+  const sub=document.getElementById('heroSubInp').value.trim();
+  localStorage.setItem('hn_hero',JSON.stringify({title,sub}));
+  // Uygula
+  if(title){const el=document.querySelector('.home-logo');if(el)el.textContent='⬡ '+title;}
+  if(sub){const el=document.querySelector('.home-sub');if(el)el.textContent=sub;}
+  showToast('💾 Hero metni kaydedildi!','#00ff88');
+  addPanicLog('Hero metni güncellendi.');
+}
+function applyHeroText(){
+  const h=JSON.parse(localStorage.getItem('hn_hero')||'{}');
+  if(h.title){const el=document.querySelector('.home-logo');if(el)el.textContent='⬡ '+h.title;}
+  if(h.sub){const el=document.querySelector('.home-sub');if(el)el.textContent=h.sub;}
+}
+
+// ════════════════════════════════════════════════
+// MADENCİLİK KONFİGÜRASYON
+// ════════════════════════════════════════════════
+const MINING_CFG_KEY='hn_mining_cfg';
+function getMiningCfg(){
+  const s=localStorage.getItem(MINING_CFG_KEY);
+  return s?JSON.parse(s):{hashRate:13,sessionMin:60,earnPerTick:0.0000008,blockChance:4,passiveRate:30,boostMult:2};
+}
+function saveMiningConfig(){
+  const cfg={
+    hashRate:parseFloat(document.getElementById('cfg-hashRate').value)||13,
+    sessionMin:parseInt(document.getElementById('cfg-sessionMin').value)||60,
+    earnPerTick:parseFloat(document.getElementById('cfg-earnPerTick').value)||0.0000008,
+    blockChance:parseInt(document.getElementById('cfg-blockChance').value)||4,
+    passiveRate:parseInt(document.getElementById('cfg-passiveRate').value)||30,
+    boostMult:parseFloat(document.getElementById('cfg-boostMult').value)||2,
+  };
+  localStorage.setItem(MINING_CFG_KEY,JSON.stringify(cfg));
+  // Aktif değerlere uygula
+  BASE_HASH_GH_DYN=cfg.hashRate;
+  SESSION_SECS_DYN=cfg.sessionMin*60;
+  BASE_EARN_DYN=cfg.earnPerTick;
+  document.getElementById('miningCfgSaved').textContent='✓ Kaydedildi! Sonraki madencilik oturumunda aktif.';
+  setTimeout(()=>{document.getElementById('miningCfgSaved').textContent='';},3000);
+  showToast('⛏ Madencilik ayarları güncellendi!','#00ff88');
+  addPanicLog('Madencilik cfg güncellendi: '+JSON.stringify(cfg));
+}
+function loadMiningConfig(){
+  const cfg=getMiningCfg();
+  document.getElementById('cfg-hashRate').value=cfg.hashRate;
+  document.getElementById('cfg-sessionMin').value=cfg.sessionMin;
+  document.getElementById('cfg-earnPerTick').value=cfg.earnPerTick;
+  document.getElementById('cfg-blockChance').value=cfg.blockChance;
+  document.getElementById('cfg-passiveRate').value=cfg.passiveRate;
+  document.getElementById('cfg-boostMult').value=cfg.boostMult;
+}
+// Dinamik değişkenler — mining kodunca kullanılır
+let BASE_HASH_GH_DYN=null, SESSION_SECS_DYN=null, BASE_EARN_DYN=null;
+function getEffectiveHashGH(){return BASE_HASH_GH_DYN||getMiningCfg().hashRate||13;}
+function getEffectiveSessionSecs(){return SESSION_SECS_DYN||(getMiningCfg().sessionMin||60)*60;}
+function getEffectiveEarnPerTick(){return BASE_EARN_DYN||getMiningCfg().earnPerTick||0.0000008;}
+function getEffectiveBlockChance(){return (getMiningCfg().blockChance||4)/100;}
+
+// CİHAZ FİYATLARI
+const DEVICE_PRICES_KEY='hn_device_prices';
+function getDevicePriceOverrides(){
+  const s=localStorage.getItem(DEVICE_PRICES_KEY);
+  return s?JSON.parse(s):{};
+}
+function renderDevicePriceList(){
+  const overrides=getDevicePriceOverrides();
+  const el=document.getElementById('devicePriceList');
+  el.innerHTML=devData.map(d=>`
+    <div class="device-edit-row">
+      <span style="font-size:1.2rem;margin-right:4px;">${d.icon}</span>
+      <span class="device-edit-name">${d.name}</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div style="text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:3px;">FİYAT(sBTC)</div>
+          <input class="device-edit-inp" type="number" id="dp-price-${d.id}" value="${overrides[d.id]?.price??d.price}" step="0.001" min="0.001"></div>
+        <div style="text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:3px;">BONUS(%)</div>
+          <input class="device-edit-inp" type="number" id="dp-bonus-${d.id}" value="${overrides[d.id]?.bonus??d.bonus}" step="1" min="0"></div>
+      </div>
+    </div>`).join('');
+}
+function saveDevicePrices(){
+  const overrides={};
+  devData.forEach(d=>{
+    const price=parseFloat(document.getElementById('dp-price-'+d.id)?.value)||d.price;
+    const bonus=parseInt(document.getElementById('dp-bonus-'+d.id)?.value)||d.bonus;
+    overrides[d.id]={price,bonus};
+    d.price=price; d.bonus=bonus; // runtime güncelle
+  });
+  localStorage.setItem(DEVICE_PRICES_KEY,JSON.stringify(overrides));
+  showToast('💾 Cihaz fiyatları güncellendi!','#00ff88');
+  addPanicLog('Cihaz fiyatları güncellendi.');
+}
+
+// ÇIFTLIK ORANLARI
+const FARM_RATES_KEY='hn_farm_rates';
+function getFarmRateOverrides(){
+  const s=localStorage.getItem(FARM_RATES_KEY);
+  return s?JSON.parse(s):{};
+}
+function renderFarmRateList(){
+  const overrides=getFarmRateOverrides();
+  const el=document.getElementById('farmRateList');
+  el.innerHTML=farmData.map(m=>`
+    <div class="device-edit-row">
+      <span style="font-size:1.2rem;margin-right:4px;">${m.icon}</span>
+      <span class="device-edit-name">${m.name}</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div style="text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:3px;">ORAN(sBTC/h)</div>
+          <input class="device-edit-inp" type="number" id="fr-rate-${m.id}" value="${overrides[m.id]?.rate??m.rate}" step="0.0001" min="0.0001"></div>
+        <div style="text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:3px;">MALİYET(sBTC)</div>
+          <input class="device-edit-inp" type="number" id="fr-cost-${m.id}" value="${overrides[m.id]?.cost??m.cost}" step="0.001" min="0.001"></div>
+      </div>
+    </div>`).join('');
+}
+function saveFarmRates(){
+  const overrides={};
+  farmData.forEach(m=>{
+    const rate=parseFloat(document.getElementById('fr-rate-'+m.id)?.value)||m.rate;
+    const cost=parseFloat(document.getElementById('fr-cost-'+m.id)?.value)||m.cost;
+    overrides[m.id]={rate,cost};
+    m.rate=rate; m.cost=cost;
+  });
+  localStorage.setItem(FARM_RATES_KEY,JSON.stringify(overrides));
+  showToast('💾 Çiftlik oranları güncellendi!','#00ff88');
+  addPanicLog('Çiftlik oranları güncellendi.');
+}
+
+// ════════════════════════════════════════════════
+// KAMPANYA SİSTEMİ
+// ════════════════════════════════════════════════
+const CAMPAIGN_KEY='hn_campaigns';
+function getCampaigns(){return JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||'[]');}
+function saveCampaigns(c){localStorage.setItem(CAMPAIGN_KEY,JSON.stringify(c));}
+
+const tagEmoji={yilbasi:'🎄',cumhuriyet:'🇹🇷',ramazan:'🌙',bayram:'🎉',sevgililer:'💕',anneler:'🌹',flash:'⚡',custom:'✏️','':''};
+const typeLabel={boost:'Hash Hız Artışı',earn:'Kazanç Artışı',free_withdraw:'Ücretsiz Çekim',double_block:'Çift Blok Ödülü',special:'Özel Ödül'};
+
+function createCampaign(){
+  const name=document.getElementById('camp-name').value.trim();
+  const desc=document.getElementById('camp-desc').value.trim();
+  const type=document.getElementById('camp-type').value;
+  const value=parseFloat(document.getElementById('camp-value').value)||2;
+  const start=document.getElementById('camp-start').value;
+  const end=document.getElementById('camp-end').value;
+  const tag=document.getElementById('camp-tag').value;
+  const reward=document.getElementById('camp-reward').value.trim();
+  if(!name){showToast('Kampanya adı zorunlu!','#ff4444');return;}
+  const camp={id:'camp'+Date.now(),name,desc,type,value,start,end,tag,reward,active:true,created:Date.now()};
+  const camps=getCampaigns();
+  camps.push(camp);
+  saveCampaigns(camps);
+  applyCampaign(camp);
+  renderActiveCampaign();
+  renderCampaignHistory();
+  ['camp-name','camp-desc','camp-reward'].forEach(id=>document.getElementById(id).value='');
+  showToast('🚀 Kampanya başlatıldı!','#f0b429');
+  addPanicLog('Kampanya oluşturuldu: '+name);
+}
+
+function applyCampaign(camp){
+  if(!camp||!camp.active) return;
+  if(camp.type==='boost'){
+    boost=Math.max(boost,camp.value);
+    addLog('🎯 Kampanya aktif: '+camp.name+' · '+camp.value+'× hız!');
+    showToast((tagEmoji[camp.tag]||'🎯')+' '+camp.name+' AKTİF!','#f0b429');
+    updateUI();
+  } else if(camp.type==='earn'){
+    addLog('🎯 Kampanya aktif: '+camp.name+' · Kazanç '+camp.value+'×!');
+    showToast((tagEmoji[camp.tag]||'🎯')+' Kazanç Artışı AKTİF!','#f0b429');
+  }
+}
+
+function renderActiveCampaign(){
+  const camps=getCampaigns().filter(c=>c.active);
+  const el=document.getElementById('activeCampaignBox');
+  if(!camps.length){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.25);padding:16px;font-size:13px;">Aktif kampanya yok.</div>';return;}
+  el.innerHTML=camps.map(c=>`
+    <div class="camp-card active-camp">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="camp-name">${tagEmoji[c.tag]||'🎯'} ${c.name} <span class="camp-badge camp-active-badge">AKTİF</span></div>
+        <button class="abtn abtn-ban" style="padding:5px 10px;font-size:11px;" onclick="deactivateCampaign('${c.id}')">Durdur</button>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);">${c.desc}</div>
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+        <span class="camp-badge">${typeLabel[c.type]||c.type}</span>
+        <span class="camp-badge">${c.value}× Değer</span>
+        ${c.reward?`<span class="camp-badge" style="color:#a855f7;border-color:rgba(168,85,247,0.3);">🎁 ${c.reward}</span>`:''}
+        ${c.start?`<span class="camp-badge" style="color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.1);">📅 ${c.start.replace('T',' ')}</span>`:''}
+        ${c.end?`<span class="camp-badge" style="color:rgba(255,68,68,0.6);border-color:rgba(255,68,68,0.2);">⏳ ${c.end.replace('T',' ')}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function deactivateCampaign(id){
+  const camps=getCampaigns();
+  const c=camps.find(x=>x.id===id);
+  if(c){c.active=false;saveCampaigns(camps);renderActiveCampaign();renderCampaignHistory();showToast('Kampanya durduruldu.','#ff4444');addPanicLog('Kampanya durduruldu: '+c.name);}
+}
+
+function renderCampaignHistory(){
+  const all=getCampaigns();
+  const el=document.getElementById('campaignHistoryList');
+  if(!all.length){el.innerHTML='<div style="color:rgba(255,255,255,0.25);font-size:13px;text-align:center;padding:10px;">Kampanya geçmişi yok.</div>';return;}
+  el.innerHTML=[...all].reverse().map(c=>`
+    <div class="camp-card" style="${c.active?'':'opacity:0.55;'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="camp-name" style="font-size:13px;">${tagEmoji[c.tag]||'🎯'} ${c.name}</div>
+        <span class="camp-badge ${c.active?'camp-active-badge':''}">${c.active?'AKTİF':'BİTTİ'}</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">${typeLabel[c.type]||c.type} · ${c.value}× · ${new Date(c.created).toLocaleDateString('tr-TR')}</div>
+    </div>`).join('');
+}
+
+// Kampanyaları uygulama açılışında yükle
+function loadActiveCampaigns(){
+  getCampaigns().filter(c=>c.active).forEach(c=>{
+    // Bitiş tarihi geçmişse kapat
+    if(c.end && new Date(c.end)<new Date()){
+      deactivateCampaign(c.id); return;
+    }
+    applyCampaign(c);
+  });
+  // Override'ları uygula
+  const dp=JSON.parse(localStorage.getItem(DEVICE_PRICES_KEY)||'{}');
+  devData.forEach(d=>{if(dp[d.id]){d.price=dp[d.id].price;d.bonus=dp[d.id].bonus;}});
+  const fr=JSON.parse(localStorage.getItem(FARM_RATES_KEY)||'{}');
+  farmData.forEach(m=>{if(fr[m.id]){m.rate=fr[m.id].rate;m.cost=fr[m.id].cost;}});
+}
+
+// ════════════════════════════════════════════════
+// YARIŞMA SİSTEMİ
+// ════════════════════════════════════════════════
+const CONTEST_KEY='hn_contests';
+function getContests(){return JSON.parse(localStorage.getItem(CONTEST_KEY)||'[]');}
+function saveContests(c){localStorage.setItem(CONTEST_KEY,JSON.stringify(c));}
+
+const cntTypeLabel={most_blocks:'En Çok Blok',most_coins:'En Çok sBTC',most_ads:'En Çok Reklam',most_referrals:'En Çok Referans',first_milestone:'İlk Milestone'};
+
+function createContest(){
+  const name=document.getElementById('cnt-name').value.trim();
+  const desc=document.getElementById('cnt-desc').value.trim();
+  const type=document.getElementById('cnt-type').value;
+  const start=document.getElementById('cnt-start').value;
+  const end=document.getElementById('cnt-end').value;
+  const prize1=document.getElementById('cnt-prize1').value.trim();
+  const prize2=document.getElementById('cnt-prize2').value.trim();
+  const prize3=document.getElementById('cnt-prize3').value.trim();
+  if(!name){showToast('Yarışma adı zorunlu!','#ff4444');return;}
+  const contest={id:'cnt'+Date.now(),name,desc,type,start,end,prizes:[prize1,prize2,prize3],active:true,created:Date.now(),winners:[]};
+  const contests=getContests();
+  contests.push(contest);
+  saveContests(contests);
+  renderActiveContest();
+  renderContestHistory();
+  ['cnt-name','cnt-desc','cnt-prize1','cnt-prize2','cnt-prize3'].forEach(id=>document.getElementById(id).value='');
+  showToast('🏆 Yarışma başlatıldı!','#a855f7');
+  addPanicLog('Yarışma oluşturuldu: '+name);
+}
+
+function renderActiveContest(){
+  const contests=getContests().filter(c=>c.active);
+  const el=document.getElementById('activeContestBox');
+  if(!contests.length){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.25);padding:16px;font-size:13px;">Aktif yarışma yok.</div>';return;}
+  el.innerHTML=contests.map(c=>`
+    <div class="cnt-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:700;color:#a855f7;">🏆 ${c.name}</div>
+        <button class="abtn abtn-ban" style="padding:5px 10px;font-size:11px;" onclick="endContest('${c.id}')">Bitir</button>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:10px;">${c.desc}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <span class="camp-badge" style="color:#a855f7;border-color:rgba(168,85,247,0.3);">${cntTypeLabel[c.type]||c.type}</span>
+        ${c.end?`<span class="camp-badge" style="color:rgba(255,68,68,0.6);border-color:rgba(255,68,68,0.2);">⏳ ${c.end.replace('T',' ')}</span>`:''}
+      </div>
+      <div style="display:flex;gap:8px;">
+        ${c.prizes.map((p,i)=>p?`<div style="flex:1;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.15);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;">${['🥇','🥈','🥉'][i]}</div><div style="font-size:11px;color:#a855f7;font-weight:700;">${p}</div></div>`:'').join('')}
+      </div>
+    </div>`).join('');
+}
+
+function endContest(id){
+  const contests=getContests();
+  const c=contests.find(x=>x.id===id);
+  if(!c)return;
+  c.active=false;
+  // Kazananları hesapla
+  const users=getUsers();
+  const ranked=rankUsersForContest(c.type,users);
+  c.winners=ranked.slice(0,3).map((u,i)=>({
+    userId:u.id,name:u.name,email:u.email,
+    rank:i+1,prize:c.prizes[i]||'',score:u._score,awarded:false
+  }));
+  saveContests(contests);
+  renderActiveContest();
+  renderContestWinners();
+  renderContestHistory();
+  showToast('🏆 Yarışma bitti! Kazananlar belirlendi.','#a855f7');
+  addPanicLog('Yarışma bitti: '+c.name+' · Kazanan: '+(c.winners[0]?.name||'?'));
+}
+
+function rankUsersForContest(type,users){
+  return users.map(u=>{
+    const ud=JSON.parse(localStorage.getItem('hn_'+u.id)||'{}');
+    let score=0;
+    if(type==='most_blocks') score=ud.blocks||0;
+    else if(type==='most_coins') score=ud.coins||0;
+    else if(type==='most_ads'){const s=getAdminStats();score=Math.floor(Math.random()*100);}
+    else if(type==='most_referrals') score=Math.floor(Math.random()*20);
+    else score=ud.blocks||0;
+    return {...u,_score:score};
+  }).sort((a,b)=>b._score-a._score);
+}
+
+function renderContestWinners(){
+  const allContests=getContests();
+  const finishedWithWinners=allContests.filter(c=>!c.active&&c.winners&&c.winners.length);
+  const el=document.getElementById('contestWinnersList');
+  if(!finishedWithWinners.length){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.25);padding:16px;font-size:13px;">Henüz ödül kazananı yok.</div>';return;}
+  let html='';
+  finishedWithWinners.forEach(c=>{
+    html+=`<div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:700;color:#a855f7;margin-bottom:8px;">🏆 ${c.name}</div>`;
+    c.winners.forEach(w=>{
+      const rankIcons=['🥇','🥈','🥉'];
+      html+=`<div class="winner-card">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="winner-rank">${rankIcons[w.rank-1]||w.rank+'.'}</span>
+          <div style="flex:1;">
+            <div class="winner-name">${w.name||'Kullanıcı'}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.35);">${w.email} · Skor: ${typeof w.score==='number'?w.score.toFixed(w.score<1?8:0):w.score}</div>
+            <div class="winner-prize">🎁 Ödül: ${w.prize||'—'}</div>
+          </div>
+          <button class="abtn ${w.awarded?'abtn-unban':'abtn-yellow'}" style="padding:7px 12px;font-size:12px;" onclick="awardWinner('${c.id}','${w.userId}')">
+            ${w.awarded?'✓ VERİLDİ':'💰 ÖDÜL VER'}
+          </button>
+        </div>
+        ${w.awarded?`<div style="font-size:11px;color:#00ff88;margin-top:6px;">✓ Ödül verildi.</div>`:``}
+      </div>`;
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function awardWinner(contestId,userId){
+  const contests=getContests();
+  const c=contests.find(x=>x.id===contestId);
+  if(!c)return;
+  const w=c.winners.find(x=>x.userId===userId);
+  if(!w)return;
+  w.awarded=true;
+  saveContests(contests);
+  // Kullanıcıya mesaj gönder
+  const users=getUsers();
+  const u=users.find(x=>x.id===userId);
+  if(u){u.adminMsg=`🏆 Tebrikler! "${c.name}" yarışmasında ${['🥇','🥈','🥉'][w.rank-1]||w.rank+'.'} oldunuz! Ödülünüz: ${w.prize}`;saveUsers(users);}
+  renderContestWinners();
+  showToast('💰 Ödül verildi: '+w.name,'#a855f7');
+  addPanicLog('Ödül verildi: '+w.name+' · '+c.name+' · '+w.prize);
+}
+
+function renderContestHistory(){
+  const all=getContests();
+  const el=document.getElementById('contestHistoryList');
+  if(!all.length){el.innerHTML='<div style="color:rgba(255,255,255,0.25);font-size:13px;text-align:center;padding:10px;">Yarışma geçmişi yok.</div>';return;}
+  el.innerHTML=[...all].reverse().map(c=>`
+    <div class="cnt-card" style="${c.active?'':'opacity:0.6;'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;color:#a855f7;">🏆 ${c.name}</div>
+        <span class="camp-badge ${c.active?'camp-active-badge':''}">${c.active?'AKTİF':'BİTTİ'}</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">${cntTypeLabel[c.type]||c.type} · ${new Date(c.created).toLocaleDateString('tr-TR')} · ${c.winners?.length||0} kazanan</div>
+    </div>`).join('');
+}
+},50);
+  function saveAdMobSettings() {
+    const p = document.getElementById('admin-pub-id').value;
+    const u = document.getElementById('admin-unit-id').value;
+    if(!p || !u) return alert("Lütfen boş bırakmayın!");
+    localStorage.setItem('saved_pub_id', p);
+    localStorage.setItem('saved_unit_id', u);
+    alert("✅ AdMob ID'leri başarıyla kaydedildi!");
+    // Sayfa yüklendiğinde kayıtlı ID varsa reklamı onunla başlat
+window.addEventListener('load', () => {
+    const savedPubId = localStorage.getItem('saved_pub_id');
+    if (savedPubId) {
+        const adEl = document.getElementById('ana-reklam');
+        if (adEl) {
+            adEl.setAttribute('data-ad-client', savedPubId.trim());
+        }
+    }
+});
+
+// Kaydet butonuna basıldığında reklamı anlık güncellemek için fonksiyonu genişlet
+function applyAdChanges() {
+    saveAdMobSettings(); // Mevcut kaydetme işlemin
+    const newId = localStorage.getItem('saved_pub_id');
+    if (newId) {
+        const adEl = document.getElementById('ana-reklam');
+        adEl.setAttribute('data-ad-client', newId.trim());
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        alert("Reklam birimi yeni ID ile güncellendi.");
+    }
+}
+}
+</script>
+</body>
+</html>
