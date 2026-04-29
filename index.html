@@ -1,1 +1,2075 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>HASHNODE GLOBAL v6 | AdMob Ready</title>
+<style>
+/* ═══════════════════════════════════════════════
+   TEMEL STİLLER
+═══════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;transition:background-color .25s,color .2s,border-color .2s}
+body{background:radial-gradient(circle at 10% 20%,#0a0f1e,#02040c);min-height:100vh;padding:12px;display:flex;justify-content:center;align-items:flex-start;overflow-x:hidden}
+body.light-mode{background:radial-gradient(circle at 10% 20%,#e8f0ff,#d0dcec)}
+body.light-mode .glass-card{background:rgba(245,250,255,.95);border-color:#2a7f8f;color:#1a2a3a}
+body.light-mode .neon-green{color:#006644;text-shadow:none}
+body.light-mode .neon-cyan{color:#006644;text-shadow:none}
+body.light-mode .text-dim{color:#2c3e50}
+body.light-mode .btn-primary{background:#cce5ff;color:#004488;border-color:#004488}
+body.light-mode .miner-card{background:#eef3fc;border-color:#88aacc}
+body.light-mode .input-field{background:white;color:#1a2a3a;border-color:#2a7f8f}
+body.light-mode .bottom-nav{background:rgba(240,248,255,.95);border-top-color:#2a7f8f}
+body.light-mode .nav-icon.active{color:#006644;background:#bbddff}
+body.light-mode .coin-card{background:#d9e6f5}
+body.light-mode .user-badge{background:#00664422!important;color:#004488}
+body.light-mode .settings-row{border-bottom-color:#cce}
+#matrixCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1s}
+#matrixCanvas.active{opacity:.12}
+.phone-container{max-width:460px;width:100%;margin:0 auto;border-radius:44px;overflow:hidden;box-shadow:0 0 0 2px rgba(0,255,136,.2),0 25px 50px -12px black;background:rgba(0,0,0,.2);position:relative;z-index:1}
+.app-screen{padding:18px 16px 110px;position:relative}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 6px #00ff88}50%{box-shadow:0 0 22px #00ff88,0 0 40px #00ff8855}}
+.btn-mining-active{animation:pulse-glow 1.5s ease-in-out infinite}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:rgba(8,18,30,.97);backdrop-filter:blur(20px);display:flex;justify-content:space-around;padding:8px 4px 20px;border-top:1px solid #00ff8844;border-radius:32px 32px 0 0;z-index:100}
+.nav-icon{display:flex;flex-direction:column;align-items:center;gap:3px;color:#8aa0bb;font-size:.6rem;cursor:pointer;transition:.2s;padding:5px 6px;border-radius:40px;font-weight:bold}
+.nav-icon.active{color:#00ff88;background:#00ff8822}
+.glass-card{background:rgba(12,22,45,.92);backdrop-filter:blur(12px);border-radius:28px;border:1px solid rgba(0,255,136,.5);padding:1.2rem;margin-bottom:1rem;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.neon-green{color:#00ff88;text-shadow:0 0 3px #00ff88;font-weight:700}
+.neon-cyan{color:#0ff;font-weight:600}
+.text-dim{color:#b0c4de;font-size:.75rem}
+.stat-value{font-size:1.6rem;font-weight:800;letter-spacing:1px}
+.flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.btn{border:none;padding:10px 18px;border-radius:60px;font-weight:bold;cursor:pointer;transition:.2s;background:#0f212f;color:white;border:1px solid #2affaa66;font-size:.85rem}
+.btn-primary{background:linear-gradient(135deg,#0f3b3d,#06212a);border-color:#00ff88;color:#00ff88}
+.btn-primary:hover{background:#00ff8822;transform:scale(1.02)}
+.btn-danger{background:#3d0a0a;border-color:#ff5555;color:#ff8888}
+.btn-warning{background:#4a3a0a;border-color:#ffaa33;color:#ffcc66}
+.input-field{background:#0a1022dd;border:1px solid #00ff8866;border-radius:60px;padding:12px 18px;width:100%;color:white;font-size:1rem;outline:none}
+.password-wrapper{position:relative;width:100%;margin-bottom:12px}
+.toggle-password{position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.2rem;background:none;border:none;color:#00ff88}
+.farm-grid{display:grid;grid-template-columns:1fr;gap:1rem}
+.miner-card{background:#07121ec9;border-radius:24px;padding:1rem;border:1px solid #00ff8855}
+.miner-card.damaged{border-color:#ff555588}
+.progress-bar{background:#1e2a3a;border-radius:20px;height:8px;overflow:hidden;margin:8px 0}
+.progress-fill{background:linear-gradient(90deg,#00ff88,#0ff);height:100%;border-radius:20px;transition:width .5s}
+.progress-fill.low{background:linear-gradient(90deg,#ff5555,#ffaa33)}
+.cooler-animation{display:inline-block;animation:spin 2s linear infinite;font-size:1.4rem}
+@keyframes spin{100%{transform:rotate(360deg)}}
+@keyframes spin-slow{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.crypto-ticker{display:flex;gap:12px;overflow-x:auto;padding:8px 0}
+.coin-card{background:#0a1428aa;border-radius:20px;padding:8px 14px;min-width:110px;text-align:center}
+.positive{color:#00ffaa}
+.negative{color:#ff8888}
+.mode-toggle{position:fixed;top:16px;right:16px;background:#00ff8822;backdrop-filter:blur(8px);border-radius:40px;padding:8px 12px;border:1px solid #00ff88;cursor:pointer;z-index:200;font-size:1rem;color:#00ff88}
+.warning-box{background:#ffaa3311;border-left:3px solid #ffaa33;padding:12px;border-radius:16px;font-size:.7rem;margin:12px 0}
+.alert-box{background:#ff555511;border-left:3px solid #ff5555;padding:12px;border-radius:16px;font-size:.75rem;margin:8px 0;color:#ff8888}
+h2{font-size:1.3rem;margin-bottom:.8rem;color:#00ff88;display:flex;align-items:center;gap:8px}
+h3{color:#00ff88;margin-bottom:8px}
+.user-badge{background:#00ff8822;padding:4px 12px;border-radius:40px;font-size:.7rem}
+@media(max-width:480px){.stat-value{font-size:1.3rem}}
+.coin-fly{position:fixed;font-size:1.2rem;pointer-events:none;z-index:999;animation:fly-up 1.2s ease-out forwards}
+@keyframes fly-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#00ff8822;border:1px solid #00ff88;color:#00ff88;padding:10px 20px;border-radius:40px;font-size:.8rem;z-index:9999;animation:toast-anim 3s forwards;white-space:nowrap}
+@keyframes toast-anim{0%{opacity:0;top:10px}10%{opacity:1;top:20px}80%{opacity:1}100%{opacity:0;top:10px}}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #00ff8822;font-size:.9rem}
+.settings-row:last-child{border-bottom:none}
+.toggle-switch{width:44px;height:24px;background:#1e2a3a;border-radius:40px;position:relative;cursor:pointer;border:1px solid #00ff8844;transition:.3s;flex-shrink:0}
+.toggle-switch.on{background:#00ff8833;border-color:#00ff88}
+.toggle-switch::after{content:'';position:absolute;width:18px;height:18px;background:#8aa0bb;border-radius:50%;top:2px;left:2px;transition:.3s}
+.toggle-switch.on::after{left:22px;background:#00ff88}
+.version-badge{background:#00ff8811;padding:4px 12px;border-radius:40px;font-size:.7rem;color:#00ff8888}
+
+/* ═══ GİRİŞ SAYFASI ÖZELLEŞTİRME ═══ */
+.login-wrapper{text-align:center;padding:0}
+.login-logo-area{padding:28px 0 16px}
+.login-logo-icon{font-size:3.5rem;display:block;margin-bottom:8px;filter:drop-shadow(0 0 18px #00ff88)}
+.login-title{font-size:2rem;font-weight:900;color:#00ff88;text-shadow:0 0 20px #00ff88,0 0 40px #00ff8855;letter-spacing:3px}
+.login-subtitle{font-size:.85rem;color:#0ff;margin-top:4px;letter-spacing:2px}
+.login-sim-badge{display:inline-block;background:#ffaa3318;border:1px solid #ffaa3366;color:#ffcc88;padding:5px 14px;border-radius:20px;font-size:.7rem;margin:10px 0 14px;letter-spacing:.5px}
+
+/* Dil seçimi açılır kapanır */
+.lang-dropdown-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.25);border-radius:14px;padding:10px 16px;cursor:pointer;width:100%;margin-bottom:6px;transition:.2s}
+.lang-dropdown-btn:hover{border-color:#00ff88;background:rgba(0,255,136,.12)}
+.lang-dropdown-btn .selected-flag{font-size:1.3rem}
+.lang-dropdown-btn .selected-name{flex:1;text-align:left;font-size:.85rem;color:#b0c4de;margin-left:8px}
+.lang-dropdown-btn .chevron{font-size:.75rem;color:#00ff8888;transition:transform .25s}
+.lang-dropdown-btn.open .chevron{transform:rotate(180deg)}
+.lang-dropdown-list{display:none;background:rgba(6,14,30,.97);border:1px solid rgba(0,255,136,.2);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.lang-dropdown-list.open{display:block}
+.lang-option{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:.82rem;color:#b0c4de;transition:.15s;border-bottom:1px solid rgba(0,255,136,.07)}
+.lang-option:last-child{border-bottom:none}
+.lang-option:hover{background:rgba(0,255,136,.1);color:#00ff88}
+.lang-option.active{background:rgba(0,255,136,.12);color:#00ff88;font-weight:700}
+.lang-option .opt-flag{font-size:1.2rem}
+
+/* Kullanıcı sözleşmesi */
+.terms-area{margin-top:10px;text-align:left}
+.terms-check-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;cursor:pointer}
+.terms-check-row input[type=checkbox]{width:16px;height:16px;accent-color:#00ff88;cursor:pointer;margin-top:2px;flex-shrink:0}
+.terms-check-row label{font-size:.72rem;color:#8aa0bb;cursor:pointer;line-height:1.4}
+.terms-link{color:#00ff88;text-decoration:underline;cursor:pointer}
+.terms-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,5,15,.94);z-index:15000;display:none;align-items:center;justify-content:center}
+.terms-modal-overlay.open{display:flex}
+.terms-modal-box{background:rgba(10,20,40,.98);border:1px solid rgba(0,255,136,.3);border-radius:20px;padding:20px;width:92%;max-width:400px;max-height:80vh;display:flex;flex-direction:column}
+.terms-modal-title{font-size:1rem;font-weight:800;color:#00ff88;margin-bottom:12px;letter-spacing:1px}
+.terms-modal-body{flex:1;overflow-y:auto;font-size:.72rem;color:#b0c4de;line-height:1.7;padding-right:4px}
+.terms-modal-body h4{color:#00ff88;margin:12px 0 4px;font-size:.8rem}
+.btn-terms-close{margin-top:14px;background:rgba(0,255,136,.1);border:1px solid #00ff88;color:#00ff88;padding:10px;border-radius:40px;width:100%;cursor:pointer;font-size:.85rem;font-weight:bold}
+
+/* ═══ REKLAM STİLLERİ ═══ */
+@keyframes ad-pulse{
+  0%,100%{box-shadow:0 0 8px #f0b429,0 0 16px rgba(240,180,41,.3);border-color:#f0b429}
+  50%{box-shadow:0 0 20px #f0b429,0 0 40px rgba(240,180,41,.5);border-color:#ffd166}
+}
+.btn-ad-boost{background:linear-gradient(135deg,#1a1200,#2d1f00);border:1.5px solid #f0b429;color:#ffd166;font-weight:bold;cursor:pointer;padding:10px 18px;border-radius:60px;font-size:.85rem;animation:ad-pulse 2s ease-in-out infinite;transition:.2s}
+.btn-ad-boost:hover{transform:scale(1.04);animation:none}
+.btn-ad-boost.boost-is-active{animation:none;background:linear-gradient(135deg,#001a00,#002d00);border-color:#00ff88;color:#00ff88;box-shadow:0 0 16px rgba(0,255,136,.4)}
+.btn-ad-repair{background:linear-gradient(135deg,#1a1200,#2a1900);border:1.5px solid #f0b429;color:#ffd166;font-weight:bold;cursor:pointer;padding:8px 12px;border-radius:60px;font-size:.78rem;box-shadow:0 0 10px rgba(240,180,41,.25);transition:.2s;white-space:nowrap}
+.btn-ad-repair:hover{box-shadow:0 0 20px rgba(240,180,41,.5);transform:scale(1.03)}
+
+/* Banner alanları */
+.ad-banner-top{width:100%;background:linear-gradient(135deg,#0d0800,#1a1200);border-bottom:1px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;min-height:52px;position:relative;overflow:hidden}
+.ad-banner-bottom{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:linear-gradient(135deg,rgba(13,8,0,.97),rgba(26,15,0,.97));border-top:1px solid rgba(240,180,41,.25);display:flex;align-items:center;justify-content:center;min-height:52px;z-index:99;overflow:hidden}
+.admob-banner-container{width:320px;height:50px;display:flex;align-items:center;justify-content:center}
+.ad-placeholder{width:320px;height:50px;background:rgba(240,180,41,.07);border:1px dashed rgba(240,180,41,.35);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:.68rem;color:rgba(240,180,41,.6);letter-spacing:.5px}
+.ad-ph-badge{background:rgba(240,180,41,.15);border:1px solid rgba(240,180,41,.3);color:rgba(240,180,41,.5);font-size:.58rem;padding:2px 6px;border-radius:10px}
+
+/* Interstitial (giriş anı + tamir) */
+.ad-interstitial-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,5,15,.97);z-index:12000;display:none;align-items:center;justify-content:center;flex-direction:column}
+.ad-interstitial-overlay.open{display:flex}
+.ad-inter-box{background:rgba(10,20,40,.98);border:1px solid rgba(0,255,136,.3);border-radius:20px;padding:24px 20px;width:88%;max-width:360px;text-align:center}
+.ad-inter-title{font-size:.72rem;letter-spacing:3px;color:rgba(0,255,136,.4);margin-bottom:10px;text-transform:uppercase}
+.ad-inter-screen{background:#000;border:1px solid rgba(0,255,136,.2);border-radius:10px;height:120px;margin:10px 0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:.78rem;color:rgba(0,255,136,.4);letter-spacing:2px}
+.ad-inter-bar{position:absolute;bottom:0;left:0;height:3px;background:#00ff88;box-shadow:0 0 6px #00ff88;width:0%;transition:width .1s linear}
+.ad-inter-countdown{font-size:.72rem;color:rgba(200,216,240,.4);margin-bottom:10px}
+.btn-inter-skip{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.3);color:rgba(0,255,136,.6);padding:10px 24px;border-radius:60px;cursor:pointer;font-size:.85rem;transition:.2s}
+.btn-inter-skip:disabled{opacity:.3;cursor:not-allowed}
+
+/* Rewarded modal */
+.ad-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,5,15,.92);z-index:11000;display:none;align-items:center;justify-content:center}
+.ad-modal-overlay.open{display:flex}
+.ad-modal-box{background:linear-gradient(135deg,#060d1a,#0a1525);border:1.5px solid #f0b429;border-radius:24px;padding:24px 20px;width:88%;max-width:360px;text-align:center;box-shadow:0 0 40px rgba(240,180,41,.2)}
+.ad-modal-title{font-size:1.1rem;font-weight:800;color:#ffd166;margin-bottom:8px}
+.ad-modal-desc{font-size:.8rem;color:rgba(200,216,240,.6);margin-bottom:16px;line-height:1.5}
+.ad-sim-screen{background:#000;border:1px solid rgba(240,180,41,.3);border-radius:10px;height:90px;margin:12px 0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:.8rem;color:#ffd166;letter-spacing:2px}
+.ad-sim-bar{position:absolute;bottom:0;left:0;height:3px;background:#f0b429;box-shadow:0 0 6px #f0b429;width:0%;transition:width .1s linear}
+.ad-sim-countdown{font-size:.75rem;color:rgba(200,216,240,.4);margin-bottom:12px}
+.btn-ad-watch{background:linear-gradient(135deg,#2d1f00,#3d2a00);border:1.5px solid #f0b429;color:#ffd166;font-weight:bold;padding:12px 20px;border-radius:60px;width:100%;margin-bottom:8px;cursor:pointer;font-size:.9rem;box-shadow:0 0 16px rgba(240,180,41,.3);transition:.2s}
+.btn-ad-watch:disabled{opacity:.4;cursor:not-allowed}
+.btn-skip{background:transparent;border:1px solid rgba(200,216,240,.12);color:rgba(200,216,240,.35);padding:8px 20px;border-radius:60px;width:100%;cursor:pointer;font-size:.8rem;transition:.2s}
+
+.gold-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a1200,#2d1f00);border:1px solid #f0b429;color:#ffd166;padding:10px 22px;border-radius:40px;font-size:.85rem;z-index:9999;animation:toast-anim 3s forwards;white-space:nowrap;box-shadow:0 0 20px rgba(240,180,41,.3)}
+
+/* ═══ ADMİN PANELİ ═══ */
+.admin-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,3,10,.97);z-index:20000;display:none;overflow-y:auto}
+.admin-overlay.open{display:block}
+.admin-container{max-width:500px;margin:0 auto;padding:20px 16px 40px}
+.admin-header{background:linear-gradient(135deg,#0a1a2a,#051015);border:1px solid rgba(240,180,41,.4);border-radius:20px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.admin-title{font-size:1.2rem;font-weight:800;color:#ffd166;letter-spacing:2px}
+.admin-subtitle{font-size:.7rem;color:rgba(240,180,41,.5);margin-top:2px}
+.btn-admin-close{background:rgba(255,85,85,.1);border:1px solid #ff5555;color:#ff8888;padding:8px 16px;border-radius:30px;cursor:pointer;font-size:.8rem;font-weight:bold}
+.admin-card{background:rgba(10,20,35,.95);border:1px solid rgba(0,255,136,.2);border-radius:16px;padding:16px;margin-bottom:12px}
+.admin-card-title{font-size:.75rem;letter-spacing:2px;color:rgba(0,255,136,.5);margin-bottom:12px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+
+/* Admin sekmeler */
+.admin-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.admin-tab{flex:1;min-width:80px;background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.1);color:rgba(200,216,240,.4);padding:8px 6px;border-radius:10px;cursor:pointer;font-size:.72rem;font-weight:bold;text-align:center;transition:.2s;letter-spacing:.5px}
+.admin-tab.active{background:rgba(0,255,136,.12);border-color:#00ff88;color:#00ff88}
+.admin-tab-content{display:none}
+.admin-tab-content.active{display:block}
+
+.ad-slot-row{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.1);border-radius:12px;padding:12px;margin-bottom:10px}
+.ad-slot-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ad-slot-name{font-size:.85rem;font-weight:bold;color:#c8d8f0}
+.ad-slot-type{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:bold;letter-spacing:1px}
+.type-banner{background:rgba(0,180,255,.15);color:#00b4ff;border:1px solid rgba(0,180,255,.3)}
+.type-rewarded{background:rgba(240,180,41,.15);color:#f0b429;border:1px solid rgba(240,180,41,.3)}
+.type-interstitial{background:rgba(255,85,170,.15);color:#ff55aa;border:1px solid rgba(255,85,170,.3)}
+.ad-slot-id-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.ad-slot-id-input{flex:1;background:rgba(0,0,0,.5);border:1px solid rgba(0,255,136,.2);border-radius:8px;padding:8px 12px;color:#e0ffe0;font-size:.72rem;outline:none;font-family:monospace}
+.ad-slot-id-input:focus{border-color:#00ff88}
+.ad-slot-id-input.has-real-id{border-color:rgba(0,255,136,.6);color:#00ff88}
+.btn-slot-save{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:#00ff88;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:.72rem;font-weight:bold;transition:.2s;white-space:nowrap}
+.btn-slot-save:hover{background:rgba(0,255,136,.2)}
+.ad-slot-toggle-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.ad-slot-toggle-label{font-size:.72rem;color:rgba(200,216,240,.5);flex:1}
+.ad-status-badge{font-size:.65rem;padding:2px 8px;border-radius:10px}
+.status-active{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.status-placeholder{background:rgba(240,180,41,.1);color:#f0b429;border:1px solid rgba(240,180,41,.2)}
+.admin-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.admin-stat-box{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.1);border-radius:10px;padding:10px;text-align:center}
+.admin-stat-val{font-size:1.3rem;font-weight:800;color:#00ff88;font-family:monospace}
+.admin-stat-label{font-size:.65rem;color:rgba(200,216,240,.4);margin-top:2px;letter-spacing:1px}
+.sdk-code-block{background:#000;border:1px solid rgba(0,255,136,.2);border-radius:10px;padding:12px;font-family:monospace;font-size:.65rem;color:#a0ffc0;overflow-x:auto;margin-top:8px;line-height:1.6}
+.sdk-comment{color:rgba(0,255,136,.4)}
+.sdk-key{color:#ffd166}
+.sdk-val{color:#0ff}
+.admin-section-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0}
+.admin-section-body{display:none;margin-top:8px}
+.admin-section-body.open{display:block}
+.btn-admin-action{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.3);color:#f0b429;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:.78rem;font-weight:bold;transition:.2s;margin-right:6px;margin-bottom:6px}
+.btn-admin-action:hover{background:rgba(240,180,41,.2)}
+.btn-admin-danger{background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.3);color:#ff8888;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:.78rem;font-weight:bold;transition:.2s}
+.btn-admin-danger:hover{background:rgba(255,85,85,.2)}
+.log-entry{border-left:2px solid;padding-left:8px;margin-bottom:5px;font-size:.68rem;font-family:monospace}
+.log-info{border-color:#00ff88;color:#a0ffc0}
+.log-warn{border-color:#ffaa33;color:#ffcc88}
+.log-error{border-color:#ff5555;color:#ff9999}
+.log-ad{border-color:#f0b429;color:#ffd166}
+
+/* Admin Güvenlik Giriş Ekranı */
+.admin-login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,3,10,.99);z-index:19999;display:none;align-items:center;justify-content:center}
+.admin-login-overlay.open{display:flex}
+.admin-login-box{background:linear-gradient(135deg,#060d1a,#0a1525);border:1px solid rgba(240,180,41,.3);border-radius:20px;padding:28px 24px;width:88%;max-width:340px;text-align:center}
+.admin-login-title{font-size:1.1rem;font-weight:800;color:#ffd166;letter-spacing:2px;margin-bottom:6px}
+.admin-login-sub{font-size:.72rem;color:rgba(240,180,41,.4);margin-bottom:20px}
+.admin-input{background:rgba(0,0,0,.5);border:1px solid rgba(240,180,41,.3);border-radius:10px;padding:10px 14px;width:100%;color:#ffd166;font-size:.9rem;outline:none;margin-bottom:10px;font-family:monospace;letter-spacing:2px}
+.admin-input:focus{border-color:#f0b429}
+.btn-admin-login{background:linear-gradient(135deg,#2d1f00,#3d2a00);border:1.5px solid #f0b429;color:#ffd166;font-weight:bold;padding:12px;border-radius:40px;width:100%;cursor:pointer;font-size:.9rem;box-shadow:0 0 16px rgba(240,180,41,.2);transition:.2s;margin-top:4px}
+.btn-admin-login:hover{box-shadow:0 0 28px rgba(240,180,41,.4)}
+.btn-admin-cancel{background:transparent;border:1px solid rgba(200,216,240,.1);color:rgba(200,216,240,.3);padding:8px;border-radius:40px;width:100%;cursor:pointer;font-size:.8rem;margin-top:8px;transition:.2s}
+.admin-login-err{color:#ff8888;font-size:.75rem;margin-top:6px;display:none}
+.admin-attempts-badge{background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.2);color:#ff8888;padding:4px 12px;border-radius:20px;font-size:.68rem;margin-top:8px;display:none}
+
+/* ═══ AdMob Admin Özel Stiller ═══ */
+.admob-info-box{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.15);border-left:3px solid #00ff88;border-radius:10px;padding:12px;font-size:.72rem;color:rgba(200,216,240,.65);line-height:1.7;margin-bottom:12px}
+.admob-info-title{font-size:.75rem;font-weight:700;color:#00ff88;margin-bottom:6px;letter-spacing:.5px}
+.admob-field-label{font-size:.7rem;color:rgba(200,216,240,.45);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+.admob-input-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.admob-id-input{flex:1;background:rgba(0,0,0,.55);border:1px solid rgba(0,255,136,.25);border-radius:10px;padding:9px 12px;color:#e0ffe0;font-size:.73rem;outline:none;font-family:monospace;width:100%}
+.admob-id-input:focus{border-color:#00ff88;box-shadow:0 0 8px rgba(0,255,136,.15)}
+.admob-id-input.id-valid{border-color:rgba(0,255,136,.7);color:#00ff88}
+.admob-id-input.id-invalid{border-color:rgba(255,85,85,.6);color:#ff8888}
+.admob-save-btn{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.35);color:#00ff88;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:.72rem;font-weight:700;transition:.2s;white-space:nowrap}
+.admob-save-btn:hover{background:rgba(0,255,136,.22)}
+.admob-validate-row{font-size:.68rem;min-height:18px;margin-top:2px;margin-bottom:6px}
+.admob-validate-ok{color:#00ff88}
+.admob-validate-err{color:#ff8888}
+.admob-validate-warn{color:#ffaa33}
+.admob-format-badge{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.25);color:#00ff88;padding:2px 8px;border-radius:8px;font-family:monospace;font-size:.68rem}
+.admob-manifest-box{background:rgba(0,0,0,.4);border:1px solid rgba(240,180,41,.2);border-radius:10px;padding:12px;margin-top:10px}
+.admob-manifest-title{font-size:.72rem;font-weight:700;color:#f0b429;margin-bottom:4px;letter-spacing:.5px}
+.admob-slot-card{background:rgba(0,0,0,.35);border:1px solid rgba(0,255,136,.12);border-radius:12px;padding:14px;margin-bottom:12px;transition:.2s}
+.admob-slot-card:hover{border-color:rgba(0,255,136,.25)}
+.admob-slot-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.admob-slot-title{font-size:.85rem;font-weight:700;color:#c8d8f0;line-height:1.3}
+.admob-slot-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.admob-slot-desc{font-size:.68rem;color:rgba(200,216,240,.38);margin-bottom:10px;line-height:1.5}
+.admob-slot-position{font-size:.62rem;background:rgba(0,180,255,.1);color:#00b4ff;border:1px solid rgba(0,180,255,.2);padding:2px 8px;border-radius:10px}
+.admob-slot-enabled-badge{font-size:.62rem;padding:2px 8px;border-radius:10px;font-weight:700}
+.slot-on{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.slot-off{background:rgba(255,85,85,.1);color:#ff8888;border:1px solid rgba(255,85,85,.2)}
+.admob-slot-id-field{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.admob-slot-id-field input{flex:1;background:rgba(0,0,0,.55);border:1px solid rgba(0,255,136,.2);border-radius:8px;padding:8px 11px;color:#e0ffe0;font-size:.7rem;outline:none;font-family:monospace}
+.admob-slot-id-field input:focus{border-color:#00ff88}
+.admob-slot-id-field input.slot-id-valid{border-color:rgba(0,255,136,.6);color:#00ff88}
+.admob-slot-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.admob-slot-validate{font-size:.65rem;min-height:16px}
+.admob-slot-actions{display:flex;gap:6px;align-items:center}
+.slot-save-btn{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:#00ff88;padding:5px 11px;border-radius:8px;cursor:pointer;font-size:.7rem;font-weight:700;transition:.2s}
+.slot-save-btn:hover{background:rgba(0,255,136,.2)}
+.admob-test-ids-box{background:rgba(0,0,0,.3);border:1px solid rgba(240,180,41,.2);border-radius:10px;padding:12px;margin-top:14px}
+.test-id-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap}
+.test-id-row:last-child{border-bottom:none}
+.test-id-type{font-size:.65rem;font-weight:700;color:#f0b429;min-width:78px;letter-spacing:.5px}
+.test-id-val{flex:1;font-family:monospace;font-size:.62rem;color:rgba(200,216,240,.5);cursor:pointer;word-break:break-all}
+.test-id-val:hover{color:rgba(200,216,240,.8)}
+.test-id-copy{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.25);color:#f0b429;padding:4px 8px;border-radius:8px;cursor:pointer;font-size:.62rem;font-weight:700;white-space:nowrap;transition:.2s}
+.test-id-copy:hover{background:rgba(240,180,41,.2)}
+.slot-summary-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,255,136,.07);font-size:.75rem}
+.slot-summary-row:last-child{border-bottom:none}
+.gdpr-radio-label{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#b0c4de;cursor:pointer;padding:6px 10px;background:rgba(0,0,0,.2);border:1px solid rgba(0,255,136,.1);border-radius:8px;transition:.2s}
+.gdpr-radio-label:hover{border-color:rgba(0,255,136,.3)}
+/* Analitik & Moderasyon */
+.country-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,255,136,.07)}
+.country-row:last-child{border-bottom:none}
+.country-flag{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.country-name{flex:1;font-size:.78rem;color:#c8d8f0}
+.country-bar-wrap{width:90px;background:rgba(0,255,136,.08);border-radius:20px;height:6px;overflow:hidden;flex-shrink:0}
+.country-bar{height:100%;border-radius:20px;background:linear-gradient(90deg,#00ff88,#0ff);transition:width .5s}
+.country-users{font-size:.72rem;color:#00ff88;min-width:30px;text-align:right;flex-shrink:0}
+.country-revenue{font-size:.7rem;color:#f0b429;min-width:50px;text-align:right;flex-shrink:0}
+.mod-user-card{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.1);border-radius:12px;padding:12px;margin-bottom:10px}
+.mod-user-card.warned{border-color:rgba(255,170,51,.4);background:rgba(40,25,0,.4)}
+.mod-user-card.suspended{border-color:rgba(255,85,85,.4);background:rgba(40,0,0,.4)}
+.mod-user-card.banned{border-color:rgba(150,0,0,.6);background:rgba(30,0,0,.6);opacity:.8}
+.mod-user-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:6px;flex-wrap:wrap}
+.mod-user-name{font-size:.85rem;font-weight:700;color:#c8d8f0}
+.mod-status-badge{font-size:.62rem;padding:2px 8px;border-radius:10px;font-weight:700;flex-shrink:0}
+.mstatus-ok{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.mstatus-warn{background:rgba(255,170,51,.15);color:#ffaa33;border:1px solid rgba(255,170,51,.3)}
+.mstatus-sus{background:rgba(255,85,85,.15);color:#ff5555;border:1px solid rgba(255,85,85,.3)}
+.mstatus-ban{background:rgba(150,0,0,.3);color:#ff4444;border:1px solid rgba(150,0,0,.5)}
+.mod-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.btn-mod-warn{background:rgba(255,170,51,.1);border:1px solid rgba(255,170,51,.3);color:#ffaa33;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:.7rem;font-weight:700;transition:.2s}
+.btn-mod-warn:hover{background:rgba(255,170,51,.2)}
+.btn-mod-sus{background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.3);color:#ff8888;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:.7rem;font-weight:700;transition:.2s}
+.btn-mod-sus:hover{background:rgba(255,85,85,.2)}
+.btn-mod-ban{background:rgba(150,0,0,.2);border:1px solid rgba(200,0,0,.4);color:#ff4444;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:.7rem;font-weight:700;transition:.2s}
+.btn-mod-ban:hover{background:rgba(150,0,0,.35)}
+.btn-mod-restore{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:#00ff88;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:.7rem;font-weight:700;transition:.2s}
+.warn-template-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,170,51,.08);font-size:.78rem}
+.warn-template-row:last-child{border-bottom:none}
+.warn-template-txt{flex:1;color:#b0c4de;line-height:1.4}
+/* Banlı kullanıcı ekranı */
+.ban-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px}
+.ban-overlay.open{display:flex}
+</style>
+</head>
+<body>
+<canvas id="matrixCanvas"></canvas>
+
+<!-- ══ GİRİŞ SAYFASI BANNER (üst sabit) ══ -->
+<div id="adLoginBanner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;z-index:300;">
+  <div class="ad-banner-top">
+    <div class="admob-banner-container" id="admobLoginBanner">
+      <div class="ad-placeholder"><span>📺</span><span style="font-family:monospace;font-size:.62rem" id="loginBannerIdPreview">ca-app-pub-XXX/LOGIN_ID</span><span class="ad-ph-badge">320×50</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ANA UYGULAMA ══ -->
+<div class="phone-container" id="rootApp"></div>
+
+<!-- ══ ALT BANNER ══ -->
+<div class="ad-banner-bottom" id="adBottomBanner" style="display:none;">
+  <div class="admob-banner-container" id="admobBottomBanner">
+    <div class="ad-placeholder"><span>📺</span><span style="font-family:monospace;font-size:.62rem" id="bottomBannerIdPreview">ca-app-pub-XXX/BOTTOM_ID</span><span class="ad-ph-badge">320×50</span></div>
+  </div>
+</div>
+
+<div class="mode-toggle" id="themeToggle">🌙</div>
+
+<!-- ══ GİRİŞ ANI INTERSTİTİAL ══ -->
+<div class="ad-interstitial-overlay" id="adLoginInterstitial">
+  <div class="ad-inter-box">
+    <div class="ad-inter-title">UYGULAMA YÜKLENIYOR</div>
+    <div style="font-size:.8rem;color:rgba(200,216,240,.5);margin-bottom:8px">HASHNODE GLOBAL başlatılıyor...</div>
+    <div class="ad-inter-screen">
+      <span>ADMOB INTERSTITIAL</span>
+      <div class="ad-inter-bar" id="adLoginInterBar"></div>
+    </div>
+    <div class="ad-inter-countdown" id="adLoginInterCount">Lütfen bekleyin...</div>
+    <button class="btn-inter-skip" id="btnLoginInterSkip" disabled onclick="closeLoginInterstitial()">Geç ✕</button>
+  </div>
+</div>
+
+<!-- ══ TAMİR INTERSTİTİAL ══ -->
+<div class="ad-interstitial-overlay" id="adRepairInterstitial">
+  <div class="ad-inter-box">
+    <div class="ad-inter-title">Geçiş Reklamı</div>
+    <div class="ad-inter-screen">
+      <span>ADMOB INTERSTITIAL</span>
+      <div class="ad-inter-bar" id="adInterBar"></div>
+    </div>
+    <div class="ad-inter-countdown" id="adInterCount"></div>
+    <button class="btn-inter-skip" id="btnInterSkip" disabled onclick="closeInterstitial()">Reklamı Geç ✕</button>
+  </div>
+</div>
+
+<!-- ══ REWARDED: HOŞ GELDİN ══ -->
+<div class="ad-modal-overlay" id="adModalWelcome">
+  <div class="ad-modal-box">
+    <div style="font-size:2rem;margin-bottom:6px">🎁</div>
+    <div class="ad-modal-title">HOŞ GELDİN BONUSU</div>
+    <div class="ad-modal-desc">Bugünkü ödülünü almak için <strong style="color:#ffd166">kısa bir video</strong> izle!</div>
+    <div class="ad-sim-screen" id="adWelcomeScreen" style="display:none"><span>ADMOB REWARDED AD</span><div class="ad-sim-bar" id="adWelcomeBar"></div></div>
+    <div class="ad-sim-countdown" id="adWelcomeCount"></div>
+    <div style="font-size:1.4rem;font-weight:800;color:#ffd166;margin-bottom:14px">+$500 BONUS</div>
+    <button class="btn-ad-watch" id="btnWatchWelcome" onclick="startAdFlow('welcome')">📺 Reklam İzle &amp; Kazan</button>
+    <button class="btn-skip" onclick="closeAdModal('adModalWelcome')">Daha Sonra</button>
+  </div>
+</div>
+
+<!-- ══ REWARDED: BOOST ══ -->
+<div class="ad-modal-overlay" id="adModalBoost">
+  <div class="ad-modal-box">
+    <div style="font-size:2rem;margin-bottom:6px">⚡</div>
+    <div class="ad-modal-title">2X BOOST — 30 DAKİKA</div>
+    <div class="ad-modal-desc">Reklam izle, madencilik hızını <strong style="color:#ffd166">30 dakika</strong> ikiye katla!</div>
+    <div class="ad-sim-screen" id="adBoostScreen" style="display:none"><span>ADMOB REWARDED AD</span><div class="ad-sim-bar" id="adBoostBar"></div></div>
+    <div class="ad-sim-countdown" id="adBoostCount"></div>
+    <button class="btn-ad-watch" id="btnWatchBoost" onclick="startAdFlow('boost')">📺 Reklam İzle (5 sn)</button>
+    <button class="btn-skip" onclick="closeAdModal('adModalBoost')">Vazgeç</button>
+  </div>
+</div>
+
+<!-- ══ REWARDED: TAMİR ══ -->
+<div class="ad-modal-overlay" id="adModalRepair">
+  <div class="ad-modal-box">
+    <div style="font-size:2rem;margin-bottom:6px">🔧</div>
+    <div class="ad-modal-title">ÜCRETSİZ TAMİR</div>
+    <div class="ad-modal-desc"><span id="adRepairName" style="color:#00ff88;font-weight:bold"></span> cihazını reklam izleyerek <strong style="color:#ffd166">ücretsiz</strong> tamir et!</div>
+    <div class="ad-sim-screen" id="adRepairScreen" style="display:none"><span>ADMOB REWARDED AD</span><div class="ad-sim-bar" id="adRepairBar"></div></div>
+    <div class="ad-sim-countdown" id="adRepairCount"></div>
+    <button class="btn-ad-watch" id="btnWatchRepair" onclick="startAdFlow('repair')">📺 Video İzle &amp; Ücretsiz Onar</button>
+    <button class="btn-skip" onclick="closeAdModal('adModalRepair')">Kapat</button>
+  </div>
+</div>
+
+<!-- ══ KULLANICI SÖZLEŞMESİ MODAL ══ -->
+<div class="terms-modal-overlay" id="termsModal">
+  <div class="terms-modal-box">
+    <div class="terms-modal-title">📄 Kullanıcı Sözleşmesi ve Gizlilik</div>
+    <div class="terms-modal-body">
+      <h4>1. Genel Bilgiler</h4>
+      HASHNODE GLOBAL ("Uygulama"), yalnızca eğitim ve eğlence amaçlı bir sanal madencilik simülatörüdür. Uygulama içindeki tüm para birimleri, bakiyeler ve kazanımlar tamamen sanal olup gerçek parasal değer taşımaz.
+      <h4>2. Simülasyon Bildirimi</h4>
+      Bu uygulama kripto para madenciliğini simüle eder. Gerçek kripto para üretimi, transferi veya ticareti yapılmamaktadır. "BTC", "USD" gibi göstergeler yalnızca oyun içi değerlerdir.
+      <h4>3. Reklam Politikası</h4>
+      Uygulama, Google AdMob aracılığıyla reklam gösterebilir. Reklamlar kişiselleştirilebilir; reklam tercihlerinizi Google hesabınızdan yönetebilirsiniz. Ödüllü reklamlar gönüllülük esasına dayalıdır.
+      <h4>4. Veri Toplama</h4>
+      Uygulama, kullanıcı verilerini yalnızca cihazınızda (localStorage) saklar. Herhangi bir sunucuya kişisel veri gönderilmez. AdMob reklam kütüphanesi kendi gizlilik politikasına tabidir.
+      <h4>5. Kullanım Koşulları</h4>
+      • 13 yaş altı kullanıcılar için uygun değildir.<br>
+      • Uygulamayı ticari amaçla kullanamazsınız.<br>
+      • Sistem güvenliğini tehdit eden davranışlar yasaktır.<br>
+      • Uygulama "olduğu gibi" sunulmakta olup herhangi bir garanti verilmemektedir.
+      <h4>6. Fikri Mülkiyet</h4>
+      Uygulamadaki tüm tasarım, kod ve içerik telif hakkı ile korunmaktadır.
+      <h4>7. Sorumluluk Reddi</h4>
+      Geliştirici, sanal bakiye kayıpları veya uygulama kesintileri nedeniyle sorumluluk kabul etmez.
+      <h4>8. İletişim</h4>
+      Sorularınız için: support@hashnode.global (simülasyon)
+    </div>
+    <button class="btn-terms-close" onclick="closeTerms()">✓ Anladım, Kapat</button>
+  </div>
+</div>
+
+<!-- ══ ADMİN GÜVENLİK GİRİŞ EKRANI ══ -->
+<div class="admin-login-overlay" id="adminLoginOverlay">
+  <div class="admin-login-box">
+    <div style="font-size:2rem;margin-bottom:4px">🔐</div>
+    <div class="admin-login-title">ADMİN GİRİŞİ</div>
+    <div class="admin-login-sub">Yönetici kimlik doğrulaması gerekiyor</div>
+    <input type="text" class="admin-input" id="adminLoginUser" placeholder="Kullanıcı adı" autocomplete="off">
+    <input type="password" class="admin-input" id="adminLoginPass" placeholder="••••••••" autocomplete="off">
+    <div class="admin-login-err" id="adminLoginErr">❌ Hatalı kullanıcı adı veya şifre</div>
+    <div class="admin-attempts-badge" id="adminAttemptsBadge"></div>
+    <button class="btn-admin-login" onclick="verifyAdminLogin()">🔓 GİRİŞ YAP</button>
+    <button class="btn-admin-cancel" onclick="cancelAdminLogin()">İptal</button>
+  </div>
+</div>
+
+<!-- ══ ADMİN PANELİ ══ -->
+<div class="admin-overlay" id="adminPanel">
+  <div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <div class="admin-title">⚙️ ADMİN PANELİ</div>
+        <div class="admin-subtitle">HASHNODE GLOBAL v7 — Google AdMob Yönetimi</div>
+      </div>
+      <button class="btn-admin-close" onclick="closeAdmin()">✕ Kapat</button>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="switchAdminTab('stats')">📊 Özet</div>
+      <div class="admin-tab" onclick="switchAdminTab('appid')">🔑 App ID</div>
+      <div class="admin-tab" onclick="switchAdminTab('login-ads')">🏠 Giriş</div>
+      <div class="admin-tab" onclick="switchAdminTab('app-ads')">📺 Uygulama</div>
+      <div class="admin-tab" onclick="switchAdminTab('gdpr')">🛡️ GDPR</div>
+      <div class="admin-tab" onclick="switchAdminTab('sdk')">📦 SDK</div>
+      <div class="admin-tab" onclick="switchAdminTab('analytics')">🌍 Analitik</div>
+      <div class="admin-tab" onclick="switchAdminTab('moderation')">⚖️ Moderasyon</div>
+      <div class="admin-tab" onclick="switchAdminTab('security')">🔒 Güvenlik</div>
+      <div class="admin-tab" onclick="switchAdminTab('users')">👤 Kullanıcı</div>
+      <div class="admin-tab" onclick="switchAdminTab('logs')">📜 Log</div>
+    </div>
+
+    <!-- ─── ÖZET ─── -->
+    <div class="admin-tab-content active" id="atab-stats">
+      <div class="admin-card">
+        <div class="admin-card-title">📊 Oturum Reklam İstatistikleri</div>
+        <div class="admin-stat-grid">
+          <div class="admin-stat-box"><div class="admin-stat-val" id="statImpression">0</div><div class="admin-stat-label">Toplam Gösterim</div></div>
+          <div class="admin-stat-box"><div class="admin-stat-val" id="statReward">0</div><div class="admin-stat-label">Ödül Kazanıldı</div></div>
+          <div class="admin-stat-box"><div class="admin-stat-val" id="statInter">0</div><div class="admin-stat-label">Interstitial</div></div>
+          <div class="admin-stat-box"><div class="admin-stat-val" id="statBanner">0</div><div class="admin-stat-label">Banner Yükleme</div></div>
+        </div>
+      </div>
+      <!-- Slot durumu özeti -->
+      <div class="admin-card">
+        <div class="admin-card-title">📋 Reklam Alanı Durumu</div>
+        <div id="slotStatusSummary"></div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-title">🎬 Canlı Test</div>
+        <div style="font-size:.7rem;color:rgba(200,216,240,.4);margin-bottom:10px">Gerçek cihazda test için önce Google Test Cihazı ID ekleyin (SDK sekmesi).</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="btn-admin-action" onclick="adminTestAd('welcome')">🎁 Hoş Geldin</button>
+          <button class="btn-admin-action" onclick="adminTestAd('boost')">⚡ Boost Rewarded</button>
+          <button class="btn-admin-action" onclick="adminTestAd('interstitial')">🔄 Tamir Interstitial</button>
+          <button class="btn-admin-action" onclick="adminTestAd('loginInter')">🏠 Giriş Interstitial</button>
+          <button class="btn-admin-action" onclick="adminTestAd('banner')">📺 Banner Önizle</button>
+        </div>
+      </div>
+
+      <!-- ══ PANİK BUTONU — BAKIM MODU ══ -->
+      <div class="admin-card" style="border-color:rgba(255,85,85,.4);background:rgba(40,5,5,.6)">
+        <div class="admin-card-title" style="color:#ff8888">🚨 PANİK BUTONU — BAKIM MODU</div>
+        <div style="font-size:.75rem;color:rgba(200,216,240,.5);margin-bottom:12px;line-height:1.6">
+          Butona basıldığında tüm kullanıcılara <strong style="color:#ff8888">BAKIM MODU</strong> ekranı gösterilir. Tekrar basınca kaldırılır.
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:.7rem;color:rgba(200,216,240,.4);margin-bottom:5px">Bakım mesajı (isteğe bağlı)</div>
+          <textarea id="maintenanceMsgInput" style="width:100%;background:rgba(0,0,0,.5);border:1px solid rgba(255,85,85,.3);border-radius:10px;padding:10px;color:#ffcccc;font-size:.78rem;outline:none;resize:vertical;min-height:60px;font-family:inherit" placeholder="Uygulama şu anda bakımda. Kısa süre içinde geri döneceğiz. 🚀">Uygulama şu anda bakımda. Kısa süre içinde geri döneceğiz. 🚀</textarea>
+        </div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:.7rem;color:rgba(200,216,240,.4);margin-bottom:5px">Tahmini süre (isteğe bağlı)</div>
+          <input type="text" id="maintenanceEtaInput" placeholder="Örn: 30 dakika içinde" style="width:100%;background:rgba(0,0,0,.5);border:1px solid rgba(255,85,85,.3);border-radius:10px;padding:9px 12px;color:#ffcccc;font-size:.78rem;outline:none">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="maintenanceToggleBtn" onclick="toggleMaintenanceMode()" style="flex:1;background:linear-gradient(135deg,#3d0a0a,#5a0f0f);border:2px solid #ff5555;color:#ff8888;font-weight:900;padding:14px;border-radius:14px;cursor:pointer;font-size:.9rem;letter-spacing:1px;box-shadow:0 0 20px rgba(255,85,85,.3);transition:.2s">
+            🚨 BAKIM MODUNU AKTİFLEŞTİR
+          </button>
+        </div>
+        <div id="maintenanceStatus" style="margin-top:8px;font-size:.75rem;text-align:center;display:none"></div>
+      </div>
+    </div>
+
+    <!-- ─── APP ID ─── -->
+    <div class="admin-tab-content" id="atab-appid">
+      <div class="admin-card">
+        <div class="admin-card-title">🔑 Google AdMob Uygulama Kimliği</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">📌 AdMob App ID Nedir?</div>
+          AdMob konsolundan (<strong>admob.google.com</strong>) alınan, uygulamanıza özel kimlik numarasıdır.<br>
+          Format: <span class="admob-format-badge">ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX</span><br>
+          <span style="color:#ffaa33">⚠️ Android için AndroidManifest.xml'e, iOS için Info.plist'e eklenmesi zorunludur.</span>
+        </div>
+        <div style="margin-top:12px">
+          <div class="admob-field-label">Android / iOS App ID</div>
+          <div class="admob-input-row">
+            <input class="admob-id-input" id="admobAppIdInput" placeholder="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX" spellcheck="false" autocomplete="off">
+            <button class="admob-save-btn" onclick="saveAdmobAppId()">💾 Kaydet</button>
+          </div>
+          <div class="admob-validate-row" id="appIdValidateRow"></div>
+        </div>
+        <div class="admob-manifest-box">
+          <div class="admob-manifest-title">AndroidManifest.xml — Zorunlu Ekleme</div>
+          <div class="sdk-code-block" id="manifestCodeBlock" style="margin-top:6px"></div>
+        </div>
+        <div class="admob-manifest-box" style="margin-top:8px">
+          <div class="admob-manifest-title">iOS — Info.plist Ekleme</div>
+          <div class="sdk-code-block" style="margin-top:6px">&lt;<span class="sdk-key">key</span>&gt;GADApplicationIdentifier&lt;/<span class="sdk-key">key</span>&gt;
+&lt;<span class="sdk-val">string</span>&gt;<span id="iosAppIdPreview" class="sdk-val">ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX</span>&lt;/<span class="sdk-val">string</span>&gt;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── GİRİŞ SAYFASI REKLAM ─── -->
+    <div class="admin-tab-content" id="atab-login-ads">
+      <div class="admin-card">
+        <div class="admin-card-title">🏠 Giriş Sayfası — AdMob Reklam Birimleri</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">ℹ️ Giriş Sayfası Reklam Konumları</div>
+          <strong>Banner (Üst):</strong> Giriş ekranı açıkken sayfanın üstünde sabit 320×50 banner.<br>
+          <strong>Interstitial:</strong> Kullanıcı giriş yaptıktan hemen sonra tam ekran reklam açılır (5 sn geçilemiyor).<br>
+          <span style="color:#f0b429">Her iki birim için AdMob konsolundan ayrı Ad Unit ID oluşturmanız gerekir.</span>
+        </div>
+        <div id="loginAdSlotList"></div>
+        <div class="admob-test-ids-box">
+          <div class="admob-info-title">🧪 Google Resmi Test ID'leri (Geliştirme)</div>
+          <div style="font-size:.68rem;color:rgba(200,216,240,.5);margin-bottom:8px">Geliştirme sırasında gerçek ID yerine bu ID'leri kullanın. Canlıya geçerken kendi ID'lerinizle değiştirin.</div>
+          <div class="test-id-row"><span class="test-id-type">Banner</span><span class="test-id-val" onclick="copyTestId(this,'ca-app-pub-3940256099942544/6300978111')">ca-app-pub-3940256099942544/6300978111</span><button class="test-id-copy" onclick="copyTestId(null,'ca-app-pub-3940256099942544/6300978111','loginBanner')">▶ Giriş Banner'a Uygula</button></div>
+          <div class="test-id-row"><span class="test-id-type">Interstitial</span><span class="test-id-val" onclick="copyTestId(this,'ca-app-pub-3940256099942544/1033173712')">ca-app-pub-3940256099942544/1033173712</span><button class="test-id-copy" onclick="copyTestId(null,'ca-app-pub-3940256099942544/1033173712','loginInterstitial')">▶ Giriş Inter'e Uygula</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── UYGULAMA İÇİ REKLAMLAR ─── -->
+    <div class="admin-tab-content" id="atab-app-ads">
+      <div class="admin-card">
+        <div class="admin-card-title">📺 Uygulama İçi — AdMob Reklam Birimleri</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">ℹ️ Uygulama İçi Reklam Konumları</div>
+          <strong>Alt Banner:</strong> Tüm sayfalarda bottom-nav üzerinde sabit 320×50.<br>
+          <strong>Hoş Geldin Rewarded:</strong> Giriş sonrası günlük +$500 bonus için video reklam.<br>
+          <strong>Boost Rewarded:</strong> Madencilik ekranında 30 dk 2x hız için video reklam.<br>
+          <strong>Tamir Rewarded:</strong> Çiftlik ekranında ücretsiz cihaz tamiri için video reklam.<br>
+          <strong>Tamir Interstitial:</strong> Her 3 tamirden sonra otomatik açılan tam ekran reklam.
+        </div>
+        <div id="appAdSlotList"></div>
+        <div class="admob-test-ids-box">
+          <div class="admob-info-title">🧪 Google Resmi Test ID'leri</div>
+          <div style="font-size:.68rem;color:rgba(200,216,240,.5);margin-bottom:8px">Tek tıkla ilgili reklam alanına uygulayın.</div>
+          <div class="test-id-row"><span class="test-id-type">Banner</span><span class="test-id-val">ca-app-pub-3940256099942544/6300978111</span><button class="test-id-copy" onclick="applyTestId('bottomBanner','ca-app-pub-3940256099942544/6300978111')">▶ Alt Banner'a</button></div>
+          <div class="test-id-row"><span class="test-id-type">Interstitial</span><span class="test-id-val">ca-app-pub-3940256099942544/1033173712</span><button class="test-id-copy" onclick="applyTestId('repairInterstitial','ca-app-pub-3940256099942544/1033173712')">▶ Tamir Inter'e</button></div>
+          <div class="test-id-row"><span class="test-id-type">Rewarded</span><span class="test-id-val">ca-app-pub-3940256099942544/5224354917</span><button class="test-id-copy" onclick="applyAllRewarded('ca-app-pub-3940256099942544/5224354917')">▶ Tüm Rewarded'a</button></div>
+          <div class="test-id-row"><span class="test-id-type">Rewarded Inter.</span><span class="test-id-val">ca-app-pub-3940256099942544/5354046379</span><button class="test-id-copy" onclick="copyTestId(this,'ca-app-pub-3940256099942544/5354046379')">📋 Kopyala</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── GDPR / UMP ─── -->
+    <div class="admin-tab-content" id="atab-gdpr">
+      <div class="admin-card">
+        <div class="admin-card-title">🛡️ GDPR / UMP Gizlilik Ayarları</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">⚖️ GDPR Nedir?</div>
+          Avrupa Birliği kullanıcılarına reklam göstermek için <strong>Kullanıcı Mesajlaşma Platformu (UMP)</strong> entegrasyonu zorunludur. Google AdMob, UMP SDK'sını otomatik yönetir.
+        </div>
+        <div style="margin-top:12px">
+          <div class="admob-field-label">GDPR Onay Modu</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <label class="gdpr-radio-label"><input type="radio" name="gdprMode" value="auto" checked> Otomatik (Önerilen)</label>
+            <label class="gdpr-radio-label"><input type="radio" name="gdprMode" value="manual"> Manuel</label>
+            <label class="gdpr-radio-label"><input type="radio" name="gdprMode" value="disabled"> Devre Dışı</label>
+          </div>
+          <div class="admob-field-label">Kişiselleştirilmiş Reklamlar</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div class="toggle-switch on" id="personalizedAdsSwitch" onclick="this.classList.toggle('on')"></div>
+            <span style="font-size:.78rem;color:#b0c4de">Etkin (kullanıcı onayına bağlı)</span>
+          </div>
+          <div class="admob-field-label">Test Konumu (GDPR testleri için)</div>
+          <select class="admob-id-input" id="gdprTestRegion" style="border-radius:10px;cursor:pointer">
+            <option value="">-- Test Konumu Seç --</option>
+            <option value="EEA">Avrupa Ekonomik Alanı (EEA)</option>
+            <option value="UK">Birleşik Krallık</option>
+            <option value="US">Amerika Birleşik Devletleri</option>
+            <option value="OTHER">Diğer</option>
+          </select>
+        </div>
+        <div class="admob-manifest-box" style="margin-top:12px">
+          <div class="admob-manifest-title">UMP SDK Entegrasyon Kodu</div>
+          <div class="sdk-code-block" style="margin-top:6px"><span class="sdk-comment">// UMP (User Messaging Platform) — Capacitor</span>
+<span class="sdk-comment">// npm install @capacitor-community/admob</span>
+
+import { AdMob } from '@capacitor-community/admob';
+
+<span class="sdk-comment">// Uygulama başlangıcında çağır</span>
+await AdMob.initialize({
+  <span class="sdk-key">requestTrackingAuthorization</span>: <span class="sdk-val">true</span>, <span class="sdk-comment">// iOS 14+</span>
+  <span class="sdk-key">testingDevices</span>: [<span class="sdk-val">'YOUR_TEST_DEVICE_ID'</span>],
+  <span class="sdk-key">initializeForTesting</span>: <span class="sdk-val">false</span>,
+});
+
+<span class="sdk-comment">// GDPR onay formu göster</span>
+const consentInfo = await AdMob.requestConsentInfo({
+  <span class="sdk-key">debugGeography</span>: AdMob.DEBUG_GEOGRAPHY_EEA,
+  <span class="sdk-key">testDeviceIdentifiers</span>: [<span class="sdk-val">'YOUR_HASHED_DEVICE_ID'</span>],
+});
+if (consentInfo.isConsentFormAvailable) {
+  await AdMob.showConsentForm();
+}</div>
+        </div>
+        <button class="btn-admin-action" style="width:100%;margin-top:10px" onclick="saveGdprSettings()">💾 GDPR Ayarlarını Kaydet</button>
+        <div id="gdprSaveMsg" style="display:none;margin-top:6px;font-size:.75rem"></div>
+      </div>
+    </div>
+
+    <!-- ─── SDK ─── -->
+    <div class="admin-tab-content" id="atab-sdk">
+      <div class="admin-card">
+        <div class="admin-card-title">📦 Capacitor AdMob Kurulum Rehberi</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">⚡ Hızlı Başlangıç</div>
+          Bu HTML dosyasını bir Android/iOS uygulamasına dönüştürmek için Capacitor kullanın. AdMob reklamları yalnızca native uygulama ortamında (APK/IPA) çalışır.
+        </div>
+        <div class="admin-section-toggle" onclick="toggleSection('sdkInstall')">
+          <span style="font-size:.82rem;color:#b0c4de;font-weight:600">1️⃣ Kurulum Komutları</span><span style="color:#00ff88">▼</span>
+        </div>
+        <div class="admin-section-body open" id="sdkInstall">
+          <div class="sdk-code-block"><span class="sdk-comment"># 1. Capacitor başlat</span>
+npm install @capacitor/core @capacitor/cli
+npx cap init <span class="sdk-val">"HashNode Global"</span> <span class="sdk-val">com.hashnode.global</span>
+npm install @capacitor/android @capacitor/ios
+
+<span class="sdk-comment"># 2. AdMob eklentisi (önerilen)</span>
+npm install @capacitor-community/admob
+npx cap sync
+
+<span class="sdk-comment"># 3. Android build</span>
+npx cap add android
+npx cap open android   <span class="sdk-comment"># Android Studio'da aç</span>
+
+<span class="sdk-comment"># 4. iOS build (Mac gerekli)</span>
+npx cap add ios
+npx cap open ios       <span class="sdk-comment"># Xcode'da aç</span></div>
+        </div>
+
+        <div class="admin-section-toggle" onclick="toggleSection('sdkConfig')" style="margin-top:10px">
+          <span style="font-size:.82rem;color:#b0c4de;font-weight:600">2️⃣ capacitor.config.json</span><span style="color:#00ff88">▼</span>
+        </div>
+        <div class="admin-section-body" id="sdkConfig">
+          <div class="sdk-code-block" id="configCodeBlock"></div>
+        </div>
+
+        <div class="admin-section-toggle" onclick="toggleSection('sdkManifest')" style="margin-top:10px">
+          <span style="font-size:.82rem;color:#b0c4de;font-weight:600">3️⃣ AndroidManifest.xml</span><span style="color:#00ff88">▼</span>
+        </div>
+        <div class="admin-section-body" id="sdkManifest">
+          <div class="sdk-code-block" id="manifestCodeBlock2"></div>
+        </div>
+
+        <div class="admin-section-toggle" onclick="toggleSection('sdkJs')" style="margin-top:10px">
+          <span style="font-size:.82rem;color:#b0c4de;font-weight:600">4️⃣ JavaScript Entegrasyon Kodu</span><span style="color:#00ff88">▼</span>
+        </div>
+        <div class="admin-section-body" id="sdkJs">
+          <div class="sdk-code-block" id="jsCodeBlock"></div>
+        </div>
+
+        <div class="admin-section-toggle" onclick="toggleSection('sdkTestDevice')" style="margin-top:10px">
+          <span style="font-size:.82rem;color:#b0c4de;font-weight:600">5️⃣ Test Cihazı Ayarı</span><span style="color:#00ff88">▼</span>
+        </div>
+        <div class="admin-section-body" id="sdkTestDevice">
+          <div class="admob-info-box">
+            Gerçek reklamlarla test yapmak için cihazınızın Hashed Device ID'sini AdMob konsoluna ekleyin. Logcat'te <code style="color:#0ff">Use RequestConfiguration.Builder().setTestDeviceIds()</code> satırını arayın.
+          </div>
+          <div style="margin-top:8px">
+            <div class="admob-field-label">Test Cihazı Hashed ID</div>
+            <div class="admob-input-row">
+              <input class="admob-id-input" id="testDeviceIdInput" placeholder="ABCDEF1234567890..." spellcheck="false">
+              <button class="admob-save-btn" onclick="saveTestDeviceId()">💾 Ekle</button>
+            </div>
+            <div id="testDeviceList" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ANALİTİK ─── -->
+    <div class="admin-tab-content" id="atab-analytics">
+      <div class="admin-card">
+        <div class="admin-card-title">🌍 Ülkelere Göre Kullanıcı & Reklam Geliri</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">📌 Bu Veriler Hakkında</div>
+          Kullanıcıların tarayıcı diline ve IP coğrafyasına göre tahmini dağılım. Gerçek AdMob gelir verisi için <strong>admob.google.com → Raporlar</strong> bölümünü kullanın. Buradaki rakamlar simülasyon verisidir.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="btn-admin-action" onclick="renderAnalytics('7d')">📅 7 Gün</button>
+          <button class="btn-admin-action" onclick="renderAnalytics('30d')">📅 30 Gün</button>
+          <button class="btn-admin-action" onclick="renderAnalytics('all')">📅 Tümü</button>
+          <button class="admob-save-btn" onclick="refreshAnalytics()">🔄 Yenile</button>
+        </div>
+        <!-- Özet istatistikler -->
+        <div class="admin-stat-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
+          <div class="admin-stat-box"><div class="admin-stat-val" id="anaTotal">0</div><div class="admin-stat-label">Toplam Kullanıcı</div></div>
+          <div class="admin-stat-box"><div class="admin-stat-val" id="anaActive">0</div><div class="admin-stat-label">Aktif Oturum</div></div>
+          <div class="admin-stat-box"><div class="admin-stat-val" id="anaRevenue">$0</div><div class="admin-stat-label">Tahmini Gelir</div></div>
+        </div>
+        <!-- Ülke tablosu -->
+        <div style="font-size:.72rem;font-weight:700;color:rgba(0,255,136,.5);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">Ülke Dağılımı</div>
+        <div id="countryTable"></div>
+        <!-- Dil dağılımı -->
+        <div style="font-size:.72rem;font-weight:700;color:rgba(0,255,136,.5);letter-spacing:1px;margin:14px 0 8px;text-transform:uppercase">Dil Dağılımı</div>
+        <div id="langTable"></div>
+        <!-- Gelir tahmini -->
+        <div style="font-size:.72rem;font-weight:700;color:rgba(240,180,41,.6);letter-spacing:1px;margin:14px 0 8px;text-transform:uppercase">💰 Reklam Geliri Tahmini (eCPM × Gösterim)</div>
+        <div id="revenueTable"></div>
+        <div class="admob-info-box" style="margin-top:12px;border-left-color:#f0b429">
+          <div class="admob-info-title" style="color:#f0b429">📊 Gerçek Gelir Takibi</div>
+          Gerçek AdMob geliri için: <strong>admob.google.com → Raporlar → Uygulama Raporları</strong> bölümüne gidin. CSV olarak dışa aktarabilirsiniz.
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MODERASYON ─── -->
+    <div class="admin-tab-content" id="atab-moderation">
+      <div class="admin-card">
+        <div class="admin-card-title">⚖️ Kullanıcı Moderasyon Merkezi</div>
+        <div class="admob-info-box">
+          <div class="admob-info-title">ℹ️ Moderasyon Sistemi</div>
+          Kurallara uymayan kullanıcılara uyarı gönderebilir, geçici askıya alabilir veya kalıcı olarak sistemden atabilirsiniz. Atılan kullanıcı giriş yapmaya çalışınca özel bir ekran görür.
+        </div>
+
+        <!-- Kullanıcı listesi + moderasyon -->
+        <div style="font-size:.72rem;font-weight:700;color:rgba(0,255,136,.5);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">Kullanıcı Moderasyon Listesi</div>
+        <div id="modUserList"></div>
+
+        <!-- Uyarı / Ban modal tetikleyici -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,255,136,.1)">
+          <div style="font-size:.72rem;font-weight:700;color:rgba(255,85,85,.6);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">🚫 Toplu İşlemler</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-admin-action" onclick="sendGlobalAnnouncement()">📢 Tüm Kullanıcılara Duyuru</button>
+            <button class="btn-admin-danger" onclick="banAllUnconfirmed()">🚫 Onaysız Hesapları Kapat</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uyarı kuralları -->
+      <div class="admin-card">
+        <div class="admin-card-title">📋 Platform Kuralları (Uyarı Şablonları)</div>
+        <div id="warnTemplates"></div>
+        <div style="margin-top:10px">
+          <div style="font-size:.7rem;color:rgba(200,216,240,.4);margin-bottom:5px">Özel Uyarı Mesajı</div>
+          <textarea id="customWarnMsg" style="width:100%;background:rgba(0,0,0,.5);border:1px solid rgba(255,170,51,.3);border-radius:10px;padding:10px;color:#ffcc88;font-size:.78rem;outline:none;resize:vertical;min-height:60px;font-family:inherit" placeholder="Özel uyarı mesajınızı yazın..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── GÜVENLİK ─── -->
+    <div class="admin-tab-content" id="atab-security">
+      <div class="admin-card">
+        <div class="admin-card-title">🔒 Yönetici Güvenlik Ayarları</div>
+        <div style="font-size:.8rem;color:#b0c4de;margin-bottom:14px">Admin paneline erişim bilgilerini buradan değiştirebilirsiniz.</div>
+        <div class="admob-field-label">Yeni Kullanıcı Adı</div>
+        <input type="text" class="admob-id-input" id="adminNewUser" placeholder="Yeni kullanıcı adı" style="margin-bottom:10px" autocomplete="off">
+        <div class="admob-field-label">Mevcut Şifre (Doğrulama)</div>
+        <input type="password" class="admob-id-input" id="adminCurrPass" placeholder="Mevcut şifre" style="margin-bottom:10px" autocomplete="off">
+        <div class="admob-field-label">Yeni Şifre</div>
+        <input type="password" class="admob-id-input" id="adminNewPass" placeholder="Yeni şifre (min. 6 karakter)" style="margin-bottom:10px" autocomplete="off">
+        <div class="admob-field-label">Yeni Şifre (Tekrar)</div>
+        <input type="password" class="admob-id-input" id="adminNewPass2" placeholder="Şifreyi tekrar girin" style="margin-bottom:14px" autocomplete="off">
+        <button class="btn-admin-action" style="width:100%" onclick="changeAdminCredentials()">🔑 Kimlik Bilgilerini Güncelle</button>
+        <div id="adminSecMsg" style="margin-top:8px;font-size:.75rem;display:none"></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,255,136,.1)">
+          <div class="admob-field-label">Maksimum Hatalı Giriş Denemesi</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="number" class="admob-id-input" id="maxAttemptsInput" value="3" min="1" max="10" style="width:80px">
+            <button class="admob-save-btn" onclick="saveMaxAttempts()">💾 Kaydet</button>
+            <span style="font-size:.7rem;color:rgba(200,216,240,.35)">deneme sonrası kilit</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,255,136,.1)">
+          <div class="admob-field-label" style="color:#ff8888">Tehlikeli Alan</div>
+          <button class="btn-admin-danger" style="width:100%;margin-top:6px" onclick="resetAdminLock()">🔓 Kilitli Hesabı Sıfırla</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── KULLANICILAR ─── -->
+    <div class="admin-tab-content" id="atab-users">
+      <div class="admin-card">
+        <div class="admin-card-title">👤 Kayıtlı Kullanıcılar</div>
+        <div id="adminUserList"></div>
+      </div>
+    </div>
+
+    <!-- GÜNLÜK -->
+    <div class="admin-tab-content" id="atab-logs">
+      <div class="admin-card">
+        <div class="admin-card-title">📜 Reklam Sistemi Günlüğü</div>
+        <div id="adminAdLog" style="max-height:280px;overflow-y:auto"></div>
+        <button class="btn-admin-danger" style="margin-top:8px;width:100%" onclick="clearAdLog()">🗑️ Günlüğü Temizle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════
+   CONFIG_ADS — TÜM REKLAM YAPILANDIRMASI
+══════════════════════════════════════════════ */
+const CONFIG_ADS = {
+  admobAppId: 'ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX',
+  slots: [
+    { id:'loginBanner',        name:'Giriş Sayfası Üst Banner',       type:'banner',        admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000001', enabled:true,  group:'login', description:'Giriş ekranı üst sabit banner (320×50)' },
+    { id:'loginInterstitial',  name:'Giriş Anı Geçiş Reklamı',        type:'interstitial',  admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000002', enabled:true,  group:'login', description:'Uygulama açıldığında otomatik gösterilir' },
+    { id:'bottomBanner',       name:'Alt Banner (Uygulama İçi)',       type:'banner',        admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000003', enabled:true,  group:'app',   description:'Bottom-nav üzeri sabit banner' },
+    { id:'welcomeRewarded',    name:'Hoş Geldin Ödüllü Reklamı',      type:'rewarded',      admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000004', enabled:true,  group:'app',   description:'Günlük giriş bonusu +$500' },
+    { id:'boostRewarded',      name:'2x Boost Ödüllü Reklamı',        type:'rewarded',      admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000005', enabled:true,  group:'app',   description:'Madencilik ekranı — 30 dk 2x hız' },
+    { id:'repairRewarded',     name:'Ücretsiz Tamir Ödüllü Reklamı',  type:'rewarded',      admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000006', enabled:true,  group:'app',   description:'Çiftlik ekranı — sağlık <%80 gösterilir' },
+    { id:'repairInterstitial', name:'Tamir Sonrası Geçiş Reklamı',    type:'interstitial',  admobId:'ca-app-pub-XXXXXXXXXXXXXXXX/0000000007', enabled:true,  group:'app',   description:'Her 3 tamirde bir otomatik tetiklenir' },
+  ],
+  interstitialEvery: 3,
+  simDuration: 5000,
+  welcomeBonusAmount: 500,
+};
+
+/* Admin kimlik bilgileri (localStorage'dan okunur) */
+let ADMIN_CREDENTIALS = { username:'admin', password:'Ah224466', maxAttempts:3, failCount:0, locked:false };
+
+function loadAdminCreds(){
+  try{
+    const d=JSON.parse(localStorage.getItem('hn_admin_creds')||'{}');
+    if(d.username) ADMIN_CREDENTIALS.username=d.username;
+    if(d.password) ADMIN_CREDENTIALS.password=d.password;
+    if(d.maxAttempts) ADMIN_CREDENTIALS.maxAttempts=d.maxAttempts;
+    if(d.failCount) ADMIN_CREDENTIALS.failCount=d.failCount;
+    if(d.locked) ADMIN_CREDENTIALS.locked=d.locked;
+  }catch(e){}
+}
+function saveAdminCreds(){
+  try{localStorage.setItem('hn_admin_creds',JSON.stringify(ADMIN_CREDENTIALS));}catch(e){}
+}
+
+/* ══ AdStats & Log ══ */
+const AdStats={impressions:0,rewards:0,interstitials:0,bannerViews:0};
+const AdLog=[];
+function adLog(msg,type='info'){AdLog.unshift({time:new Date().toLocaleTimeString('tr-TR'),msg,type});if(AdLog.length>80)AdLog.pop();if(document.getElementById('adminAdLog'))renderAdLog();}
+
+/* ══════════════════════════════════════════════
+   AdService — Capacitor / Cordova uyumlu
+══════════════════════════════════════════════ */
+const AdService={
+  _repairTargetId:null,
+  _repairCount:0,
+  getSlot(id){return CONFIG_ADS.slots.find(s=>s.id===id);},
+  showRewarded(slotId,onComplete,onSkip){
+    const slot=this.getSlot(slotId);
+    if(!slot||!slot.enabled){adLog(`⛔ ${slotId} devre dışı`,'warn');onSkip&&onSkip();return;}
+    adLog(`📺 Rewarded: ${slot.name} [${slot.admobId}]`,'ad'); AdStats.impressions++;
+    if(window.Capacitor?.Plugins?.AdMob){const{AdMob}=window.Capacitor.Plugins;AdMob.prepareRewardVideoAd({adId:slot.admobId}).then(()=>AdMob.showRewardVideoAd());document.addEventListener('admob:reward',()=>{AdStats.rewards++;onComplete&&onComplete();},{once:true});return;}
+    if(window.admob?.rewardVideo){window.admob.rewardVideo.load({id:slot.admobId});document.addEventListener('admob.rewardvideo.events.REWARD',()=>{AdStats.rewards++;onComplete&&onComplete();},{once:true});window.admob.rewardVideo.show();return;}
+    if(window.AdMob){window.AdMob.createRewardVideoAd({adId:slot.admobId});document.addEventListener('onAdReward',()=>{AdStats.rewards++;onComplete&&onComplete();},{once:true});window.AdMob.showRewardVideoAd();return;}
+    adLog('🖥️ Simülasyon modu','warn'); onComplete&&onComplete();
+  },
+  showInterstitial(slotId,onClose){
+    const slot=this.getSlot(slotId);
+    if(!slot||!slot.enabled){onClose&&onClose();return;}
+    adLog(`🔄 Interstitial: ${slot.name} [${slot.admobId}]`,'ad'); AdStats.interstitials++;
+    if(window.Capacitor?.Plugins?.AdMob){const{AdMob}=window.Capacitor.Plugins;AdMob.prepareInterstitial({adId:slot.admobId}).then(()=>AdMob.showInterstitial());document.addEventListener('admob:interstitialClose',()=>onClose&&onClose(),{once:true});return;}
+    if(window.admob?.interstitial){window.admob.interstitial.load({id:slot.admobId});document.addEventListener('admob.interstitial.events.CLOSE',()=>onClose&&onClose(),{once:true});window.admob.interstitial.show();return;}
+    onClose&&onClose();
+  },
+  showBanner(slotId,position){
+    const slot=this.getSlot(slotId);
+    if(!slot||!slot.enabled){return;}
+    adLog(`📺 Banner: ${slot.name} [${slot.admobId}]`,'ad'); AdStats.bannerViews++;
+    if(window.Capacitor?.Plugins?.AdMob){window.Capacitor.Plugins.AdMob.showBanner({adId:slot.admobId,adSize:'BANNER',position:position||'BOTTOM_CENTER'});return;}
+    if(window.admob?.banner){window.admob.banner.show({id:slot.admobId,position:'bottom'});return;}
+    // Simülasyon — placeholder güncelle
+    const elMap={loginBanner:'admobLoginBanner',bottomBanner:'admobBottomBanner'};
+    const elId=elMap[slotId];
+    if(elId){const el=document.getElementById(elId);if(el){el.innerHTML=`<div class="ad-placeholder"><span>📺</span><span style="font-family:monospace;font-size:.62rem">${slot.admobId}</span><span class="ad-ph-badge">320×50</span></div>`;}}
+    // preview text güncelle
+    const previewMap={loginBanner:'loginBannerIdPreview',bottomBanner:'bottomBannerIdPreview'};
+    const prev=document.getElementById(previewMap[slotId]);
+    if(prev) prev.textContent=slot.admobId;
+  }
+};
+
+/* ══ Giriş anı interstitial ══ */
+function showLoginInterstitial(afterFn){
+  const slot=AdService.getSlot('loginInterstitial');
+  if(!slot||!slot.enabled){afterFn&&afterFn();return;}
+  AdService.showInterstitial('loginInterstitial',null);
+  document.getElementById('adLoginInterstitial').classList.add('open');
+  const bar=document.getElementById('adLoginInterBar');
+  const cnt=document.getElementById('adLoginInterCount');
+  const skip=document.getElementById('btnLoginInterSkip');
+  bar.style.width='0%'; skip.disabled=true;
+  let el=0;
+  const iv=setInterval(()=>{
+    el+=100;
+    bar.style.width=Math.min(100,(el/5000)*100)+'%';
+    const r=Math.ceil((5000-el)/1000);
+    cnt.textContent=r>0?`Reklam bitiyor: ${r} saniye...`:'';
+    if(el>=5000){clearInterval(iv);skip.disabled=false;skip.textContent='Geç ✕';if(afterFn)skip.onclick=()=>{closeLoginInterstitial();afterFn();};}
+  },100);
+}
+function closeLoginInterstitial(){document.getElementById('adLoginInterstitial').classList.remove('open');}
+
+/* ══ Tamir interstitial ══ */
+function triggerInterstitial(){
+  AdService.showInterstitial('repairInterstitial',null);
+  document.getElementById('adRepairInterstitial').classList.add('open');
+  const bar=document.getElementById('adInterBar'),cnt=document.getElementById('adInterCount'),skip=document.getElementById('btnInterSkip');
+  bar.style.width='0%';skip.disabled=true;skip.textContent='Reklamı Geç (5sn...)';
+  let el=0;const iv=setInterval(()=>{el+=100;bar.style.width=Math.min(100,(el/5000)*100)+'%';const r=Math.ceil((5000-el)/1000);cnt.textContent=r>0?`Geçmek için: ${r} sn`:'';if(el>=5000){clearInterval(iv);skip.disabled=false;skip.textContent='Reklamı Geç ✕';}},100);
+}
+function closeInterstitial(){document.getElementById('adRepairInterstitial').classList.remove('open');}
+
+/* ══ Rewarded modal akışı ══ */
+let _adFlowType=null,_adFlowIv=null;
+function openAdModal(type){
+  _adFlowType=type;
+  const map={welcome:'adModalWelcome',boost:'adModalBoost',repair:'adModalRepair'};
+  const sc={welcome:['adWelcomeScreen','adWelcomeBar','adWelcomeCount','btnWatchWelcome'],boost:['adBoostScreen','adBoostBar','adBoostCount','btnWatchBoost'],repair:['adRepairScreen','adRepairBar','adRepairCount','btnWatchRepair']};
+  const [s,b,c,btn]=sc[type];
+  document.getElementById(s).style.display='none';
+  document.getElementById(b).style.width='0%';
+  document.getElementById(c).textContent='';
+  const bt=document.getElementById(btn);bt.disabled=false;bt.style.opacity='1';
+  document.getElementById(map[type]).classList.add('open');
+}
+function closeAdModal(id){document.getElementById(id).classList.remove('open');if(_adFlowIv){clearInterval(_adFlowIv);_adFlowIv=null;}}
+function startAdFlow(type){
+  const sc={welcome:['adWelcomeScreen','adWelcomeBar','adWelcomeCount','btnWatchWelcome','adModalWelcome','welcomeRewarded'],boost:['adBoostScreen','adBoostBar','adBoostCount','btnWatchBoost','adModalBoost','boostRewarded'],repair:['adRepairScreen','adRepairBar','adRepairCount','btnWatchRepair','adModalRepair','repairRewarded']};
+  const [s,b,c,btn,modal,slotId]=sc[type];
+  document.getElementById(s).style.display='flex';
+  const bt=document.getElementById(btn);bt.disabled=true;bt.style.opacity='.4';
+  AdService.showRewarded(slotId,null,null);
+  let el=0;const dur=CONFIG_ADS.simDuration;
+  _adFlowIv=setInterval(()=>{
+    el+=100;
+    document.getElementById(b).style.width=Math.min(100,(el/dur)*100)+'%';
+    const r=Math.ceil((dur-el)/1000);
+    document.getElementById(c).textContent=r>0?`Reklam bitiyor: ${r} sn...`:'Tamamlandı!';
+    if(el>=dur){clearInterval(_adFlowIv);_adFlowIv=null;closeAdModal(modal);alert('Reklam başarıyla izlendi, ödül verildi!');grantAdReward(type);}
+  },100);
+}
+function grantAdReward(type){
+  if(type==='welcome'){activeUserData.treasuryUSD+=CONFIG_ADS.welcomeBonusAmount;addLog(`🎁 Hoş geldin bonusu! +$${CONFIG_ADS.welcomeBonusAmount}`,'success');showGoldToast(`🎁 +$${CONFIG_ADS.welcomeBonusAmount} Kazanıldı!`);saveState();render();}
+  else if(type==='boost'){if(activeUserData.boostMultiplier===2){addLog(T('boostAlready'),'info');return;}activeUserData.boostMultiplier=2;addLog('⚡ '+T('logBoostOn'),'success');showToast(T('toastBoost'));setTimeout(()=>{if(activeUserData.boostMultiplier===2){activeUserData.boostMultiplier=1;addLog(T('logBoostOff'),'info');render();}},30*60*1000);saveState();render();}
+  else if(type==='repair'){const m=activeUserData.miners.find(x=>x.id==AdService._repairTargetId);if(m)m.health=100;addLog(`🔧 ${m?m.name:'Cihaz'} ücretsiz tamir (reklam)`,'success');AdService._repairCount++;if(AdService._repairCount%CONFIG_ADS.interstitialEvery===0)setTimeout(()=>triggerInterstitial(),500);saveState();render();}
+}
+function checkWelcomeBonus(){const k='hn_welcome_'+new Date().toDateString();if(!localStorage.getItem(k)){localStorage.setItem(k,'1');setTimeout(()=>openAdModal('welcome'),1800);}}
+function showGoldToast(msg){const t=document.createElement('div');t.className='gold-toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
+
+/* ══ Sözleşme ══ */
+function openTerms(e){if(e)e.preventDefault();document.getElementById('termsModal').classList.add('open');}
+function closeTerms(){document.getElementById('termsModal').classList.remove('open');}
+
+/* ══ Admin giriş / güvenlik ══ */
+function openAdminLogin(){
+  if(ADMIN_CREDENTIALS.locked){showToast('⛔ Çok fazla hatalı deneme. Sayfa yenile.');return;}
+  document.getElementById('adminLoginUser').value='';
+  document.getElementById('adminLoginPass').value='';
+  document.getElementById('adminLoginErr').style.display='none';
+  document.getElementById('adminAttemptsBadge').style.display='none';
+  document.getElementById('adminLoginOverlay').classList.add('open');
+}
+function cancelAdminLogin(){document.getElementById('adminLoginOverlay').classList.remove('open');}
+function verifyAdminLogin(){
+  const u=document.getElementById('adminLoginUser').value.trim();
+  const p=document.getElementById('adminLoginPass').value;
+  if(u===ADMIN_CREDENTIALS.username&&p===ADMIN_CREDENTIALS.password){
+    ADMIN_CREDENTIALS.failCount=0;ADMIN_CREDENTIALS.locked=false;saveAdminCreds();
+    document.getElementById('adminLoginOverlay').classList.remove('open');
+    renderAdminPanel();document.getElementById('adminPanel').classList.add('open');
+    adLog('✅ Admin girişi başarılı','info');
+  } else {
+    ADMIN_CREDENTIALS.failCount++;
+    if(ADMIN_CREDENTIALS.failCount>=ADMIN_CREDENTIALS.maxAttempts){ADMIN_CREDENTIALS.locked=true;saveAdminCreds();showToast('⛔ Hesap kilitlendi!');cancelAdminLogin();return;}
+    saveAdminCreds();
+    const rem=ADMIN_CREDENTIALS.maxAttempts-ADMIN_CREDENTIALS.failCount;
+    document.getElementById('adminLoginErr').style.display='block';
+    const badge=document.getElementById('adminAttemptsBadge');badge.style.display='block';badge.textContent=`⚠️ ${rem} deneme hakkınız kaldı`;
+    adLog(`❌ Hatalı admin girişi (${ADMIN_CREDENTIALS.failCount}/${ADMIN_CREDENTIALS.maxAttempts})`,'error');
+  }
+}
+function openAdmin(){openAdminLogin();}
+let _logoTapCount=0,_logoTapTimer=null;
+function handleLogoTap(){
+  _logoTapCount++;
+  if(_logoTapTimer)clearTimeout(_logoTapTimer);
+  const icon=document.getElementById('logoIcon');
+  if(icon){icon.style.transform=`scale(1.2)`;setTimeout(()=>{if(icon)icon.style.transform='scale(1)';},150);}
+  if(_logoTapCount>=7){
+    _logoTapCount=0;
+    if(_logoTapTimer)clearTimeout(_logoTapTimer);
+    _logoTapTimer=null;
+    showToast('🔐 Admin girişi...');
+    setTimeout(()=>openAdminLogin(),400);
+    return;
+  }
+  // Kalan tıklama göstergesi (4. tıklamadan itibaren)
+  if(_logoTapCount>=4){showToast(`🔐 ${7-_logoTapCount} tıklama daha...`);}
+  _logoTapTimer=setTimeout(()=>{_logoTapCount=0;},2000);
+}
+function closeAdmin(){document.getElementById('adminPanel').classList.remove('open');}
+
+function changeAdminCredentials(){
+  const newU=document.getElementById('adminNewUser').value.trim();
+  const currP=document.getElementById('adminCurrPass').value;
+  const newP=document.getElementById('adminNewPass').value;
+  const newP2=document.getElementById('adminNewPass2').value;
+  const msg=document.getElementById('adminSecMsg');
+  if(currP!==ADMIN_CREDENTIALS.password){msg.style.display='block';msg.style.color='#ff8888';msg.textContent='❌ Mevcut şifre hatalı!';return;}
+  if(newP&&newP.length<6){msg.style.display='block';msg.style.color='#ff8888';msg.textContent='❌ Şifre en az 6 karakter olmalı!';return;}
+  if(newP&&newP!==newP2){msg.style.display='block';msg.style.color='#ff8888';msg.textContent='❌ Şifreler eşleşmiyor!';return;}
+  if(newU)ADMIN_CREDENTIALS.username=newU;
+  if(newP)ADMIN_CREDENTIALS.password=newP;
+  saveAdminCreds();
+  msg.style.display='block';msg.style.color='#00ff88';msg.textContent='✅ Kimlik bilgileri güncellendi!';
+  adLog('🔑 Admin kimlik bilgileri değiştirildi','warn');
+  setTimeout(()=>{msg.style.display='none';},3000);
+}
+function saveMaxAttempts(){
+  const v=parseInt(document.getElementById('maxAttemptsInput').value)||3;
+  ADMIN_CREDENTIALS.maxAttempts=Math.max(1,Math.min(10,v));
+  saveAdminCreds();showToast('✅ Kaydedildi');
+}
+
+/* ══════════════════════════════════════════════
+   ADMİN PANELİ — TAM ADMOB UYUMLU FONKSİYONLAR
+══════════════════════════════════════════════ */
+
+function validateAdUnitId(val,type){
+  if(!val||val.trim()==='')return{ok:false,msg:'⚠️ Boş bırakılamaz'};
+  const v=val.trim();
+  if(v.startsWith('ca-app-pub-')){
+    if(/^ca-app-pub-\d{16}\/\d{9,10}$/.test(v))return{ok:true,msg:'✅ Geçerli AdMob Ad Unit ID'};
+    if(v.includes('3940256099942544'))return{ok:true,msg:'🧪 Google Resmi Test ID'};
+    if(v.includes('XXXXXX'))return{ok:false,msg:'⚠️ Placeholder — gerçek ID girilmeli'};
+    return{ok:false,msg:'❌ Format: ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX'};
+  }
+  if(v.includes('XXXXXX'))return{ok:false,msg:'⚠️ Placeholder — değiştirin'};
+  return{ok:false,msg:'❌ Geçersiz format'};
+}
+function validateAppId(val){
+  if(!val||val.trim()==='')return{ok:false,msg:'⚠️ Boş bırakılamaz'};
+  const v=val.trim();
+  if(/^ca-app-pub-\d{16}~\d{9,10}$/.test(v))return{ok:true,msg:'✅ Geçerli AdMob App ID'};
+  if(v.includes('3940256099942544'))return{ok:true,msg:'🧪 Test App ID'};
+  if(v.includes('XXXXXX'))return{ok:false,msg:'⚠️ Placeholder — AdMob konsolundan alın'};
+  return{ok:false,msg:'❌ Format: ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX (~ işaretine dikkat)'};
+}
+
+let _testDeviceIds=[];
+function loadTestDeviceIds(){try{_testDeviceIds=JSON.parse(localStorage.getItem('hn_test_devices')||'[]');}catch(e){_testDeviceIds=[];}}
+function saveTestDeviceId(){
+  const v=document.getElementById('testDeviceIdInput')?.value.trim();
+  if(!v){showToast('⚠️ Cihaz ID girin');return;}
+  if(!_testDeviceIds.includes(v)){_testDeviceIds.push(v);try{localStorage.setItem('hn_test_devices',JSON.stringify(_testDeviceIds));}catch(e){}}
+  document.getElementById('testDeviceIdInput').value='';
+  renderTestDeviceList();adLog('🔧 Test cihazı: '+v,'info');showToast('✅ Eklendi');
+}
+function renderTestDeviceList(){
+  const el=document.getElementById('testDeviceList');if(!el)return;
+  if(!_testDeviceIds.length){el.innerHTML='<div style="font-size:.68rem;color:rgba(200,216,240,.3)">Henüz eklenmedi</div>';return;}
+  el.innerHTML=_testDeviceIds.map((id,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="font-family:monospace;font-size:.68rem;color:#00ff88;flex:1">${id}</span><button onclick="removeTestDevice(${i})" style="background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.3);color:#ff8888;padding:2px 8px;border-radius:6px;cursor:pointer;font-size:.65rem">✕</button></div>`).join('');
+}
+function removeTestDevice(i){_testDeviceIds.splice(i,1);try{localStorage.setItem('hn_test_devices',JSON.stringify(_testDeviceIds));}catch(e){}renderTestDeviceList();}
+
+function switchAdminTab(tab){
+  const tabNames=['stats','appid','login-ads','app-ads','gdpr','sdk','analytics','moderation','security','users','logs'];
+  document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',tabNames[i]===tab));
+  document.querySelectorAll('.admin-tab-content').forEach(c=>c.classList.remove('active'));
+  const el=document.getElementById('atab-'+tab);if(el)el.classList.add('active');
+  if(tab==='login-ads')renderAdSlotList('login');
+  else if(tab==='app-ads')renderAdSlotList('app');
+  else if(tab==='users')renderAdminUsers();
+  else if(tab==='logs')renderAdLog();
+  else if(tab==='sdk'){renderSdkCode();loadTestDeviceIds();renderTestDeviceList();}
+  else if(tab==='appid')renderAppIdTab();
+  else if(tab==='analytics')renderAnalytics(_analyticsRange);
+  else if(tab==='moderation')renderModUserList();
+  else if(tab==='security'){document.getElementById('adminNewUser').value=ADMIN_CREDENTIALS.username;document.getElementById('maxAttemptsInput').value=ADMIN_CREDENTIALS.maxAttempts;}
+  else if(tab==='stats')refreshStats();
+}
+function renderAdminPanel(){
+  document.getElementById('admobAppIdInput').value=CONFIG_ADS.admobAppId;
+  switchAdminTab('stats');
+}
+function refreshStats(){
+  document.getElementById('statImpression').textContent=AdStats.impressions;
+  document.getElementById('statReward').textContent=AdStats.rewards;
+  document.getElementById('statInter').textContent=AdStats.interstitials;
+  document.getElementById('statBanner').textContent=AdStats.bannerViews;
+  const el=document.getElementById('slotStatusSummary');
+  if(el)el.innerHTML=CONFIG_ADS.slots.map(s=>{
+    const isReal=s.admobId&&!s.admobId.includes('XXXXXX');
+    const v=isReal?validateAdUnitId(s.admobId,s.type):{ok:false,msg:'Placeholder'};
+    return `<div class="slot-summary-row"><span style="font-size:.78rem;color:#c8d8f0">${s.name}</span><div style="display:flex;gap:5px;align-items:center"><span class="ad-slot-type type-${s.type}" style="font-size:.6rem">${s.type.toUpperCase()}</span><span style="font-size:.65rem;${s.enabled?'color:#00ff88':'color:#ff8888'}">${s.enabled?'● Etkin':'○ Kapalı'}</span><span style="font-size:.62rem;${v.ok?'color:#00ff88':'color:#ffaa33'}">${v.ok?'✅':'⚠️'}</span></div></div>`;
+  }).join('');
+}
+function renderAppIdTab(){
+  const inp=document.getElementById('admobAppIdInput');if(inp)inp.value=CONFIG_ADS.admobAppId;
+  updateManifestCode();
+  const iosPreview=document.getElementById('iosAppIdPreview');if(iosPreview)iosPreview.textContent=CONFIG_ADS.admobAppId;
+  const validateRow=document.getElementById('appIdValidateRow');
+  if(validateRow&&CONFIG_ADS.admobAppId){const r=validateAppId(CONFIG_ADS.admobAppId);validateRow.innerHTML=`<span class="${r.ok?'admob-validate-ok':'admob-validate-warn'}">${r.msg}</span>`;}
+}
+function updateManifestCode(){
+  const code=`&lt;<span class="sdk-key">manifest</span>&gt;\n  &lt;<span class="sdk-key">application</span>&gt;\n    <span class="sdk-comment">&lt;!-- AdMob App ID - ZORUNLU --&gt;</span>\n    &lt;<span class="sdk-key">meta-data</span>\n      android:<span class="sdk-key">name</span>=<span class="sdk-val">"com.google.android.gms.ads.APPLICATION_ID"</span>\n      android:<span class="sdk-key">value</span>=<span class="sdk-val">"${CONFIG_ADS.admobAppId}"</span>/&gt;\n    &lt;<span class="sdk-key">meta-data</span>\n      android:<span class="sdk-key">name</span>=<span class="sdk-val">"com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT"</span>\n      android:<span class="sdk-key">value</span>=<span class="sdk-val">"true"</span>/&gt;\n  &lt;/<span class="sdk-key">application</span>&gt;\n  &lt;<span class="sdk-key">uses-permission</span> android:<span class="sdk-key">name</span>=<span class="sdk-val">"android.permission.INTERNET"</span>/&gt;\n  &lt;<span class="sdk-key">uses-permission</span> android:<span class="sdk-key">name</span>=<span class="sdk-val">"android.permission.ACCESS_NETWORK_STATE"</span>/&gt;\n&lt;/<span class="sdk-key">manifest</span>&gt;`;
+  const el1=document.getElementById('manifestCodeBlock');if(el1)el1.innerHTML=code;
+  const el2=document.getElementById('manifestCodeBlock2');if(el2)el2.innerHTML=code;
+}
+function saveAdmobAppId(){
+  const v=document.getElementById('admobAppIdInput')?.value.trim();
+  if(!v){showToast('⚠️ App ID girin');return;}
+  const r=validateAppId(v);
+  const row=document.getElementById('appIdValidateRow');
+  if(row)row.innerHTML=`<span class="${r.ok?'admob-validate-ok':'admob-validate-warn'}">${r.msg}</span>`;
+  CONFIG_ADS.admobAppId=v;saveAdConfig();updateManifestCode();
+  const ios=document.getElementById('iosAppIdPreview');if(ios)ios.textContent=v;
+  adLog('💾 AdMob App ID: '+v,'info');
+  showToast(r.ok?'✅ App ID kaydedildi':'⚠️ Kaydedildi (format kontrol et)');
+}
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='admobAppIdInput'){
+    const v=e.target.value.trim();const r=validateAppId(v);
+    const row=document.getElementById('appIdValidateRow');
+    if(row&&v)row.innerHTML=`<span class="${r.ok?'admob-validate-ok':'admob-validate-warn'}">${r.msg}</span>`;
+    else if(row)row.innerHTML='';
+  }
+});
+function renderAdSlotList(group){
+  const targetId=group==='login'?'loginAdSlotList':'appAdSlotList';
+  const el=document.getElementById(targetId);if(!el)return;
+  const slots=CONFIG_ADS.slots.filter(s=>s.group===group);
+  const typeLabel={'banner':'BANNER','interstitial':'INTERSTITIAL','rewarded':'REWARDED VIDEO'};
+  el.innerHTML=slots.map(slot=>{
+    const i=CONFIG_ADS.slots.indexOf(slot);
+    const r=validateAdUnitId(slot.admobId,slot.type);
+    return `<div class="admob-slot-card">
+      <div class="admob-slot-header">
+        <div class="admob-slot-title">${slot.name}</div>
+        <div class="admob-slot-badges">
+          <span class="ad-slot-type type-${slot.type}" style="font-size:.62rem">${typeLabel[slot.type]||slot.type.toUpperCase()}</span>
+          <span class="admob-slot-enabled-badge ${slot.enabled?'slot-on':'slot-off'}">${slot.enabled?'✅ Etkin':'⛔ Kapalı'}</span>
+        </div>
+      </div>
+      <div class="admob-slot-desc">📍 ${slot.description}</div>
+      <div class="admob-field-label">AdMob Ad Unit ID</div>
+      <div class="admob-slot-id-field">
+        <input id="slotId_${i}" value="${slot.admobId}" placeholder="ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX" spellcheck="false" autocomplete="off" class="${r.ok?'slot-id-valid':''}" oninput="liveValidateSlot(${i},this)">
+        <button class="slot-save-btn" onclick="saveSlotId(${i})">💾 Kaydet</button>
+      </div>
+      <div class="admob-slot-footer">
+        <div class="admob-slot-validate" id="slotValidate_${i}"><span style="${r.ok?'color:#00ff88':'color:#ffaa33'}">${r.msg}</span></div>
+        <div class="admob-slot-actions">
+          <span class="admob-slot-position">${slot.position||slot.id}</span>
+          <div class="toggle-switch ${slot.enabled?'on':''}" onclick="toggleSlot(${i})"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function liveValidateSlot(i,input){
+  const v=input.value.trim();const r=validateAdUnitId(v,CONFIG_ADS.slots[i].type);
+  const el=document.getElementById(`slotValidate_${i}`);
+  if(el)el.innerHTML=v?`<span style="${r.ok?'color:#00ff88':'color:#ffaa33'}">${r.msg}</span>`:'';
+  input.classList.toggle('slot-id-valid',r.ok);
+}
+function saveSlotId(i){
+  const val=document.getElementById(`slotId_${i}`)?.value.trim();
+  if(!val){showToast('⚠️ Boş bırakılamaz');return;}
+  CONFIG_ADS.slots[i].admobId=val;
+  adLog(`💾 ${CONFIG_ADS.slots[i].name} → ${val}`,'info');
+  saveAdConfig();
+  if(CONFIG_ADS.slots[i].id==='loginBanner'){const p=document.getElementById('loginBannerIdPreview');if(p)p.textContent=val;}
+  if(CONFIG_ADS.slots[i].id==='bottomBanner'){const p=document.getElementById('bottomBannerIdPreview');if(p)p.textContent=val;}
+  const r=validateAdUnitId(val,CONFIG_ADS.slots[i].type);
+  showToast(r.ok?'✅ Ad Unit ID kaydedildi':'⚠️ Kaydedildi (format kontrol et)');
+  renderAdSlotList(CONFIG_ADS.slots[i].group);
+}
+function toggleSlot(i){CONFIG_ADS.slots[i].enabled=!CONFIG_ADS.slots[i].enabled;adLog(`${CONFIG_ADS.slots[i].enabled?'✅':'⛔'} ${CONFIG_ADS.slots[i].name}`,'info');saveAdConfig();renderAdSlotList(CONFIG_ADS.slots[i].group);}
+function applyTestId(slotId,testId){const i=CONFIG_ADS.slots.findIndex(s=>s.id===slotId);if(i<0)return;CONFIG_ADS.slots[i].admobId=testId;saveAdConfig();adLog(`🧪 Test ID: ${CONFIG_ADS.slots[i].name}`,'info');renderAdSlotList(CONFIG_ADS.slots[i].group);showToast('🧪 Test ID uygulandı');}
+function applyAllRewarded(testId){CONFIG_ADS.slots.filter(s=>s.type==='rewarded').forEach(s=>{s.admobId=testId;});saveAdConfig();adLog('🧪 Tüm Rewarded test ID','info');renderAdSlotList('app');showToast('🧪 Tüm Rewarded güncellendi');}
+function copyTestId(el,id,slotKey){
+  if(slotKey){const i=CONFIG_ADS.slots.findIndex(s=>s.id===slotKey);if(i>=0){CONFIG_ADS.slots[i].admobId=id;saveAdConfig();renderAdSlotList(CONFIG_ADS.slots[i].group);showToast('✅ Test ID uygulandı');return;}}
+  if(navigator.clipboard)navigator.clipboard.writeText(id).then(()=>showToast('📋 Kopyalandı'));else showToast('📋 '+id);
+}
+function saveAdConfig(){try{localStorage.setItem('hn_adconfig',JSON.stringify({slots:CONFIG_ADS.slots,admobAppId:CONFIG_ADS.admobAppId}));}catch(e){}}
+function loadAdConfig(){
+  try{
+    const d=JSON.parse(localStorage.getItem('hn_adconfig')||'{}');
+    if(d.slots)d.slots.forEach((s,i)=>{if(CONFIG_ADS.slots[i]){CONFIG_ADS.slots[i].admobId=s.admobId;CONFIG_ADS.slots[i].enabled=s.enabled;}});
+    if(d.admobAppId)CONFIG_ADS.admobAppId=d.admobAppId;
+  }catch(e){}
+}
+function saveGdprSettings(){
+  const mode=document.querySelector('input[name=gdprMode]:checked')?.value||'auto';
+  const personalized=document.getElementById('personalizedAdsSwitch')?.classList.contains('on');
+  const region=document.getElementById('gdprTestRegion')?.value;
+  try{localStorage.setItem('hn_gdpr',JSON.stringify({mode,personalized,region}));}catch(e){}
+  adLog(`🛡️ GDPR: mode=${mode}, personalized=${personalized}, region=${region}`,'info');
+  const msg=document.getElementById('gdprSaveMsg');
+  if(msg){msg.style.display='block';msg.style.color='#00ff88';msg.textContent='✅ GDPR ayarları kaydedildi!';}
+  setTimeout(()=>{if(msg)msg.style.display='none';},2500);
+}
+function renderSdkCode(){
+  updateManifestCode();
+  const bannerSlot=CONFIG_ADS.slots.find(s=>s.id==='bottomBanner');
+  const rewardedSlot=CONFIG_ADS.slots.find(s=>s.id==='boostRewarded');
+  const interSlot=CONFIG_ADS.slots.find(s=>s.type==='interstitial');
+  document.getElementById('configCodeBlock').innerHTML=`<span class="sdk-comment">// capacitor.config.json</span>
+{
+  <span class="sdk-key">"appId"</span>: <span class="sdk-val">"com.hashnode.global"</span>,
+  <span class="sdk-key">"appName"</span>: <span class="sdk-val">"HashNode Global"</span>,
+  <span class="sdk-key">"webDir"</span>: <span class="sdk-val">"www"</span>,
+  <span class="sdk-key">"plugins"</span>: {
+    <span class="sdk-key">"AdMob"</span>: {
+      <span class="sdk-key">"appId"</span>: <span class="sdk-val">"${CONFIG_ADS.admobAppId}"</span>,
+      <span class="sdk-key">"isTesting"</span>: <span class="sdk-val">false</span>,
+      <span class="sdk-key">"initializeForTesting"</span>: <span class="sdk-val">false</span>
+    }
+  }
+}`;
+  document.getElementById('jsCodeBlock').innerHTML=`<span class="sdk-comment">// @capacitor-community/admob entegrasyonu</span>
+import { AdMob, BannerAdSize, BannerAdPosition } from '@capacitor-community/admob';
+
+<span class="sdk-comment">// 1. Başlatma</span>
+await AdMob.initialize({
+  <span class="sdk-key">requestTrackingAuthorization</span>: <span class="sdk-val">true</span>,
+  <span class="sdk-key">testingDevices</span>: [<span class="sdk-val">'YOUR_HASHED_DEVICE_ID'</span>],
+  <span class="sdk-key">initializeForTesting</span>: <span class="sdk-val">false</span>,
+});
+
+<span class="sdk-comment">// 2. Banner</span>
+await AdMob.showBanner({
+  <span class="sdk-key">adId</span>: <span class="sdk-val">'${bannerSlot?.admobId||'ca-app-pub-XXX/XXX'}'</span>,
+  <span class="sdk-key">adSize</span>: BannerAdSize.BANNER,
+  <span class="sdk-key">position</span>: BannerAdPosition.BOTTOM_CENTER,
+  <span class="sdk-key">margin</span>: <span class="sdk-val">0</span>,
+});
+AdMob.addListener(<span class="sdk-val">'bannerAdLoaded'</span>, () => console.log(<span class="sdk-val">'Banner OK'</span>));
+AdMob.addListener(<span class="sdk-val">'bannerAdFailedToLoad'</span>, (e) => console.error(e));
+
+<span class="sdk-comment">// 3. Interstitial</span>
+await AdMob.prepareInterstitial({ <span class="sdk-key">adId</span>: <span class="sdk-val">'${interSlot?.admobId||'ca-app-pub-XXX/XXX'}'</span> });
+await AdMob.showInterstitial();
+AdMob.addListener(<span class="sdk-val">'interstitialAdClosed'</span>, () => console.log(<span class="sdk-val">'Interstitial kapandı'</span>));
+
+<span class="sdk-comment">// 4. Rewarded Video</span>
+await AdMob.prepareRewardVideoAd({ <span class="sdk-key">adId</span>: <span class="sdk-val">'${rewardedSlot?.admobId||'ca-app-pub-XXX/XXX'}'</span> });
+await AdMob.showRewardVideoAd();
+AdMob.addListener(<span class="sdk-val">'onRewardedVideoAdRewarded'</span>, (reward) => {
+  grantAdReward(<span class="sdk-val">'boost'</span>); <span class="sdk-comment">// 'welcome' | 'repair' | 'boost'</span>
+});`;
+  loadTestDeviceIds();renderTestDeviceList();
+}
+function renderAdminUsers(){
+  const el=document.getElementById('adminUserList');if(!el)return;
+  el.innerHTML=usersDB.map(u=>`<div style="background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.1);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.85rem;font-weight:bold;color:#c8d8f0">${u.username}${u.isAdmin?'<span style="margin-left:6px;font-size:.6rem;background:rgba(240,180,41,.2);color:#f0b429;padding:2px 6px;border-radius:8px">ADMIN</span>':''}</div><div style="font-size:.65rem;color:rgba(200,216,240,.35)">${u.email}</div><div style="font-size:.7rem;color:#00ff88;margin-top:2px">$${u.userData.treasuryUSD.toFixed(2)} · ${u.userData.miners.length} cihaz</div></div><button class="btn-admin-danger" style="padding:5px 10px;font-size:.7rem" onclick="adminResetUser('${u.email}')">Sıfırla</button></div>`).join('')||'<div class="text-dim">Kayıtlı kullanıcı yok</div>';
+}
+function adminResetUser(email){if(!confirm('Bu kullanıcıyı sıfırla?'))return;const u=usersDB.find(x=>x.email===email);if(u){const dm=MINER_TEMPLATES.map((t,i)=>({id:i+Date.now(),...t,health:100,level:1,discountUsed:false}));u.userData={username:u.username,treasuryUSD:12500,minedBTC:0.287,miners:dm,sessionSeconds:0,miningActive:false,boostMultiplier:1,systemLogs:[]};saveState();adLog(`🔄 Kullanıcı sıfırlandı: ${email}`,'warn');renderAdminUsers();}}
+function renderAdLog(){const el=document.getElementById('adminAdLog');if(!el)return;el.innerHTML=AdLog.map(l=>`<div class="log-entry log-${l.type}"><span style="color:rgba(0,255,255,.5)">[${l.time}]</span> ${l.msg}</div>`).join('')||'<div class="text-dim" style="font-size:.75rem">Henüz log yok</div>';}
+function clearAdLog(){AdLog.length=0;renderAdLog();}
+function toggleSection(id){document.getElementById(id)?.classList.toggle('open');}
+function resetAdminLock(){ADMIN_CREDENTIALS.locked=false;ADMIN_CREDENTIALS.failCount=0;saveAdminCreds();showToast('✅ Kilit sıfırlandı');}
+function adminTestAd(type){closeAdmin();setTimeout(()=>{if(type==='welcome'||type==='boost'||type==='repair')openAdModal(type);else if(type==='interstitial')triggerInterstitial();else if(type==='loginInter')showLoginInterstitial(null);else if(type==='banner')showGoldToast('📺 Banner: '+(CONFIG_ADS.slots.find(s=>s.id==='bottomBanner')?.admobId||'N/A'));},300);}
+
+/* ══ BAKIM MODU ══ */
+let _maintenanceActive = false;
+function toggleMaintenanceMode(){
+  _maintenanceActive = !_maintenanceActive;
+  const overlay = document.getElementById('maintenanceOverlay');
+  const btn = document.getElementById('maintenanceToggleBtn');
+  const status = document.getElementById('maintenanceStatus');
+  const msg = document.getElementById('maintenanceMsgInput')?.value || 'Uygulama şu anda bakımda. Kısa süre içinde geri döneceğiz. 🚀';
+  const eta = document.getElementById('maintenanceEtaInput')?.value || '';
+
+  if(_maintenanceActive){
+    // Mesajları güncelle
+    const msgEl = document.getElementById('maintenanceMsg');
+    const etaEl = document.getElementById('maintenanceEta');
+    if(msgEl) msgEl.innerHTML = msg.replace(/\n/g,'<br>');
+    if(etaEl) etaEl.textContent = eta ? '⏱️ Tahmini süre: ' + eta : '';
+    // Overlay'i göster
+    overlay.style.display = 'flex';
+    // Butonu güncelle
+    btn.textContent = '✅ BAKIM MODUNU KAPAT';
+    btn.style.background = 'linear-gradient(135deg,#003d00,#005a00)';
+    btn.style.borderColor = '#00ff88';
+    btn.style.color = '#00ff88';
+    btn.style.boxShadow = '0 0 20px rgba(0,255,136,.3)';
+    status.style.display = 'block';
+    status.style.color = '#ff8888';
+    status.textContent = '🔴 BAKIM MODU AKTİF — Kullanıcılar bakım ekranı görüyor';
+    adLog('🚨 BAKIM MODU AKTİFLEŞTİRİLDİ','error');
+    try{localStorage.setItem('hn_maintenance',JSON.stringify({active:true,msg,eta,time:Date.now()}));}catch(e){}
+  } else {
+    overlay.style.display = 'none';
+    btn.textContent = '🚨 BAKIM MODUNU AKTİFLEŞTİR';
+    btn.style.background = 'linear-gradient(135deg,#3d0a0a,#5a0f0f)';
+    btn.style.borderColor = '#ff5555';
+    btn.style.color = '#ff8888';
+    btn.style.boxShadow = '0 0 20px rgba(255,85,85,.3)';
+    status.style.display = 'block';
+    status.style.color = '#00ff88';
+    status.textContent = '✅ Bakım modu kapatıldı — Uygulama normal çalışıyor';
+    adLog('✅ Bakım modu kapatıldı','info');
+    try{localStorage.setItem('hn_maintenance',JSON.stringify({active:false}));}catch(e){}
+  }
+}
+
+/* ══════════════════════════════════════════════
+   ANALİTİK — ÜLKE & GELİR İSTATİSTİKLERİ
+══════════════════════════════════════════════ */
+const COUNTRY_DATA = [
+  {flag:'🇹🇷',name:'Türkiye',code:'TR',ecpm:0.45},
+  {flag:'🇺🇸',name:'Amerika',code:'US',ecpm:8.50},
+  {flag:'🇩🇪',name:'Almanya',code:'DE',ecpm:5.20},
+  {flag:'🇬🇧',name:'İngiltere',code:'GB',ecpm:6.10},
+  {flag:'🇫🇷',name:'Fransa',code:'FR',ecpm:4.80},
+  {flag:'🇸🇦',name:'Suudi Arabistan',code:'SA',ecpm:2.10},
+  {flag:'🇷🇺',name:'Rusya',code:'RU',ecpm:1.20},
+  {flag:'🇯🇵',name:'Japonya',code:'JP',ecpm:7.30},
+  {flag:'🇨🇳',name:'Çin',code:'CN',ecpm:1.80},
+  {flag:'🇧🇷',name:'Brezilya',code:'BR',ecpm:1.40},
+  {flag:'🇪🇸',name:'İspanya',code:'ES',ecpm:3.60},
+  {flag:'🇮🇳',name:'Hindistan',code:'IN',ecpm:0.55},
+];
+let _analyticsRange='30d';
+
+function generateAnalyticsData(range){
+  const mult = range==='7d'?0.25:range==='30d'?1:4;
+  const base = usersDB.length||1;
+  return COUNTRY_DATA.map(c=>{
+    const seed = c.code.charCodeAt(0)+c.code.charCodeAt(1);
+    const users = Math.floor((seed%8+1)*base*mult*(0.5+Math.random()*0.5));
+    const impressions = users * Math.floor(3+Math.random()*5);
+    const revenue = (impressions/1000)*c.ecpm;
+    return {...c, users, impressions, revenue};
+  }).sort((a,b)=>b.users-a.users);
+}
+
+function renderAnalytics(range){
+  _analyticsRange = range||_analyticsRange;
+  const data = generateAnalyticsData(_analyticsRange);
+  const totalUsers = data.reduce((s,d)=>s+d.users,0);
+  const totalRevenue = data.reduce((s,d)=>s+d.revenue,0);
+  const activeNow = Math.floor(totalUsers*(0.03+Math.random()*0.05));
+
+  document.getElementById('anaTotal').textContent = totalUsers.toLocaleString('tr-TR');
+  document.getElementById('anaActive').textContent = activeNow;
+  document.getElementById('anaRevenue').textContent = '$'+totalRevenue.toFixed(2);
+
+  // Ülke tablosu
+  const maxU = data[0]?.users||1;
+  document.getElementById('countryTable').innerHTML = data.map(d=>`
+    <div class="country-row">
+      <span class="country-flag">${d.flag}</span>
+      <span class="country-name">${d.name}</span>
+      <div class="country-bar-wrap"><div class="country-bar" style="width:${Math.round(d.users/maxU*100)}%"></div></div>
+      <span class="country-users">${d.users.toLocaleString()}</span>
+      <span class="country-revenue">$${d.revenue.toFixed(2)}</span>
+    </div>`).join('');
+
+  // Dil dağılımı
+  const langData = Object.values(LANGS).map(l=>{
+    const u = Math.floor(Math.random()*totalUsers*0.15+1);
+    return {flag:l.flag, name:l.name, users:u};
+  }).sort((a,b)=>b.users-a.users);
+  const maxL = langData[0]?.users||1;
+  document.getElementById('langTable').innerHTML = langData.map(l=>`
+    <div class="country-row">
+      <span class="country-flag">${l.flag}</span>
+      <span class="country-name">${l.name}</span>
+      <div class="country-bar-wrap"><div class="country-bar" style="width:${Math.round(l.users/maxL*100)}%;background:linear-gradient(90deg,#0ff,#00ff88)"></div></div>
+      <span class="country-users">${l.users}</span>
+    </div>`).join('');
+
+  // Gelir tablosu
+  const revenueByType = [
+    {type:'Banner',icon:'📺',impressions:AdStats.bannerViews||Math.floor(totalUsers*8),ecpm:0.8},
+    {type:'Rewarded Video',icon:'🎁',impressions:AdStats.rewards||Math.floor(totalUsers*2),ecpm:12.0},
+    {type:'Interstitial',icon:'🔄',impressions:AdStats.interstitials||Math.floor(totalUsers*3),ecpm:4.5},
+  ];
+  document.getElementById('revenueTable').innerHTML = revenueByType.map(r=>{
+    const rev = (r.impressions/1000)*r.ecpm;
+    return `<div class="country-row">
+      <span class="country-flag">${r.icon}</span>
+      <span class="country-name">${r.type}</span>
+      <span style="font-size:.7rem;color:rgba(200,216,240,.4);flex:1">${r.impressions.toLocaleString()} gösterim @ $${r.ecpm} eCPM</span>
+      <span class="country-revenue" style="font-size:.8rem;font-weight:700">$${rev.toFixed(2)}</span>
+    </div>`;
+  }).join('');
+}
+function refreshAnalytics(){renderAnalytics(_analyticsRange);showToast('🔄 Veriler güncellendi');}
+
+/* ══════════════════════════════════════════════
+   MODERASYON — UYARI & BAN SİSTEMİ
+══════════════════════════════════════════════ */
+const WARN_TEMPLATES = [
+  {id:'spam',    icon:'📢', text:'Spam içerik paylaşımı — Tekrarında hesabınız askıya alınacaktır.'},
+  {id:'abuse',   icon:'🗯️', text:'Hakaret ve saldırgan dil kullanımı — Platform kurallarını ihlal ettiniz.'},
+  {id:'cheat',   icon:'🎮', text:'Hile/exploit kullanımı tespit edildi — Bakiyeniz sıfırlanabilir.'},
+  {id:'multi',   icon:'👥', text:'Çoklu hesap kullanımı yasaktır — Ek hesaplar kapatılacak.'},
+  {id:'tos',     icon:'📋', text:'Kullanım koşullarının ihlali — Lütfen kuralları okuyun.'},
+  {id:'fraud',   icon:'⚠️', text:'Şüpheli faaliyet tespit edildi — Hesabınız inceleniyor.'},
+];
+
+function getUserModStatus(email){
+  try{
+    const d=JSON.parse(localStorage.getItem('hn_mod_'+email)||'{}');
+    return d; // {status:'ok'|'warned'|'suspended'|'banned', reason:'', warnings:0, banMsg:''}
+  }catch(e){return {};}
+}
+function saveUserModStatus(email, data){
+  try{localStorage.setItem('hn_mod_'+email, JSON.stringify(data));}catch(e){}
+}
+
+function renderModUserList(){
+  const el=document.getElementById('modUserList');if(!el)return;
+  if(!usersDB.length){el.innerHTML='<div class="text-dim">Kayıtlı kullanıcı yok</div>';return;}
+  el.innerHTML = usersDB.map(u=>{
+    const mod = getUserModStatus(u.email);
+    const status = mod.status||'ok';
+    const warnings = mod.warnings||0;
+    const statusLabels = {ok:'✅ Temiz',warned:'⚠️ Uyarıldı',suspended:'🔴 Askıda',banned:'🚫 Banlı'};
+    const statusClass = {ok:'mstatus-ok',warned:'mstatus-warn',suspended:'mstatus-sus',banned:'mstatus-ban'};
+    return `<div class="mod-user-card ${status!=='ok'?status:''}">
+      <div class="mod-user-header">
+        <div>
+          <div class="mod-user-name">${u.username} ${u.isAdmin?'<span style="font-size:.6rem;color:#f0b429">👑 ADMIN</span>':''}</div>
+          <div style="font-size:.65rem;color:rgba(200,216,240,.35)">${u.email}</div>
+          <div style="font-size:.68rem;color:#b0c4de;margin-top:2px">⚠️ ${warnings} uyarı · $${u.userData.treasuryUSD.toFixed(0)} bakiye · ${u.userData.miners.length} cihaz</div>
+          ${mod.reason?`<div style="font-size:.65rem;color:#ffaa33;margin-top:2px">📌 ${mod.reason}</div>`:''}
+        </div>
+        <span class="mod-status-badge ${statusClass[status]}">${statusLabels[status]}</span>
+      </div>
+      <div class="mod-actions">
+        <button class="btn-mod-warn" onclick="warnUser('${u.email}')">⚠️ Uyar</button>
+        ${status!=='suspended'&&status!=='banned'?`<button class="btn-mod-sus" onclick="suspendUser('${u.email}')">⏸️ Askıya Al</button>`:''}
+        ${status!=='banned'?`<button class="btn-mod-ban" onclick="banUser('${u.email}')">🚫 Sistemden At</button>`:''}
+        ${status!=='ok'?`<button class="btn-mod-restore" onclick="restoreUser('${u.email}')">✅ Normale Al</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Uyarı şablonları
+  const wtEl = document.getElementById('warnTemplates');
+  if(wtEl) wtEl.innerHTML = WARN_TEMPLATES.map(t=>`
+    <div class="warn-template-row">
+      <span style="font-size:1.1rem;flex-shrink:0">${t.icon}</span>
+      <span class="warn-template-txt">${t.text}</span>
+      <button class="btn-mod-warn" onclick="setWarnTemplate('${t.id}')" style="font-size:.65rem;padding:4px 8px">Seç</button>
+    </div>`).join('');
+}
+
+function setWarnTemplate(id){
+  const t = WARN_TEMPLATES.find(x=>x.id===id);
+  if(t){
+    const el = document.getElementById('customWarnMsg');
+    if(el){el.value=t.text;showToast('📋 Şablon seçildi');}
+  }
+}
+
+function warnUser(email){
+  const u = usersDB.find(x=>x.email===email);if(!u)return;
+  const msg = document.getElementById('customWarnMsg')?.value||'Platform kurallarını ihlal ettiniz.';
+  const mod = getUserModStatus(email);
+  mod.warnings = (mod.warnings||0)+1;
+  mod.reason = msg;
+  if(mod.status==='ok') mod.status='warned';
+  // 3 uyarıdan sonra otomatik askıya al
+  if(mod.warnings>=3 && mod.status!=='banned'){
+    mod.status='suspended';
+    showToast(`⏸️ ${u.username} — 3 uyarı doldu, otomatik askıya alındı`);
+  } else {
+    showToast(`⚠️ ${u.username} uyarıldı (${mod.warnings}. kez)`);
+  }
+  saveUserModStatus(email, mod);
+  adLog(`⚠️ Kullanıcı uyarıldı: ${email} — ${msg}`,'warn');
+  // Kullanıcı aktif oturumda ise bildirim göster
+  if(currentUser?.email===email) showUserWarningBanner(msg);
+  renderModUserList();
+}
+
+function suspendUser(email){
+  if(!confirm(`${email} kullanıcısını askıya almak istediğinize emin misiniz?`))return;
+  const mod = getUserModStatus(email);
+  mod.status='suspended';
+  mod.reason=mod.reason||'Platform kurallarını ihlal ettiniz.';
+  saveUserModStatus(email, mod);
+  adLog(`⏸️ Kullanıcı askıya alındı: ${email}`,'error');
+  showToast('⏸️ Kullanıcı askıya alındı');
+  if(currentUser?.email===email){handleLogout();}
+  renderModUserList();
+}
+
+function banUser(email){
+  if(!confirm(`⛔ ${email} kullanıcısını KALICI olarak sistemden atmak istediğinize emin misiniz?
+
+Bu işlem geri alınabilir.`))return;
+  const u = usersDB.find(x=>x.email===email);
+  const mod = getUserModStatus(email);
+  mod.status='banned';
+  mod.banMsg = mod.reason||'Platform kurallarını ciddi şekilde ihlal ettiniz.';
+  mod.bannedAt = Date.now();
+  saveUserModStatus(email, mod);
+  adLog(`🚫 Kullanıcı banlı: ${email}`,'error');
+  showToast('🚫 Kullanıcı sistemden atıldı');
+  // Aktif oturumda ise çıkış yaptır ve ban ekranı göster
+  if(currentUser?.email===email){
+    showBanScreen(mod.banMsg);
+  }
+  renderModUserList();
+}
+
+function restoreUser(email){
+  const mod = getUserModStatus(email);
+  mod.status='ok';
+  mod.warnings=0;
+  mod.reason='';
+  saveUserModStatus(email, mod);
+  adLog(`✅ Kullanıcı normale alındı: ${email}`,'info');
+  showToast('✅ Kullanıcı normale alındı');
+  renderModUserList();
+}
+
+function showUserWarningBanner(msg){
+  // Aktif kullanıcıya anlık uyarı göster
+  const banner = document.createElement('div');
+  banner.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:linear-gradient(135deg,#2d1a00,#3d2400);border-bottom:2px solid #ffaa33;padding:14px 16px;z-index:50000;text-align:center';
+  banner.innerHTML=`<div style="font-size:.8rem;font-weight:700;color:#ffaa33;margin-bottom:4px">⚠️ YÖNETİCİ UYARISI</div><div style="font-size:.75rem;color:#ffcc88;line-height:1.5">${msg}</div><button onclick="this.parentElement.remove()" style="margin-top:8px;background:rgba(255,170,51,.2);border:1px solid #ffaa33;color:#ffaa33;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:.72rem">Anladım</button>`;
+  document.body.appendChild(banner);
+  setTimeout(()=>{if(banner.parentElement)banner.remove();},15000);
+}
+
+function showBanScreen(msg){
+  isLoggedIn=false;currentUser=null;
+  const overlay=document.getElementById('banOverlay');
+  const msgEl=document.getElementById('banMsg');
+  const reasonEl=document.getElementById('banReason');
+  if(msgEl)msgEl.textContent=msg||'Hesabınız platform kurallarını ihlal ettiğiniz için askıya alınmıştır.';
+  if(reasonEl)reasonEl.textContent='Destek: support@hashnode.global';
+  if(overlay)overlay.classList.add('open');
+  stopMatrix();saveState();
+}
+
+function checkUserBanStatus(){
+  if(!currentUser)return;
+  const mod=getUserModStatus(currentUser.email);
+  if(mod.status==='banned'){showBanScreen(mod.banMsg);return;}
+  if(mod.status==='suspended'){
+    showToast('⏸️ Hesabınız askıya alındı');
+    handleLogout();return;
+  }
+}
+
+function sendGlobalAnnouncement(){
+  const msg=document.getElementById('customWarnMsg')?.value;
+  if(!msg){showToast('⚠️ Mesaj girin');return;}
+  showUserWarningBanner('📢 DUYURU: '+msg);
+  adLog('📢 Genel duyuru gönderildi: '+msg,'info');
+  showToast('✅ Duyuru gönderildi');
+}
+
+function banAllUnconfirmed(){
+  if(!confirm('Onaysız/şüpheli hesapları kapat?'))return;
+  showToast('✅ İşlem tamamlandı (simülasyon)');
+  adLog('🔄 Onaysız hesaplar kapatıldı','warn');
+}
+
+function checkMaintenanceMode(){
+  try{
+    const d=JSON.parse(localStorage.getItem('hn_maintenance')||'{}');
+    if(d.active){
+      _maintenanceActive=true;
+      const overlay=document.getElementById('maintenanceOverlay');
+      const msgEl=document.getElementById('maintenanceMsg');
+      const etaEl=document.getElementById('maintenanceEta');
+      if(msgEl&&d.msg)msgEl.innerHTML=d.msg.replace(/\n/g,'<br>');
+      if(etaEl&&d.eta)etaEl.textContent='⏱️ Tahmini süre: '+d.eta;
+      if(overlay)overlay.style.display='flex';
+    }
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════════════
+   DİL SİSTEMİ
+══════════════════════════════════════════════ */
+const LANGS={
+tr:{code:"tr",name:"Türkçe",flag:"🇹🇷",appName:"Sanal Madencilik Simülatörü",login:"Giriş Yap",register:"Kayıt Ol",email:"E-posta adresi",password:"Şifre",username:"Kullanıcı Adı",createAccount:"Hesap Oluştur",backToLogin:"← Giriş Sayfası",demo:"Demo hesap:",simulation:"EĞİTİM AMAÇLI SİMÜLASYON — Gerçek ödül yoktur.",home:"Ana",mining:"Kazım",farm:"Çiftlik",withdraw:"Çekim",settings:"Ayarlar",balance:"TOPLAM BAKİYE",hashrate:"TOPLAM HASHRATE",btcMined:"Kazılan BTC",dailyEst:"Günlük:",liveMarket:"KRİPTO PARALAR (CANLI)",marketSim:"Gerçek zamanlı piyasa simülasyonu",miningPanel:"KAZIM",active:"AKTİF",idle:"DURAK",coolerOn:"Soğutucu AKTİF",coolerOff:"Soğutucu BEKLEMEDE",btcPerSec:"BTC/sn",usdPerSec:"USD/sn",startMining:"▶️ BAŞLAT",stopMining:"⏸️ DURDUR",boost:"⚡ 2x Boost",boostActive:"2x AKTİF ⚡",boostNormal:"1x Normal",coolingPerf:"SOĞUTMA PERFORMANSI",coolingOn:"Çalışıyor 💨",coolingOff:"Pasif",startHint:"▶️ Başlat butonuna basarak madenciliği başlatın",farmTitle:"MADENCİLİK ÇİFTLİĞİ",shopTitle:"CİHAZ MAĞAZASI",noDevice:"Henüz cihaz yok",health:"Sağlık:",repair:"Bakım",upgrade:"⬆️ Yükselt",buyBtn:"🛒 Satın Al",price:"Fiyat:",damagedAlert:"cihaz kritik durumda!",withdrawTitle:"ÇEKİM İŞLEMLERİ",currentBalance:"Mevcut Bakiye:",walletAddress:"Cüzdan Adresi (Simülasyon)",amount:"Tutar (USD)",withdrawBtn:"✅ ÇEKİM TALEBİ OLUŞTUR",withdrawWarning:"Min. $10 | Simülasyon amaçlı",logTitle:"SİSTEM GÜNLÜĞÜ",settingsTitle:"AYARLAR",languageSection:"🌐 Dil Seçimi",themeSection:"Gece Modu",matrixSection:"Matrix Arka Plan",version:"Sürüm",logWelcome:"Hoş geldiniz",logMiningStart:"Madencilik BAŞLADI!",logMiningStop:"Madencilik durduruldu",logSessionEnd:"Madencilik oturumu sona erdi.",logBought:"satın alındı!",logRepaired:"bakım yapıldı",logUpgraded:"yükseltildi!",logBoostOn:"2x Boost 30 dakika aktif!",logBoostOff:"Boost süresi doldu",logMarket:"Piyasa güncellendi:",logDamaged:"arızalandı!",logAllDamaged:"Tüm cihazlar arızalı! Madencilik durdu.",logWithdraw:"çekim talebi (Simülasyon)",logNoDevice:"Aktif cihaz yok!",errBalance:"Yetersiz bakiye!",errWallet:"Cüzdan adresi girin",errMinWithdraw:"Minimum çekim: $10",errInsufBalance:"Yetersiz bakiye",toastBoost:"⚡ 2x Boost Aktif!",toastWithdraw:"✅ Çekim talebi oluşturuldu!",boostAlready:"Boost zaten aktif",adminPanel:"⚙️ Admin Paneli",terms:"Kullanıcı Sözleşmesi",privacy:"Gizlilik Politikası",termsAgree:"Kullanıcı sözleşmesini ve gizlilik politikasını okudum, kabul ediyorum.",ageConfirm:"13 yaşından büyük olduğumu onaylıyorum.",loginDisabledTerms:"Devam etmek için sözleşmeyi kabul edin."},
+en:{code:"en",name:"English",flag:"🇬🇧",appName:"Virtual Mining Simulator",login:"Login",register:"Register",email:"Email address",password:"Password",username:"Username",createAccount:"Create Account",backToLogin:"← Back to Login",demo:"Demo account:",simulation:"EDUCATIONAL SIMULATION — No real rewards.",home:"Home",mining:"Mining",farm:"Farm",withdraw:"Withdraw",settings:"Settings",balance:"TOTAL BALANCE",hashrate:"TOTAL HASHRATE",btcMined:"Mined BTC",dailyEst:"Daily:",liveMarket:"CRYPTO MARKETS (LIVE)",marketSim:"Real-time market simulation",miningPanel:"MINING",active:"ACTIVE",idle:"IDLE",coolerOn:"Cooler ACTIVE",coolerOff:"Cooler STANDBY",btcPerSec:"BTC/sec",usdPerSec:"USD/sec",startMining:"▶️ START",stopMining:"⏸️ STOP",boost:"⚡ 2x Boost",boostActive:"2x ACTIVE ⚡",boostNormal:"1x Normal",coolingPerf:"COOLING PERFORMANCE",coolingOn:"Running 💨",coolingOff:"Passive",startHint:"▶️ Press Start to begin mining",farmTitle:"MINING FARM",shopTitle:"DEVICE SHOP",noDevice:"No devices yet",health:"Health:",repair:"Repair",upgrade:"⬆️ Upgrade",buyBtn:"🛒 Buy",price:"Price:",damagedAlert:"devices critical!",withdrawTitle:"WITHDRAWAL",currentBalance:"Current Balance:",walletAddress:"Wallet Address (Simulation)",amount:"Amount (USD)",withdrawBtn:"✅ CREATE WITHDRAWAL",withdrawWarning:"Min. $10 | Simulation only",logTitle:"SYSTEM LOG",settingsTitle:"SETTINGS",languageSection:"🌐 Language",themeSection:"Dark Mode",matrixSection:"Matrix Background",version:"Version",logWelcome:"Welcome",logMiningStart:"Mining STARTED!",logMiningStop:"Mining paused",logSessionEnd:"Mining session ended.",logBought:"purchased!",logRepaired:"maintained",logUpgraded:"upgraded!",logBoostOn:"2x Boost active 30 min!",logBoostOff:"Boost expired",logMarket:"Market updated:",logDamaged:"broke down!",logAllDamaged:"All devices failed! Mining stopped.",logWithdraw:"withdrawal (Simulation)",logNoDevice:"No active devices!",errBalance:"Insufficient balance!",errWallet:"Enter wallet address",errMinWithdraw:"Minimum withdrawal: $10",errInsufBalance:"Insufficient balance",toastBoost:"⚡ 2x Boost Active!",toastWithdraw:"✅ Withdrawal created!",boostAlready:"Boost already active",adminPanel:"⚙️ Admin Panel",terms:"Terms of Service",privacy:"Privacy Policy",termsAgree:"I have read and agree to the Terms of Service and Privacy Policy.",ageConfirm:"I confirm that I am over 13 years old.",loginDisabledTerms:"Please accept the terms to continue."},
+de:{code:"de",name:"Deutsch",flag:"🇩🇪",appName:"Virtueller Mining-Simulator",login:"Anmelden",register:"Registrieren",email:"E-Mail",password:"Passwort",username:"Benutzername",createAccount:"Konto erstellen",backToLogin:"← Zurück",demo:"Demo-Konto:",simulation:"BILDUNGSSIMULATION",home:"Start",mining:"Mining",farm:"Farm",withdraw:"Auszahlung",settings:"Einstellungen",balance:"GUTHABEN",hashrate:"HASHRATE",btcMined:"BTC",dailyEst:"Täglich:",liveMarket:"KRYPTOMÄRKTE",marketSim:"Echtzeit",miningPanel:"MINING",active:"AKTIV",idle:"PAUSIERT",coolerOn:"Kühler AKTIV",coolerOff:"Kühler STANDBY",btcPerSec:"BTC/Sek",usdPerSec:"USD/Sek",startMining:"▶️ STARTEN",stopMining:"⏸️ STOPPEN",boost:"⚡ Boost 2x",boostActive:"2x AKTIV ⚡",boostNormal:"1x Normal",coolingPerf:"KÜHLUNG",coolingOn:"Läuft 💨",coolingOff:"Passiv",startHint:"▶️ Start drücken",farmTitle:"MINING-FARM",shopTitle:"SHOP",noDevice:"Keine Geräte",health:"Gesundheit:",repair:"Reparatur",upgrade:"⬆️ Upgrade",buyBtn:"🛒 Kaufen",price:"Preis:",damagedAlert:"Geräte kritisch!",withdrawTitle:"AUSZAHLUNG",currentBalance:"Guthaben:",walletAddress:"Wallet-Adresse",amount:"Betrag (USD)",withdrawBtn:"✅ AUSZAHLUNG",withdrawWarning:"Min. $10",logTitle:"PROTOKOLL",settingsTitle:"EINSTELLUNGEN",languageSection:"🌐 Sprache",themeSection:"Dunkelmodus",matrixSection:"Matrix",version:"Version",logWelcome:"Willkommen",logMiningStart:"GESTARTET!",logMiningStop:"Pausiert",logSessionEnd:"Beendet.",logBought:"gekauft!",logRepaired:"gewartet",logUpgraded:"aufgerüstet!",logBoostOn:"Boost 30 Min!",logBoostOff:"Abgelaufen",logMarket:"Markt:",logDamaged:"ausgefallen!",logAllDamaged:"Alle defekt!",logWithdraw:"Auszahlung",logNoDevice:"Keine Geräte!",errBalance:"Unzureichend!",errWallet:"Adresse eingeben",errMinWithdraw:"Min. $10",errInsufBalance:"Unzureichend",toastBoost:"⚡ Boost 2x!",toastWithdraw:"✅ Auszahlung!",boostAlready:"Boost aktiv",adminPanel:"⚙️ Admin",terms:"Nutzungsbedingungen",privacy:"Datenschutz",termsAgree:"Ich akzeptiere die Nutzungsbedingungen und Datenschutzrichtlinie.",ageConfirm:"Ich bestätige, dass ich über 13 Jahre alt bin.",loginDisabledTerms:"Bitte akzeptieren Sie die Bedingungen."},
+fr:{code:"fr",name:"Français",flag:"🇫🇷",appName:"Simulateur de Minage",login:"Connexion",register:"S'inscrire",email:"E-mail",password:"Mot de passe",username:"Utilisateur",createAccount:"Créer un compte",backToLogin:"← Retour",demo:"Compte démo:",simulation:"SIMULATION ÉDUCATIVE",home:"Accueil",mining:"Minage",farm:"Ferme",withdraw:"Retrait",settings:"Paramètres",balance:"SOLDE",hashrate:"HASHRATE",btcMined:"BTC",dailyEst:"Quotidien:",liveMarket:"MARCHÉS",marketSim:"Temps réel",miningPanel:"MINAGE",active:"ACTIF",idle:"ARRÊTÉ",coolerOn:"Refroidisseur ACTIF",coolerOff:"EN VEILLE",btcPerSec:"BTC/sec",usdPerSec:"USD/sec",startMining:"▶️ DÉMARRER",stopMining:"⏸️ ARRÊTER",boost:"⚡ Boost 2x",boostActive:"2x ACTIF ⚡",boostNormal:"1x Normal",coolingPerf:"REFROIDISSEMENT",coolingOn:"En cours 💨",coolingOff:"Passif",startHint:"▶️ Démarrer",farmTitle:"FERME",shopTitle:"BOUTIQUE",noDevice:"Aucun appareil",health:"Santé:",repair:"Réparer",upgrade:"⬆️ Améliorer",buyBtn:"🛒 Acheter",price:"Prix:",damagedAlert:"critiques!",withdrawTitle:"RETRAIT",currentBalance:"Solde:",walletAddress:"Adresse",amount:"Montant (USD)",withdrawBtn:"✅ RETRAIT",withdrawWarning:"Min. $10",logTitle:"JOURNAL",settingsTitle:"PARAMÈTRES",languageSection:"🌐 Langue",themeSection:"Mode Sombre",matrixSection:"Matrix",version:"Version",logWelcome:"Bienvenue",logMiningStart:"Démarré!",logMiningStop:"Pausé",logSessionEnd:"Terminée.",logBought:"acheté!",logRepaired:"entretenu",logUpgraded:"amélioré!",logBoostOn:"Boost 30 min!",logBoostOff:"Expiré",logMarket:"Marché:",logDamaged:"en panne!",logAllDamaged:"Tous en panne!",logWithdraw:"retrait",logNoDevice:"Aucun!",errBalance:"Insuffisant!",errWallet:"Adresse",errMinWithdraw:"Min. $10",errInsufBalance:"Insuffisant",toastBoost:"⚡ Boost!",toastWithdraw:"✅ Retrait!",boostAlready:"Boost actif",adminPanel:"⚙️ Admin",terms:"CGU",privacy:"Confidentialité",termsAgree:"J'accepte les CGU et la politique de confidentialité.",ageConfirm:"Je confirme avoir plus de 13 ans.",loginDisabledTerms:"Veuillez accepter les conditions."},
+es:{code:"es",name:"Español",flag:"🇪🇸",appName:"Simulador de Minería",login:"Iniciar sesión",register:"Registrarse",email:"Correo",password:"Contraseña",username:"Usuario",createAccount:"Crear cuenta",backToLogin:"← Volver",demo:"Cuenta demo:",simulation:"SIMULACIÓN EDUCATIVA",home:"Inicio",mining:"Minería",farm:"Granja",withdraw:"Retiro",settings:"Ajustes",balance:"SALDO",hashrate:"HASHRATE",btcMined:"BTC",dailyEst:"Diario:",liveMarket:"MERCADOS",marketSim:"Tiempo real",miningPanel:"MINERÍA",active:"ACTIVO",idle:"DETENIDO",coolerOn:"Enfriador ACTIVO",coolerOff:"EN ESPERA",btcPerSec:"BTC/seg",usdPerSec:"USD/seg",startMining:"▶️ INICIAR",stopMining:"⏸️ DETENER",boost:"⚡ Boost 2x",boostActive:"2x ACTIVO ⚡",boostNormal:"1x Normal",coolingPerf:"ENFRIAMIENTO",coolingOn:"Funcionando 💨",coolingOff:"Pasivo",startHint:"▶️ Iniciar",farmTitle:"GRANJA",shopTitle:"TIENDA",noDevice:"Sin dispositivos",health:"Salud:",repair:"Reparar",upgrade:"⬆️ Mejorar",buyBtn:"🛒 Comprar",price:"Precio:",damagedAlert:"críticos!",withdrawTitle:"RETIRO",currentBalance:"Saldo:",walletAddress:"Dirección",amount:"Cantidad (USD)",withdrawBtn:"✅ RETIRO",withdrawWarning:"Mín. $10",logTitle:"REGISTRO",settingsTitle:"AJUSTES",languageSection:"🌐 Idioma",themeSection:"Modo Oscuro",matrixSection:"Matrix",version:"Versión",logWelcome:"Bienvenido",logMiningStart:"¡Iniciada!",logMiningStop:"Pausada",logSessionEnd:"Terminada.",logBought:"comprado!",logRepaired:"mantenido",logUpgraded:"mejorado!",logBoostOn:"¡Boost 30 min!",logBoostOff:"Expirado",logMarket:"Mercado:",logDamaged:"averiado!",logAllDamaged:"¡Todos averiados!",logWithdraw:"retiro",logNoDevice:"¡Sin dispositivos!",errBalance:"¡Insuficiente!",errWallet:"Dirección",errMinWithdraw:"Mín. $10",errInsufBalance:"Insuficiente",toastBoost:"⚡ ¡Boost!",toastWithdraw:"✅ ¡Retiro!",boostAlready:"Boost activo",adminPanel:"⚙️ Admin",terms:"Términos",privacy:"Privacidad",termsAgree:"Acepto los términos de servicio y política de privacidad.",ageConfirm:"Confirmo que tengo más de 13 años.",loginDisabledTerms:"Por favor acepte los términos."},
+ar:{code:"ar",name:"العربية",flag:"🇸🇦",appName:"محاكي التعدين",login:"تسجيل الدخول",register:"إنشاء حساب",email:"البريد",password:"كلمة المرور",username:"المستخدم",createAccount:"إنشاء حساب",backToLogin:"→ العودة",demo:"حساب تجريبي:",simulation:"محاكاة تعليمية",home:"الرئيسية",mining:"التعدين",farm:"المزرعة",withdraw:"السحب",settings:"الإعدادات",balance:"الرصيد",hashrate:"الهاشريت",btcMined:"BTC",dailyEst:"يومي:",liveMarket:"الأسواق",marketSim:"الوقت الفعلي",miningPanel:"التعدين",active:"نشط",idle:"متوقف",coolerOn:"المبرد نشط",coolerOff:"انتظار",btcPerSec:"BTC/ث",usdPerSec:"USD/ث",startMining:"▶️ بدء",stopMining:"⏸️ إيقاف",boost:"⚡ تعزيز",boostActive:"2x نشط ⚡",boostNormal:"1x عادي",coolingPerf:"التبريد",coolingOn:"يعمل 💨",coolingOff:"سلبي",startHint:"▶️ اضغط بدء",farmTitle:"مزرعة التعدين",shopTitle:"المتجر",noDevice:"لا أجهزة",health:"الصحة:",repair:"إصلاح",upgrade:"⬆️ ترقية",buyBtn:"🛒 شراء",price:"السعر:",damagedAlert:"أجهزة حرجة!",withdrawTitle:"السحب",currentBalance:"الرصيد:",walletAddress:"عنوان المحفظة",amount:"المبلغ",withdrawBtn:"✅ سحب",withdrawWarning:"الحد الأدنى $10",logTitle:"السجل",settingsTitle:"الإعدادات",languageSection:"🌐 اللغة",themeSection:"الوضع الداكن",matrixSection:"خلفية ماتريكس",version:"الإصدار",logWelcome:"مرحباً",logMiningStart:"بدأ التعدين!",logMiningStop:"متوقف",logSessionEnd:"انتهت.",logBought:"تم الشراء!",logRepaired:"صيانة",logUpgraded:"ترقية!",logBoostOn:"التعزيز نشط!",logBoostOff:"انتهى",logMarket:"السوق:",logDamaged:"تعطل!",logAllDamaged:"كل الأجهزة!",logWithdraw:"سحب",logNoDevice:"لا أجهزة!",errBalance:"رصيد غير كافٍ!",errWallet:"أدخل العنوان",errMinWithdraw:"الحد الأدنى: $10",errInsufBalance:"غير كافٍ",toastBoost:"⚡ التعزيز نشط!",toastWithdraw:"✅ تم السحب!",boostAlready:"نشط",adminPanel:"⚙️ الإدارة",terms:"اتفاقية المستخدم",privacy:"الخصوصية",termsAgree:"أوافق على اتفاقية المستخدم وسياسة الخصوصية.",ageConfirm:"أؤكد أنني أكبر من 13 عاماً.",loginDisabledTerms:"يرجى قبول الشروط للمتابعة."},
+ru:{code:"ru",name:"Русский",flag:"🇷🇺",appName:"Виртуальный Майнинг",login:"Войти",register:"Регистрация",email:"Эл. почта",password:"Пароль",username:"Имя",createAccount:"Создать аккаунт",backToLogin:"← Назад",demo:"Демо:",simulation:"УЧЕБНАЯ СИМУЛЯЦИЯ",home:"Главная",mining:"Майнинг",farm:"Ферма",withdraw:"Вывод",settings:"Настройки",balance:"БАЛАНС",hashrate:"ХЕШРЕЙТ",btcMined:"BTC",dailyEst:"В день:",liveMarket:"РЫНКИ",marketSim:"В реальном времени",miningPanel:"МАЙНИНГ",active:"АКТИВЕН",idle:"ОСТАНОВЛЕН",coolerOn:"Кулер АКТИВЕН",coolerOff:"ОЖИДАНИЕ",btcPerSec:"BTC/сек",usdPerSec:"USD/сек",startMining:"▶️ СТАРТ",stopMining:"⏸️ СТОП",boost:"⚡ Буст 2x",boostActive:"2x АКТИВЕН ⚡",boostNormal:"1x Обычный",coolingPerf:"ОХЛАЖДЕНИЕ",coolingOn:"Работает 💨",coolingOff:"Пассив",startHint:"▶️ Нажмите Старт",farmTitle:"ФЕРМА",shopTitle:"МАГАЗИН",noDevice:"Нет устройств",health:"Здоровье:",repair:"Ремонт",upgrade:"⬆️ Улучшить",buyBtn:"🛒 Купить",price:"Цена:",damagedAlert:"критически!",withdrawTitle:"ВЫВОД",currentBalance:"Баланс:",walletAddress:"Адрес кошелька",amount:"Сумма (USD)",withdrawBtn:"✅ ВЫВЕСТИ",withdrawWarning:"Мин. $10",logTitle:"ЖУРНАЛ",settingsTitle:"НАСТРОЙКИ",languageSection:"🌐 Язык",themeSection:"Тёмный режим",matrixSection:"Матрица",version:"Версия",logWelcome:"Добро пожаловать",logMiningStart:"НАЧАТ!",logMiningStop:"Остановлен",logSessionEnd:"Завершена.",logBought:"куплено!",logRepaired:"обслужено",logUpgraded:"улучшено!",logBoostOn:"Буст 30 мин!",logBoostOff:"Истёк",logMarket:"Рынок:",logDamaged:"сломалось!",logAllDamaged:"Все сломаны!",logWithdraw:"заявка",logNoDevice:"Нет устройств!",errBalance:"Недостаточно!",errWallet:"Введите адрес",errMinWithdraw:"Мин. $10",errInsufBalance:"Недостаточно",toastBoost:"⚡ Буст 2x!",toastWithdraw:"✅ Заявка!",boostAlready:"Буст активен",adminPanel:"⚙️ Админ",terms:"Соглашение",privacy:"Конфиденциальность",termsAgree:"Я принимаю условия использования и политику конфиденциальности.",ageConfirm:"Подтверждаю, что мне больше 13 лет.",loginDisabledTerms:"Примите условия для продолжения."},
+ja:{code:"ja",name:"日本語",flag:"🇯🇵",appName:"仮想マイニング",login:"ログイン",register:"登録",email:"メール",password:"パスワード",username:"ユーザー名",createAccount:"アカウント作成",backToLogin:"← 戻る",demo:"デモ:",simulation:"教育用シミュレーション",home:"ホーム",mining:"マイニング",farm:"ファーム",withdraw:"出金",settings:"設定",balance:"残高",hashrate:"ハッシュレート",btcMined:"BTC",dailyEst:"1日:",liveMarket:"市場",marketSim:"リアルタイム",miningPanel:"マイニング",active:"稼働中",idle:"停止中",coolerOn:"クーラー稼働",coolerOff:"待機",btcPerSec:"BTC/秒",usdPerSec:"USD/秒",startMining:"▶️ 開始",stopMining:"⏸️ 停止",boost:"⚡ 2xブースト",boostActive:"2x 有効 ⚡",boostNormal:"1x 通常",coolingPerf:"冷却",coolingOn:"稼働中 💨",coolingOff:"パッシブ",startHint:"▶️ 開始を押してください",farmTitle:"ファーム",shopTitle:"ショップ",noDevice:"なし",health:"耐久度:",repair:"修理",upgrade:"⬆️ アップグレード",buyBtn:"🛒 購入",price:"価格:",damagedAlert:"危機的！",withdrawTitle:"出金",currentBalance:"残高:",walletAddress:"ウォレット",amount:"金額 (USD)",withdrawBtn:"✅ 出金",withdrawWarning:"最低 $10",logTitle:"ログ",settingsTitle:"設定",languageSection:"🌐 言語",themeSection:"ダーク",matrixSection:"マトリックス",version:"バージョン",logWelcome:"ようこそ",logMiningStart:"開始！",logMiningStop:"一時停止",logSessionEnd:"終了。",logBought:"購入！",logRepaired:"整備",logUpgraded:"アップ！",logBoostOn:"ブースト30分！",logBoostOff:"終了",logMarket:"市場:",logDamaged:"故障！",logAllDamaged:"全停止！",logWithdraw:"出金",logNoDevice:"なし！",errBalance:"残高不足！",errWallet:"入力してください",errMinWithdraw:"最低 $10",errInsufBalance:"残高不足",toastBoost:"⚡ ブースト！",toastWithdraw:"✅ 出金！",boostAlready:"有効中",adminPanel:"⚙️ 管理者",terms:"利用規約",privacy:"プライバシー",termsAgree:"利用規約とプライバシーポリシーに同意します。",ageConfirm:"13歳以上であることを確認します。",loginDisabledTerms:"続けるには規約に同意してください。"},
+zh:{code:"zh",name:"中文",flag:"🇨🇳",appName:"虚拟挖矿",login:"登录",register:"注册",email:"邮箱",password:"密码",username:"用户名",createAccount:"创建账户",backToLogin:"← 返回",demo:"演示:",simulation:"教育模拟",home:"首页",mining:"挖矿",farm:"矿场",withdraw:"提款",settings:"设置",balance:"余额",hashrate:"算力",btcMined:"BTC",dailyEst:"每日:",liveMarket:"市场",marketSim:"实时",miningPanel:"挖矿",active:"运行中",idle:"已停止",coolerOn:"冷却器运行",coolerOff:"待机",btcPerSec:"BTC/秒",usdPerSec:"USD/秒",startMining:"▶️ 开始",stopMining:"⏸️ 停止",boost:"⚡ 2倍加速",boostActive:"2倍 激活 ⚡",boostNormal:"1倍 正常",coolingPerf:"冷却",coolingOn:"运行中 💨",coolingOff:"被动",startHint:"▶️ 按开始",farmTitle:"矿场",shopTitle:"商店",noDevice:"无设备",health:"耐久度:",repair:"维修",upgrade:"⬆️ 升级",buyBtn:"🛒 购买",price:"价格:",damagedAlert:"设备损坏！",withdrawTitle:"提款",currentBalance:"余额:",walletAddress:"钱包地址",amount:"金额 (USD)",withdrawBtn:"✅ 提款",withdrawWarning:"最低 $10",logTitle:"日志",settingsTitle:"设置",languageSection:"🌐 语言",themeSection:"暗色",matrixSection:"矩阵",version:"版本",logWelcome:"欢迎",logMiningStart:"开始！",logMiningStop:"已暂停",logSessionEnd:"结束。",logBought:"已购买！",logRepaired:"已维护",logUpgraded:"已升级！",logBoostOn:"2倍30分钟！",logBoostOff:"到期",logMarket:"市场:",logDamaged:"故障！",logAllDamaged:"全部停止！",logWithdraw:"提款",logNoDevice:"无设备！",errBalance:"余额不足！",errWallet:"输入地址",errMinWithdraw:"最低 $10",errInsufBalance:"余额不足",toastBoost:"⚡ 2倍激活！",toastWithdraw:"✅ 提款！",boostAlready:"已激活",adminPanel:"⚙️ 管理",terms:"服务条款",privacy:"隐私政策",termsAgree:"我已阅读并同意服务条款和隐私政策。",ageConfirm:"我确认我已超过13岁。",loginDisabledTerms:"请接受条款以继续。"},
+pt:{code:"pt",name:"Português",flag:"🇧🇷",appName:"Simulador de Mineração",login:"Entrar",register:"Registrar",email:"E-mail",password:"Senha",username:"Usuário",createAccount:"Criar conta",backToLogin:"← Voltar",demo:"Conta demo:",simulation:"SIMULAÇÃO EDUCACIONAL",home:"Início",mining:"Mineração",farm:"Fazenda",withdraw:"Saque",settings:"Config",balance:"SALDO",hashrate:"HASHRATE",btcMined:"BTC",dailyEst:"Diário:",liveMarket:"MERCADOS",marketSim:"Tempo real",miningPanel:"MINERAÇÃO",active:"ATIVO",idle:"PARADO",coolerOn:"Cooler ATIVO",coolerOff:"EM ESPERA",btcPerSec:"BTC/seg",usdPerSec:"USD/seg",startMining:"▶️ INICIAR",stopMining:"⏸️ PARAR",boost:"⚡ Boost 2x",boostActive:"2x ATIVO ⚡",boostNormal:"1x Normal",coolingPerf:"RESFRIAMENTO",coolingOn:"Funcionando 💨",coolingOff:"Passivo",startHint:"▶️ Pressione Iniciar",farmTitle:"FAZENDA",shopTitle:"LOJA",noDevice:"Sem dispositivos",health:"Saúde:",repair:"Reparar",upgrade:"⬆️ Melhorar",buyBtn:"🛒 Comprar",price:"Preço:",damagedAlert:"críticos!",withdrawTitle:"SAQUE",currentBalance:"Saldo:",walletAddress:"Endereço",amount:"Valor (USD)",withdrawBtn:"✅ SAQUE",withdrawWarning:"Mín. $10",logTitle:"REGISTRO",settingsTitle:"CONFIGURAÇÕES",languageSection:"🌐 Idioma",themeSection:"Modo Escuro",matrixSection:"Matrix",version:"Versão",logWelcome:"Bem-vindo",logMiningStart:"Iniciada!",logMiningStop:"Pausada",logSessionEnd:"Encerrada.",logBought:"comprado!",logRepaired:"manutenido",logUpgraded:"melhorado!",logBoostOn:"Boost 30 min!",logBoostOff:"Expirado",logMarket:"Mercado:",logDamaged:"quebrou!",logAllDamaged:"Todos parados!",logWithdraw:"saque",logNoDevice:"Sem dispositivos!",errBalance:"Insuficiente!",errWallet:"Insira o endereço",errMinWithdraw:"Mín. $10",errInsufBalance:"Insuficiente",toastBoost:"⚡ Boost 2x!",toastWithdraw:"✅ Saque!",boostAlready:"Boost ativo",adminPanel:"⚙️ Admin",terms:"Termos",privacy:"Privacidade",termsAgree:"Li e aceito os Termos de Serviço e a Política de Privacidade.",ageConfirm:"Confirmo que tenho mais de 13 anos.",loginDisabledTerms:"Por favor aceite os termos."}
+};
+let currentLang='tr';
+function T(k){return LANGS[currentLang]?.[k]||LANGS.tr[k]||k;}
+function setLang(c){currentLang=c;localStorage.setItem('hnLang',c);saveState();render();}
+window.changeLang=c=>setLang(c);
+
+/* Dil açılır menü */
+function toggleLangDropdown(){
+  const btn=document.getElementById('langDropdownBtn');
+  const list=document.getElementById('langDropdownList');
+  if(!btn||!list)return;
+  btn.classList.toggle('open');
+  list.classList.toggle('open');
+}
+function buildLangDropdown(){
+  const btn=document.getElementById('langDropdownBtn');
+  const list=document.getElementById('langDropdownList');
+  if(!btn||!list)return;
+  const cur=LANGS[currentLang];
+  btn.querySelector('.selected-flag').textContent=cur.flag;
+  btn.querySelector('.selected-name').textContent=cur.name;
+  list.innerHTML=Object.values(LANGS).map(l=>`<div class="lang-option ${currentLang===l.code?'active':''}" onclick="setLang('${l.code}');toggleLangDropdown()"><span class="opt-flag">${l.flag}</span><span>${l.name}</span></div>`).join('');
+}
+
+/* Matrix */
+const matrixCanvas=document.getElementById('matrixCanvas');
+const mCtx=matrixCanvas.getContext('2d');
+function resizeMatrix(){matrixCanvas.width=window.innerWidth;matrixCanvas.height=window.innerHeight;}
+resizeMatrix();window.addEventListener('resize',resizeMatrix);
+const mChars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ₿⛏⚡';
+let mDrops=[],mTimer=null,matrixEnabled=true;
+function initMatrix(){mDrops=Array(Math.floor(matrixCanvas.width/14)).fill(1);}
+initMatrix();
+function drawMatrix(){mCtx.fillStyle='rgba(0,0,0,0.05)';mCtx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);mCtx.fillStyle='#00ff88';mCtx.font='12px monospace';for(let i=0;i<mDrops.length;i++){mCtx.fillText(mChars[Math.floor(Math.random()*mChars.length)],i*14,mDrops[i]*14);if(mDrops[i]*14>matrixCanvas.height&&Math.random()>.975)mDrops[i]=0;mDrops[i]++;}}
+function startMatrix(){if(!mTimer&&matrixEnabled){initMatrix();mTimer=setInterval(drawMatrix,50);matrixCanvas.classList.add('active');}}
+function stopMatrix(){if(mTimer){clearInterval(mTimer);mTimer=null;}matrixCanvas.classList.remove('active');}
+
+/* State */
+const LS_KEY='hashnodeV6';
+let isLoggedIn=false,currentUser=null,usersDB=[];
+let activeUserData={username:'',treasuryUSD:15800,minedBTC:0.412,miners:[],sessionSeconds:0,miningActive:false,boostMultiplier:1,systemLogs:[]};
+let cryptoList=[{symbol:'BTC',price:68420,change:2.3},{symbol:'ETH',price:3420,change:-0.8},{symbol:'BNB',price:582,change:1.1},{symbol:'SOL',price:156.4,change:4.5},{symbol:'XRP',price:0.62,change:-0.3},{symbol:'ADA',price:0.45,change:2.1},{symbol:'DOGE',price:0.128,change:3.2}];
+let btcPrice=68420,activePage='login',miningIv=null,marketIv=null,wearIv=null;
+const MINER_TEMPLATES=[
+  {id:'t1',name:'Antminer S19',hashPower:12.5,price:1850,img:'🖥️',repairCost:420,upgradeCost:950,upgradeHash:3.2},
+  {id:'t2',name:'Whatsminer M50',hashPower:14.2,price:2250,img:'⚙️',repairCost:590,upgradeCost:1100,upgradeHash:3.8},
+  {id:'t3',name:'Avalon A12',hashPower:9.8,price:1350,img:'🔌',repairCost:310,upgradeCost:700,upgradeHash:2.5}
+];
+
+function saveState(){try{localStorage.setItem(LS_KEY,JSON.stringify({usersDB,activeUserData,isLoggedIn,activePage,cue:currentUser?.email||null,lang:currentLang,matrixEnabled}));}catch(e){}}
+function loadState(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    usersDB=d.usersDB||[];
+    if(d.lang&&LANGS[d.lang])currentLang=d.lang;
+    if(d.matrixEnabled===false)matrixEnabled=false;
+    if(d.isLoggedIn&&d.cue){const u=usersDB.find(x=>x.email===d.cue);if(u){isLoggedIn=true;currentUser=u;activeUserData=JSON.parse(JSON.stringify(u.userData));activeUserData.miningActive=false;activePage=d.activePage||'home';}}
+  }catch(e){}
+}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
+function spawnCoin(){const c=document.createElement('div');c.className='coin-fly';c.textContent='₿';c.style.cssText=`left:${Math.random()*60+20}%;top:${Math.random()*40+30}%;`;document.body.appendChild(c);setTimeout(()=>c.remove(),1300);}
+function addLog(msg,type='info'){const time=new Date().toLocaleTimeString('tr-TR');activeUserData.systemLogs=[{id:Date.now(),time,msg,type},...activeUserData.systemLogs].slice(0,35);if(isLoggedIn&&activePage!=='login')render();}
+function calcTotalHashrate(){return activeUserData.miners.reduce((s,m)=>s+(m.hashPower*(m.health/100)),0);}
+function getBTCperSec(){return (!activeUserData.miningActive||activeUserData.sessionSeconds<=0)?0:calcTotalHashrate()*7.2e-10*activeUserData.boostMultiplier;}
+function startWearSimulation(){if(wearIv)clearInterval(wearIv);wearIv=setInterval(()=>{if(!isLoggedIn||!activeUserData.miningActive)return;let failed=false;activeUserData.miners.forEach(m=>{if(m.health>0){m.health=Math.max(0,m.health-0.05);if(m.health<=0){m.health=0;failed=true;addLog(`⚠️ ${m.name} ${T('logDamaged')}`,'error');}}});if(failed&&calcTotalHashrate()===0){activeUserData.miningActive=false;addLog(T('logAllDamaged'),'error');stopMatrix();showToast('⚠️ '+T('logAllDamaged'));}saveState();if(activePage==='farm')render();},1000);}
+// CoinGecko proxy üzerinden canlı fiyat çekimi
+const COINGECKO_IDS={BTC:'bitcoin',ETH:'ethereum',BNB:'binancecoin',SOL:'solana',XRP:'ripple',ADA:'cardano',DOGE:'dogecoin'};
+let cgLastFetch=0,cgFetching=false;
+async function fetchCoinGeckoPrices(){
+  if(cgFetching)return;
+  const now=Date.now();
+  if(now-cgLastFetch<30000)return; // 30 sn cooldown
+  cgFetching=true;
+  try{
+    const ids=Object.values(COINGECKO_IDS).join(',');
+    const url=`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+    const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+    if(!res.ok)throw new Error('CoinGecko HTTP '+res.status);
+    const data=await res.json();
+    let updated=false;
+    cryptoList.forEach(c=>{
+      const cgId=COINGECKO_IDS[c.symbol];
+      if(cgId&&data[cgId]){
+        const newPrice=data[cgId].usd;
+        const ch=data[cgId].usd_24h_change;
+        c.price=parseFloat(newPrice.toFixed(newPrice>=1?2:6));
+        c.change=parseFloat((ch||0).toFixed(2));
+        if(c.symbol==='BTC')btcPrice=Math.floor(c.price);
+        updated=true;
+      }
+    });
+    cgLastFetch=now;
+    if(updated&&isLoggedIn&&activePage!=='login'){
+      addLog(`🌐 CoinGecko: BTC $${btcPrice.toLocaleString()}`,'market');
+      render();
+    }
+    adLog('🌐 CoinGecko fiyatları güncellendi','info');
+  }catch(err){
+    // CoinGecko erişilemezse simülasyon moduna geç
+    adLog('⚠️ CoinGecko ulaşılamadı, simülasyon modu: '+err.message,'warn');
+    fallbackUpdateMarket();
+  }finally{cgFetching=false;}
+}
+function fallbackUpdateMarket(){
+  for(let c of cryptoList){
+    let v=(Math.random()-.5)*2.5;
+    c.price=parseFloat((c.price*(1+v/100)).toFixed(c.price>=1?2:6));
+    if(c.price<0.0001)c.price=0.0001;
+    c.change=parseFloat((v+(Math.random()-.5)*1).toFixed(2));
+    if(c.symbol==='BTC')btcPrice=Math.floor(c.price);
+  }
+  if(isLoggedIn&&activePage!=='login'){addLog(`📊 ${T('logMarket')} BTC $${btcPrice}`,'market');render();}
+}
+function updateMarketPrices(){
+  // Önce CoinGecko dene, başarısız olursa simülasyon
+  fetchCoinGeckoPrices().catch(()=>fallbackUpdateMarket());
+}
+function startMiningBackground(){if(miningIv)clearInterval(miningIv);miningIv=setInterval(()=>{if(isLoggedIn&&activeUserData.miningActive&&activeUserData.sessionSeconds>0){let g=getBTCperSec();if(g>0){activeUserData.minedBTC+=g;activeUserData.treasuryUSD+=g*btcPrice;if(Math.random()<.1)spawnCoin();}activeUserData.sessionSeconds--;if(activeUserData.sessionSeconds<=0){activeUserData.miningActive=false;addLog(T('logSessionEnd'),'warn');stopMatrix();}saveState();if(activePage!=='login')render();}},1000);}
+function startMarketSimulation(){
+  if(marketIv)clearInterval(marketIv);
+  // CoinGecko her 60 sn, fallback her 8 sn
+  updateMarketPrices(); // ilk çekim
+  marketIv=setInterval(()=>{
+    fetchCoinGeckoPrices().catch(()=>fallbackUpdateMarket());
+  },60000); // 60 sn
+  // Araya simülasyon hareketi ekle (UI canlı görünsün)
+  if(window._fallbackIv)clearInterval(window._fallbackIv);
+  window._fallbackIv=setInterval(()=>{
+    if(Date.now()-cgLastFetch>60000){fallbackUpdateMarket();}
+  },8000);
+}
+
+/* Auth */
+function handleRegister(email,pwd,uname){
+  if(!email||!pwd||!uname){alert('All fields required');return false;}
+  if(usersDB.find(u=>u.email===email)){alert('Email already exists!');return false;}
+  const nm=MINER_TEMPLATES.map((t,i)=>({id:i+100+Date.now(),...t,health:100,level:1,discountUsed:false}));
+  usersDB.push({email,password:pwd,username:uname,isAdmin:false,userData:{username:uname,treasuryUSD:12500,minedBTC:0.287,miners:nm,sessionSeconds:0,miningActive:false,boostMultiplier:1,systemLogs:[]}});
+  saveState();alert('✅ '+T('register')+'!');return true;
+}
+function handleLogin(email,pwd){
+  // Ban/suspend kontrolü
+  const _preCheck = usersDB.find(u=>u.email===email&&u.password===pwd);
+  if(_preCheck){
+    const _mod=getUserModStatus(_preCheck.email);
+    if(_mod.status==='banned'){showBanScreen(_mod.banMsg||'Hesabınız askıya alındı.');return false;}
+    if(_mod.status==='suspended'){alert('⏸️ Hesabınız geçici olarak askıya alınmıştır. Destek: support@hashnode.global');return false;}
+  }
+  const termsOk=document.getElementById('chkTerms')?.checked;
+  const ageOk=document.getElementById('chkAge')?.checked;
+  if(!termsOk||!ageOk){showToast(T('loginDisabledTerms'));return false;}
+  const u=usersDB.find(u=>u.email===email&&u.password===pwd);
+  if(u){
+    isLoggedIn=true;currentUser=u;activeUserData=JSON.parse(JSON.stringify(u.userData));
+    addLog(`✨ ${T('logWelcome')}, ${u.username}!`,'success');
+    activePage='home';saveState();
+    // Giriş anı interstitial, sonra ana sayfaya geç
+    document.getElementById('adLoginBanner').style.display='none';
+    showLoginInterstitial(()=>{
+      render();
+      document.getElementById('adBottomBanner').style.display='flex';
+      AdService.showBanner('bottomBanner','BOTTOM_CENTER');
+      checkWelcomeBonus();
+    });
+    return true;
+  }
+  alert('❌ Invalid email or password');return false;
+}
+function handleLogout(){
+  if(currentUser)currentUser.userData=JSON.parse(JSON.stringify(activeUserData));
+  isLoggedIn=false;activePage='login';stopMatrix();
+  document.getElementById('adBottomBanner').style.display='none';
+  document.getElementById('adLoginBanner').style.display='block';
+  AdService.showBanner('loginBanner','TOP_CENTER');
+  saveState();render();
+}
+
+/* Game */
+function buyMiner(t){if(activeUserData.treasuryUSD>=t.price){activeUserData.treasuryUSD-=t.price;activeUserData.miners.push({id:Date.now(),...t,health:100,level:1,discountUsed:false});addLog(`✅ ${t.name} ${T('logBought')} +${t.hashPower} GH/s`,'success');saveState();render();}else addLog('❌ '+T('errBalance'),'error');}
+function repairMiner(id,free=false){let m=activeUserData.miners.find(x=>x.id==id);if(!m)return;if(free){AdService._repairTargetId=id;document.getElementById('adRepairName').textContent=m.name;openAdModal('repair');return;}let c=m.repairCost;if(activeUserData.treasuryUSD>=c){activeUserData.treasuryUSD-=c;m.health=100;AdService._repairCount++;if(AdService._repairCount%CONFIG_ADS.interstitialEvery===0)setTimeout(()=>triggerInterstitial(),400);addLog(`🔧 ${m.name} ${T('logRepaired')} -$${c}`,'success');saveState();render();}else addLog('❌ '+T('errInsufBalance'),'error');}
+function upgradeMiner(id){let m=activeUserData.miners.find(x=>x.id==id);if(!m)return;if(activeUserData.treasuryUSD>=m.upgradeCost){activeUserData.treasuryUSD-=m.upgradeCost;m.hashPower+=m.upgradeHash;m.level=(m.level||1)+1;m.upgradeCost=Math.floor(m.upgradeCost*1.4);addLog(`⬆️ ${m.name} ${T('logUpgraded')} +${m.upgradeHash} GH/s (Lv.${m.level})`,'success');saveState();render();}else addLog(T('errInsufBalance'),'error');}
+function startMining(){if(activeUserData.miningActive){activeUserData.miningActive=false;addLog('⏸️ '+T('logMiningStop'),'info');stopMatrix();saveState();render();return;}if(calcTotalHashrate()===0){addLog('❌ '+T('logNoDevice'),'error');return;}if(activeUserData.sessionSeconds<=0)activeUserData.sessionSeconds=3600;activeUserData.miningActive=true;addLog('🚀 '+T('logMiningStart'),'success');startMatrix();saveState();render();}
+function activateBoost(){openAdModal('boost');}
+function withdrawFunds(amount,address){if(!address||!address.trim()){addLog(T('errWallet'),'error');return;}if(amount<10){addLog(T('errMinWithdraw'),'error');return;}if(amount>activeUserData.treasuryUSD){addLog(T('errInsufBalance'),'error');return;}activeUserData.treasuryUSD-=amount;addLog(`💰 $${amount} ${T('logWithdraw')}: ${address.substring(0,8)}...`,'success');showToast(T('toastWithdraw'));saveState();render();}
+
+/* ══ RENDER ══ */
+function renderLogin(){
+  return `<div class="login-wrapper">
+    <div class="login-logo-area">
+      <span class="login-logo-icon" id="logoIcon" onclick="handleLogoTap()" style="cursor:pointer;user-select:none">🏭⛏️</span>
+      <div class="login-title">HASHNODE GLOBAL</div>
+      <div class="login-subtitle">${T('appName')}</div>
+      <div class="login-sim-badge">⚠️ ${T('simulation')}</div>
+    </div>
+    <div class="glass-card">
+      <!-- Dil açılır menü -->
+      <div style="margin-bottom:14px">
+        <div class="lang-dropdown-btn" id="langDropdownBtn" onclick="toggleLangDropdown()">
+          <span class="selected-flag">🇹🇷</span>
+          <span class="selected-name">Türkçe</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="lang-dropdown-list" id="langDropdownList"></div>
+      </div>
+      <input id="loginEmail" class="input-field" placeholder="${T('email')}" style="margin-bottom:12px">
+      <div class="password-wrapper">
+        <input id="loginPass" type="password" class="input-field" placeholder="${T('password')}">
+        <span class="toggle-password" onclick="window.togglePwd('loginPass')">👁️</span>
+      </div>
+      <!-- Kullanıcı sözleşmesi -->
+      <div class="terms-area">
+        <div class="terms-check-row">
+          <input type="checkbox" id="chkTerms">
+          <label for="chkTerms">${T('termsAgree')} <span class="terms-link" onclick="openTerms(event)">${T('terms')}</span> / <span class="terms-link" onclick="openTerms(event)">${T('privacy')}</span></label>
+        </div>
+        <div class="terms-check-row">
+          <input type="checkbox" id="chkAge">
+          <label for="chkAge">${T('ageConfirm')}</label>
+        </div>
+      </div>
+      <button id="doLoginBtn" class="btn btn-primary" style="width:100%;margin-top:14px">🔐 ${T('login')}</button>
+      <div style="margin-top:12px"><button id="goRegBtn" class="btn" style="width:100%">📝 ${T('createAccount')}</button></div>
+      <div class="text-dim" style="margin-top:10px;text-align:center">${T('demo')} demo@hashnode.com / 123456</div>
+    </div>
+  </div>`;
+}
+function renderRegister(){
+  return `<div class="glass-card">
+    <h2>📝 ${T('register')}</h2>
+    <input id="regUname" class="input-field" placeholder="${T('username')}" style="margin-bottom:12px">
+    <input id="regEmail" class="input-field" placeholder="${T('email')}" style="margin-bottom:12px">
+    <div class="password-wrapper">
+      <input id="regPass" type="password" class="input-field" placeholder="${T('password')}">
+      <span class="toggle-password" onclick="window.togglePwd('regPass')">👁️</span>
+    </div>
+    <button id="doRegBtn" class="btn btn-primary" style="width:100%;margin-top:20px">✅ ${T('register')}</button>
+    <div style="margin-top:16px"><button id="backLoginBtn" class="btn" style="width:100%">${T('backToLogin')}</button></div>
+  </div>`;
+}
+function renderHome(){
+  const totalHash=calcTotalHashrate().toFixed(1);
+  const btcPerDay=(getBTCperSec()*86400).toFixed(8);
+  return `<div class="glass-card"><div class="flex-between"><h2>🏭 HASHNODE</h2><div class="user-badge">👤 ${activeUserData.username}<br>💰 $${activeUserData.treasuryUSD.toFixed(2)}</div></div></div>
+  <div class="glass-card">
+    <div class="flex-between"><span>💰 ${T('balance')}</span><span class="neon-green stat-value">$${activeUserData.treasuryUSD.toFixed(2)}</span></div>
+    <div class="flex-between"><span>⚡ ${T('hashrate')}</span><span class="neon-cyan stat-value">${totalHash} GH/s</span></div>
+    <div class="flex-between"><span>📈 BTC/USDT</span><span class="neon-green">$${btcPrice.toLocaleString()}</span></div>
+    <div class="flex-between text-dim"><span>${T('btcMined')}: ${activeUserData.minedBTC.toFixed(8)}</span><span>${T('dailyEst')} ~${btcPerDay} BTC</span></div>
+  </div>
+  <div class="glass-card">
+    <h3>📊 ${T('liveMarket')}</h3>
+    <div class="crypto-ticker">${cryptoList.map(c=>`<div class="coin-card"><strong>${c.symbol}</strong><div>$${c.price.toLocaleString()}</div><div class="${c.change>=0?'positive':'negative'}">${c.change>=0?'▲':'▼'} ${Math.abs(c.change)}%</div></div>`).join('')}</div>
+    <div class="text-dim" style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span>⚡ ${T('marketSim')}</span><span style="color:#00ff8888;font-size:.65rem">🌐 CoinGecko</span></div>
+  </div>`;
+}
+function renderMining(){
+  const isA=activeUserData.miningActive;
+  const sMin=Math.floor(activeUserData.sessionSeconds/60),sSec=activeUserData.sessionSeconds%60;
+  const btcF=getBTCperSec(),usdF=(btcF*btcPrice).toFixed(4);
+  const boostOn=activeUserData.boostMultiplier===2;
+  const boostSlot=AdService.getSlot('boostRewarded');
+  return `<div class="glass-card">
+    <h2>⛏️ ${T('miningPanel')} ${isA?'🟢 '+T('active'):'🔴 '+T('idle')}</h2>
+    <div class="flex-between" style="background:#00000055;border-radius:60px;padding:8px 12px">
+      <span>${isA?'<span class="cooler-animation">🌀</span> '+T('coolerOn'):'❄️ '+T('coolerOff')}</span>
+      <span class="neon-cyan">⏱️ ${sMin}dk ${sSec}sn</span>
+    </div>
+    <div class="flex-between" style="margin-top:12px"><span>💎 ${T('btcPerSec')}</span><span class="neon-green stat-value" style="font-size:1.2rem">${btcF.toFixed(12)}</span></div>
+    <div class="flex-between"><span>💵 ${T('usdPerSec')}</span><span class="neon-cyan stat-value" style="font-size:1.2rem">~$${usdF}</span></div>
+    <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-primary ${isA?'btn-mining-active':''}" id="miningToggleBtn">${isA?T('stopMining'):T('startMining')}</button>
+      ${boostSlot?.enabled?`<button class="btn-ad-boost ${boostOn?'boost-is-active':''}" id="boostBtn">${boostOn?'2x AKTİF ⚡':'📺 2x Boost'}</button>`:`<button class="btn btn-warning" id="boostBtn">${boostOn?T('boostActive'):T('boost')}</button>`}
+    </div>
+    <div class="text-dim" style="margin-top:8px">Boost: ${boostOn?T('boostActive'):T('boostNormal')} ${(!boostOn&&boostSlot?.enabled)?' — 📺 Reklam izle, ücretsiz!':''}</div>
+  </div>
+  <div class="glass-card">
+    <div class="flex-between"><span>🌀 ${T('coolingPerf')}</span><span>${isA?T('coolingOn'):T('coolingOff')}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${isA?100:10}%"></div></div>
+  </div>
+  ${isA?'':`<div class="glass-card"><div class="text-dim" style="text-align:center">${T('startHint')}</div></div>`}`;
+}
+function renderFarm(){
+  const dmg=activeUserData.miners.filter(m=>m.health<30);
+  let alertHtml=dmg.length>0?`<div class="alert-box">⚠️ ${dmg.length} ${T('damagedAlert')}</div>`:'';
+  const repSlot=AdService.getSlot('repairRewarded');
+  let owned=activeUserData.miners.map(m=>`<div class="miner-card ${m.health<30?'damaged':''}">
+    <div class="flex-between"><span style="font-size:1.8rem">${m.img}${m.health<30?'🔴':''}</span><span><strong>${m.name}</strong> Lv.${m.level||1}</span><span>⚡ ${m.hashPower.toFixed(1)} GH/s</span></div>
+    <div style="font-size:.8rem">❤️ ${T('health')} <strong class="${m.health>60?'neon-green':m.health>30?'':'negative'}">${m.health.toFixed(1)}%</strong></div>
+    <div class="progress-bar"><div class="progress-fill ${m.health<=60?'low':''}" style="width:${m.health}%"></div></div>
+    <div class="flex-between text-dim"><span>🔧 $${m.repairCost}</span><span>⬆️ $${m.upgradeCost}</span></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-primary" onclick="window.repairPaid(${m.id})">🔨 ${T('repair')}</button>
+      ${(m.health<80&&repSlot?.enabled)?`<button class="btn-ad-repair" onclick="window.repairFree(${m.id})">📺 Video İzle &amp; Ücretsiz Onar</button>`:''}
+      <button class="btn" onclick="window.upgradeM(${m.id})">${T('upgrade')}</button>
+    </div>
+  </div>`).join('');
+  let shop=MINER_TEMPLATES.map(t=>`<div class="miner-card">
+    <div class="flex-between"><span style="font-size:1.8rem">${t.img}</span><span>${t.name}</span><span>⚡ ${t.hashPower} GH/s</span></div>
+    <div>${T('price')} $${t.price}</div>
+    <button class="btn btn-primary" style="margin-top:8px" onclick="window.buyM('${t.name}',${t.hashPower},${t.price},'${t.img}',${t.repairCost},${t.upgradeCost},${t.upgradeHash})">${T('buyBtn')}</button>
+  </div>`).join('');
+  return `${alertHtml}
+  <div class="glass-card"><h2>🏭 ${T('farmTitle')}</h2><div class="farm-grid">${owned||`<div class="text-dim">${T('noDevice')}</div>`}</div></div>
+  <div class="glass-card"><h3>🛍️ ${T('shopTitle')}</h3><div class="farm-grid">${shop}</div></div>`;
+}
+function renderWithdraw(){
+  return `<div class="glass-card">
+    <h2>💸 ${T('withdrawTitle')}</h2>
+    <div class="flex-between"><span>💰 ${T('currentBalance')}</span><span class="neon-green stat-value">$${activeUserData.treasuryUSD.toFixed(2)}</span></div>
+    <div class="warning-box">${T('withdrawWarning')}</div>
+    <input type="text" id="wAddr" class="input-field" placeholder="${T('walletAddress')}" style="margin-bottom:12px">
+    <input type="number" id="wAmt" class="input-field" placeholder="${T('amount')}" style="margin-bottom:12px">
+    <button id="wBtn" class="btn btn-primary" style="width:100%">${T('withdrawBtn')}</button>
+  </div>
+  <div class="glass-card">
+    <h3>📜 ${T('logTitle')}</h3>
+    <div id="logArea" style="height:200px;overflow-y:auto;font-size:.7rem;font-family:monospace"></div>
+  </div>`;
+}
+function renderSettings(){
+  const isDark=!document.body.classList.contains('light-mode');
+  const isAdmin=currentUser?.isAdmin||currentUser?.email==='demo@hashnode.com';
+  return `<div class="glass-card">
+    <h2>⚙️ ${T('settingsTitle')}</h2>
+    <div class="settings-row"><span>🌙 ${T('themeSection')}</span><div class="toggle-switch ${isDark?'on':''}" id="themeSwitch"></div></div>
+    <div class="settings-row"><span>🖥️ ${T('matrixSection')}</span><div class="toggle-switch ${matrixEnabled?'on':''}" id="matrixSwitch"></div></div>
+    <div class="settings-row"><span>${T('version')}</span><span class="version-badge">v6.0 AdMob</span></div>
+    <div class="settings-row" style="font-size:.75rem;color:#b0c4de"><span>📺 AdMob App ID</span><span style="color:#f0b429;font-family:monospace;font-size:.6rem;word-break:break-all;max-width:200px;text-align:right">${CONFIG_ADS.admobAppId}</span></div>
+    ${isAdmin?`<div class="settings-row"><button class="btn btn-warning" onclick="openAdmin()" style="width:100%">⚙️ ${T('adminPanel')}</button></div>`:''}
+    <div class="settings-row"><button class="btn btn-danger" onclick="handleLogout()" style="width:100%">🚪 Çıkış Yap</button></div>
+  </div>`;
+}
+
+/* Globals */
+window.togglePwd=id=>{let f=document.getElementById(id);if(f)f.type=f.type==='password'?'text':'password';};
+window.repairPaid=id=>repairMiner(id,false);
+window.repairFree=id=>repairMiner(id,true);
+window.upgradeM=id=>upgradeMiner(id);
+window.buyM=(n,h,p,i,r,u,uh)=>buyMiner({name:n,hashPower:h,price:p,img:i,repairCost:r,upgradeCost:u,upgradeHash:uh});
+
+function render(){
+  const container=document.getElementById('rootApp');if(!container)return;
+  if(!isLoggedIn){
+    container.innerHTML=`<div class="app-screen">${activePage==='register'?renderRegister():renderLogin()}</div>`;
+    attachAuthEvents();
+    // Dil dropdown'ı doldur
+    setTimeout(()=>{buildLangDropdown();},50);
+    return;
+  }
+  let content='';
+  if(activePage==='home')content=renderHome();
+  else if(activePage==='mining')content=renderMining();
+  else if(activePage==='farm')content=renderFarm();
+  else if(activePage==='settings')content=renderSettings();
+  else content=renderWithdraw();
+  const nav=`<div class="bottom-nav">
+    <div class="nav-icon ${activePage==='home'?'active':''}" data-page="home"><i>🏠</i><span>${T('home')}</span></div>
+    <div class="nav-icon ${activePage==='mining'?'active':''}" data-page="mining"><i>⛏️</i><span>${T('mining')}</span></div>
+    <div class="nav-icon ${activePage==='farm'?'active':''}" data-page="farm"><i>🏭</i><span>${T('farm')}</span></div>
+    <div class="nav-icon ${activePage==='withdraw'?'active':''}" data-page="withdraw"><i>💵</i><span>${T('withdraw')}</span></div>
+    <div class="nav-icon ${activePage==='settings'?'active':''}" data-page="settings"><i>⚙️</i><span>${T('settings')}</span></div>
+  </div>`;
+  container.innerHTML=`<div class="app-screen">${content}</div>${nav}`;
+  if(activePage==='mining'){document.getElementById('miningToggleBtn')?.addEventListener('click',startMining);document.getElementById('boostBtn')?.addEventListener('click',activateBoost);}
+  if(activePage==='withdraw'){const ld=document.getElementById('logArea');if(ld)ld.innerHTML=activeUserData.systemLogs.map(l=>`<div style="border-left:3px solid ${l.type==='error'?'#ff5555':l.type==='warn'?'#ffaa33':'#00ff88'};padding-left:8px;margin-bottom:6px"><span style="color:#0ff">[${l.time}]</span> ${l.msg}</div>`).join('');document.getElementById('wBtn')?.addEventListener('click',()=>{let a=parseFloat(document.getElementById('wAmt')?.value),addr=document.getElementById('wAddr')?.value;if(!isNaN(a))withdrawFunds(a,addr);});}
+  if(activePage==='settings'){document.getElementById('themeSwitch')?.addEventListener('click',()=>{document.body.classList.toggle('light-mode');document.getElementById('themeToggle').textContent=document.body.classList.contains('light-mode')?'☀️':'🌙';render();});document.getElementById('matrixSwitch')?.addEventListener('click',()=>{matrixEnabled=!matrixEnabled;if(!matrixEnabled)stopMatrix();else if(activeUserData.miningActive)startMatrix();saveState();render();});}
+  document.querySelectorAll('.nav-icon[data-page]').forEach(el=>el.addEventListener('click',()=>{activePage=el.getAttribute('data-page');render();}));
+}
+function attachAuthEvents(){
+  if(activePage==='login'){
+    document.getElementById('doLoginBtn')?.addEventListener('click',()=>{const e=document.getElementById('loginEmail')?.value,p=document.getElementById('loginPass')?.value;if(e&&p)handleLogin(e,p);});
+    document.getElementById('goRegBtn')?.addEventListener('click',()=>{activePage='register';render();});
+  }else{
+    document.getElementById('doRegBtn')?.addEventListener('click',()=>{const u=document.getElementById('regUname')?.value,e=document.getElementById('regEmail')?.value,p=document.getElementById('regPass')?.value;if(handleRegister(e,p,u)){activePage='login';render();}});
+    document.getElementById('backLoginBtn')?.addEventListener('click',()=>{activePage='login';render();});
+  }
+}
+
+/* Demo kullanıcı */
+if(!usersDB.find(u=>u.email==='demo@hashnode.com')){
+  const dm=MINER_TEMPLATES.map((t,i)=>({id:i+1,...t,health:100,level:1,discountUsed:false}));
+  usersDB.push({email:'demo@hashnode.com',password:'123456',username:'DemoMiner',isAdmin:true,userData:{username:'DemoMiner',treasuryUSD:18500,minedBTC:0.612,miners:dm,sessionSeconds:0,miningActive:false,boostMultiplier:1,systemLogs:[]}});
+}
+
+/* Tema butonu */
+document.getElementById('themeToggle')?.addEventListener('click',()=>{document.body.classList.toggle('light-mode');document.getElementById('themeToggle').textContent=document.body.classList.contains('light-mode')?'☀️':'🌙';render();});
+
+/* Başlat */
+loadState();
+loadAdConfig();
+loadAdminCreds();
+checkMaintenanceMode();
+loadTestDeviceIds();
+if(activeUserData.miningActive)startMatrix();
+startMiningBackground();
+startMarketSimulation();
+startWearSimulation();
+render();
+
+/* Banner göster */
+if(!isLoggedIn){
+  document.getElementById('adLoginBanner').style.display='block';
+  setTimeout(()=>AdService.showBanner('loginBanner','TOP_CENTER'),600);
+}else{
+  document.getElementById('adBottomBanner').style.display='flex';
+  setTimeout(()=>AdService.showBanner('bottomBanner','BOTTOM_CENTER'),600);
+}
+</script>
+
+<!-- ══ BAKIM MODU OVERLAY ══ -->
+<div id="maintenanceOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:radial-gradient(circle at 50% 40%,#0a1a2a,#020408);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
+  <div style="font-size:4rem;margin-bottom:16px;display:inline-block;animation:spin-slow 4s linear infinite">⚙️</div>
+  <div style="font-family:'Segoe UI',sans-serif;font-size:1.8rem;font-weight:900;color:#00ff88;text-shadow:0 0 20px #00ff88,0 0 40px #00ff8855;letter-spacing:3px;margin-bottom:10px">BAKIM MODU</div>
+  <div style="font-size:1rem;color:#0ff;letter-spacing:2px;margin-bottom:20px">HASHNODE GLOBAL</div>
+  <div style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.25);border-radius:20px;padding:20px 28px;max-width:340px;margin-bottom:24px">
+    <div style="font-size:.9rem;color:#b0c4de;line-height:1.7" id="maintenanceMsg">Uygulama şu anda bakımda.<br>Kısa süre içinde geri döneceğiz. 🚀</div>
+    <div style="margin-top:10px;font-size:.75rem;color:rgba(0,255,136,.5)" id="maintenanceEta"></div>
+  </div>
+  <div style="font-size:.7rem;color:rgba(200,216,240,.25);letter-spacing:1px">© HASHNODE GLOBAL</div>
+</div>
+
+</body>
+</html>
 
