@@ -14,8 +14,7 @@ jobs:
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
           mkdir -p www
-          # Eğer ana dizinde index.html varsa onu www içine kopyala
-          [ -f index.html ] && cp index.html www/index.html || echo "index.html not found, using placeholder"
+          [ -f index.html ] && cp index.html www/index.html || echo "index.html not found"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -25,7 +24,6 @@ jobs:
 
       - name: Configure and Build AAB
         run: |
-          # webDir hatasını çözmek için dizini zorla tanımlıyoruz
           npx cap add android || true
           sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json || true
           npx cap sync android
@@ -33,12 +31,8 @@ jobs:
           chmod +x gradlew
           ./gradlew bundleRelease
 
-      - name: Prepare AAB File
-        run: |
-          mv android/app/build/outputs/bundle/release/app-release-unsigned.aab HashNode-V9.aab
-
       - name: Upload AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: HashNode-V9-Bundle
-          path: HashNode-V9.aab
+          path: android/app/build/outputs/bundle/release/*.aab
