@@ -14,7 +14,8 @@ jobs:
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
           mkdir -p www
-          cp index.html www/index.html || true
+          # Eğer ana dizinde index.html varsa onu www içine kopyala
+          [ -f index.html ] && cp index.html www/index.html || echo "index.html not found, using placeholder"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -22,9 +23,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Add Android Platform & Build AAB
+      - name: Configure and Build AAB
         run: |
+          # webDir hatasını çözmek için dizini zorla tanımlıyoruz
           npx cap add android || true
+          sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json || true
           npx cap sync android
           cd android
           chmod +x gradlew
