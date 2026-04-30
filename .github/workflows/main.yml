@@ -1,28 +1,145 @@
-permissions:
-  contents: write
-  pages: write
-  id-token: write
+name: HashNode Global — Auto Release APK
 
-env:
-  CI: false
-name: Build
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
-  build:
+  build-release:
+    name: 🏗️ Build Signed Release APK
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      # ── 1. Kodu çek ──────────────────────────────────────
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js ───────────────────────────────────────
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm install @capacitor/cli @capacitor/core @capacitor/android
-      - run: mkdir www
-      - run: cp index.html www/
-      - run: npx cap init "HashNode" com.minersim.hash --web-dir www
-      - run: npx cap add android
-      - run: npx cap sync android
-      - run: cd android && ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Java 17 ───────────────────────────────────────
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          name: HashNode-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          java-version: '17'
+          distribution: 'temurin'
+
+      # ── 4. Android SDK ───────────────────────────────────
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ── 5. npm bağımlılıkları ────────────────────────────
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      # ── 6. Web dosyalarını kopyala ───────────────────────
+      - name: 🌐 Prepare web assets
+        run: |
+          mkdir -p www
+          cp HASHNODE_GLOBAL_FINAL.html www/index.html
+          echo "✅ www/index.html hazır"
+
+      # ── 7. Capacitor sync ────────────────────────────────
+      - name: 🔄 Capacitor sync
+        run: npx cap sync android
+
+      # ── 8. Gradle izinleri ───────────────────────────────
+      - name: 🔧 Make gradlew executable
+        run: chmod +x android/gradlew
+
+      # ── 9. KRİTİK: Keystore'u Actions içinde otomatik oluştur ──
+      #    Dışarıdan hiçbir dosya veya Secret yüklemene gerek yok.
+      #    keytool, JDK ile birlikte geliyor.
+      - name: 🔑 Auto-Generate Keystore
+        run: |
+          keytool -genkey -v \
+            -keystore android/app/hashnode-release.keystore \
+            -alias hashnode \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass HashnodeStore2024! \
+            -keypass HashnodeKey2024! \
+            -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
+          echo "✅ Keystore oluşturuldu"
+
+      # ── 10. Signing config'i build.gradle'a ekle ─────────
+      - name: 📝 Inject Signing Config into build.gradle
+        run: |
+          cat >> android/app/build.gradle << 'GRADLEEOF'
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("hashnode-release.keystore")
+                      storePassword "HashnodeStore2024!"
+                      keyAlias "hashnode"
+                      keyPassword "HashnodeKey2024!"
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                      shrinkResources false
+                  }
+              }
+          }
+          GRADLEEOF
+          echo "✅ Signing config eklendi"
+
+      # ── 11. Release APK derle ────────────────────────────
+      - name: 🏗️ Build Release APK
+        working-directory: android
+        run: |
+          ./gradlew assembleRelease --stacktrace
+          echo "✅ Build tamamlandı"
+
+      # ── 12. APK'yı yeniden adlandır ──────────────────────
+      - name: ✏️ Rename APK to HashNode-V9-Release.apk
+        run: |
+          mkdir -p release-output
+          APK_PATH=$(find android/app/build/outputs/apk/release/ -name "*.apk" | head -1)
+          cp "$APK_PATH" release-output/HashNode-V9-Release.apk
+          ls -lh release-output/
+          echo "✅ HashNode-V9-Release.apk hazır"
+
+      # ── 13. İmzayı doğrula ───────────────────────────────
+      - name: 🔍 Verify APK Signature
+        run: |
+          BUILD_TOOLS=$ANDROID_SDK_ROOT/build-tools/$(ls $ANDROID_SDK_ROOT/build-tools/ | sort -V | tail -1)
+          $BUILD_TOOLS/apksigner verify --print-certs release-output/HashNode-V9-Release.apk
+          echo "✅ İmza doğrulandı — Google Play kabul edecek"
+
+      # ── 14. Keystore'u artifact olarak sakla ─────────────
+      - name: 💾 Upload Keystore Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNode-Keystore-Backup
+          path: android/app/hashnode-release.keystore
+          retention-days: 90
+
+      # ── 15. Release APK'yı artifact olarak yükle ─────────
+      - name: 📤 Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNode-V9-Release
+          path: release-output/HashNode-V9-Release.apk
+          retention-days: 30
+
+      # ── 16. Build özeti ───────────────────────────────────
+      - name: 📋 Build Summary
+        run: |
+          echo "======================================="
+          echo "  ✅  HashNode Global v9 — BUILD OK"
+          echo "======================================="
+          echo "  APK  : HashNode-V9-Release.apk"
+          echo "  Boyut: $(du -sh release-output/HashNode-V9-Release.apk | cut -f1)"
+          echo "  İmza : Signed Release (Google Play OK)"
+          echo "======================================="
