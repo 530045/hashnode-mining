@@ -1,4 +1,4 @@
-name: Build Signed PKCS12 AAB
+name: Build Signed Release AAB
 on: [push]
 
 jobs:
@@ -22,8 +22,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Initialize Android Project
+        run: |
+          npx cap add android || true
+          sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json || true
+          npx cap sync android
+
       - name: Decode Keystore
-        run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > android/app/release.keystore
+        run: |
+          mkdir -p android/app
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > android/app/release.keystore
 
       - name: Build and Sign AAB
         env:
@@ -31,9 +39,6 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          npx cap add android || true
-          sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json || true
-          npx cap sync android
           cd android
           chmod +x gradlew
           ./gradlew bundleRelease \
