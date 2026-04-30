@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Configure and Build AAB
+      - name: Build AAB
         run: |
           npx cap add android || true
           sed -i 's/"webDir": "."/"webDir": "www"/' capacitor.config.json || true
@@ -30,9 +30,11 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew bundleRelease
+          # Dosyayı kolay bulabilmek için ana dizine kopyalıyoruz
+          cp app/build/outputs/bundle/release/*.aab ../HashNode-V9.aab
 
       - name: Upload AAB Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HashNode-V9-Bundle
-          path: android/app/build/outputs/bundle/release/*.aab
+          name: HashNode-V9-Final-AAB
+          path: HashNode-V9.aab
