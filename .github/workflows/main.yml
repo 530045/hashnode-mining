@@ -1,4 +1,4 @@
-   name: HashNode Global — Auto Release APK
+name: HashNode Global — Auto Release APK
 
 on:
   push:
