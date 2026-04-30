@@ -16,7 +16,7 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      # ── 2. Node.js (cache OLMADAN — package-lock.json gerekmez) ──
+      # ── 2. Node.js ───────────────────────────────────────
       - name: 🟢 Setup Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -33,11 +33,31 @@ jobs:
       - name: 🤖 Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ── 5. package.json yoksa oluştur ────────────────────
-      - name: 📝 Create package.json if missing
+      # ── 5. www klasörü + index.html (CAP ADD'DEN ÖNCE) ───
+      #    webDir mevcut olmazsa cap add hata verir
+      - name: 🌐 Create www folder and index.html FIRST
         run: |
-          if [ ! -f package.json ]; then
-            cat > package.json << 'EOF'
+          mkdir -p www
+          if [ -f HASHNODE_GLOBAL_FINAL.html ]; then
+            cp HASHNODE_GLOBAL_FINAL.html www/index.html
+            echo "✅ HASHNODE_GLOBAL_FINAL.html kopyalandı"
+          elif [ -f index.html ]; then
+            cp index.html www/index.html
+            echo "✅ index.html kopyalandı"
+          else
+            cat > www/index.html << 'EOF'
+          <!DOCTYPE html><html><head><meta charset="UTF-8">
+          <title>HashNode Global</title></head>
+          <body><h1>HashNode Global</h1></body></html>
+          EOF
+            echo "⚠️ Placeholder www/index.html oluşturuldu"
+          fi
+          ls -la www/
+
+      # ── 6. package.json oluştur ───────────────────────────
+      - name: 📝 Create package.json
+        run: |
+          cat > package.json << 'EOF'
           {
             "name": "hashnode-global",
             "version": "9.0.0",
@@ -46,78 +66,61 @@ jobs:
               "build": "echo Build OK"
             },
             "dependencies": {
-              "@capacitor/core": "^5.7.0",
-              "@capacitor/android": "^5.7.0",
-              "@capacitor-community/admob": "^5.0.0"
+              "@capacitor/core": "5.7.0",
+              "@capacitor/android": "5.7.0"
             },
             "devDependencies": {
-              "@capacitor/cli": "^5.7.0"
+              "@capacitor/cli": "5.7.0"
             }
           }
           EOF
-            echo "✅ package.json oluşturuldu"
-          else
-            echo "✅ package.json zaten var"
-          fi
+          echo "✅ package.json oluşturuldu"
 
-      # ── 6. capacitor.config.json yoksa oluştur ───────────
-      - name: 📝 Create capacitor.config.json if missing
+      # ── 7. capacitor.config.json oluştur (webDir: www) ───
+      - name: 📝 Create capacitor.config.json
         run: |
-          if [ ! -f capacitor.config.json ]; then
-            cat > capacitor.config.json << 'EOF'
+          cat > capacitor.config.json << 'EOF'
           {
             "appId": "com.hashnode.global",
             "appName": "HashNode Global",
-            "webDir": "www",
-            "plugins": {
-              "AdMob": {
-                "appId": "ca-app-pub-3940256099942544~3347511713",
-                "isTesting": false
-              }
-            }
+            "webDir": "www"
           }
           EOF
-            echo "✅ capacitor.config.json oluşturuldu"
-          fi
+          echo "✅ capacitor.config.json oluşturuldu (webDir: www)"
 
-      # ── 7. npm install (ci değil — lock file gerekmez) ───
+      # ── 8. npm install ────────────────────────────────────
       - name: 📦 Install dependencies
         run: npm install
 
-      # ── 8. Web dosyalarını hazırla ────────────────────────
-      - name: 🌐 Prepare web assets
-        run: |
-          mkdir -p www
-          if [ -f HASHNODE_GLOBAL_FINAL.html ]; then
-            cp HASHNODE_GLOBAL_FINAL.html www/index.html
-            echo "✅ HASHNODE_GLOBAL_FINAL.html → www/index.html"
-          elif [ -f index.html ]; then
-            cp index.html www/index.html
-            echo "✅ index.html → www/index.html"
-          else
-            echo "<h1>HashNode Global</h1>" > www/index.html
-            echo "⚠️ Placeholder index.html oluşturuldu"
-          fi
-
-      # ── 9. Android platformu yoksa ekle ──────────────────
-      - name: 🤖 Add Android platform if missing
+      # ── 9. Android platformu ekle (www hazır olduğu için) ─
+      - name: 🤖 Add Android platform
         run: |
           if [ ! -d android ]; then
             npx cap add android
-            echo "✅ Android platformu eklendi"
+            echo "✅ Android eklendi"
           else
-            echo "✅ Android platformu zaten var"
+            echo "✅ Android zaten var"
           fi
 
-      # ── 10. Capacitor sync ───────────────────────────────
-      - name: 🔄 Capacitor sync
-        run: npx cap sync android
+      # ── 10. assets klasörünü garantiye al ─────────────────
+      - name: 📁 Ensure assets folder exists
+        run: |
+          mkdir -p android/app/src/main/assets
+          echo "✅ assets klasörü hazır"
 
-      # ── 11. Gradle izinleri ──────────────────────────────
+      # ── 11. Capacitor copy (web → android assets) ─────────
+      - name: 📋 Capacitor copy
+        run: npx cap copy android
+
+      # ── 12. Capacitor update ──────────────────────────────
+      - name: 🔄 Capacitor update
+        run: npx cap update android
+
+      # ── 13. Gradle izinleri ───────────────────────────────
       - name: 🔧 Make gradlew executable
         run: chmod +x android/gradlew
 
-      # ── 12. Keystore'u otomatik oluştur ──────────────────
+      # ── 14. Keystore otomatik oluştur ─────────────────────
       - name: 🔑 Auto-Generate Keystore
         run: |
           keytool -genkey -v \
@@ -131,11 +134,10 @@ jobs:
             -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
           echo "✅ Keystore oluşturuldu"
 
-      # ── 13. Signing config'i build.gradle'a ekle ─────────
+      # ── 15. Signing config build.gradle'a ekle ────────────
       - name: 📝 Inject Signing Config
         run: |
           BUILD_GRADLE="android/app/build.gradle"
-          # Daha önce eklenmemişse ekle
           if ! grep -q "HashNode Auto-Signing" "$BUILD_GRADLE"; then
             cat >> "$BUILD_GRADLE" << 'GRADLEEOF'
 
@@ -163,12 +165,12 @@ jobs:
             echo "✅ Signing config zaten var"
           fi
 
-      # ── 14. Release APK derle ────────────────────────────
+      # ── 16. Release APK derle ─────────────────────────────
       - name: 🏗️ Build Release APK
         working-directory: android
         run: ./gradlew assembleRelease --stacktrace
 
-      # ── 15. APK'yı bul ve yeniden adlandır ───────────────
+      # ── 17. APK yeniden adlandır ──────────────────────────
       - name: ✏️ Rename APK
         run: |
           mkdir -p release-output
@@ -178,15 +180,15 @@ jobs:
           ls -lh release-output/
           echo "✅ HashNode-V9-Release.apk hazır"
 
-      # ── 16. İmzayı doğrula ───────────────────────────────
+      # ── 18. İmzayı doğrula ───────────────────────────────
       - name: 🔍 Verify Signature
         run: |
           BUILD_TOOLS=$ANDROID_SDK_ROOT/build-tools/$(ls $ANDROID_SDK_ROOT/build-tools/ | sort -V | tail -1)
           $BUILD_TOOLS/apksigner verify --print-certs \
             release-output/HashNode-V9-Release.apk && \
-            echo "✅ İmza doğrulandı — Google Play kabul edecek"
+          echo "✅ İmza doğrulandı — Google Play kabul edecek"
 
-      # ── 17. Keystore artifact ────────────────────────────
+      # ── 19. Keystore artifact ─────────────────────────────
       - name: 💾 Upload Keystore Backup
         uses: actions/upload-artifact@v4
         with:
@@ -194,7 +196,7 @@ jobs:
           path: android/app/hashnode-release.keystore
           retention-days: 90
 
-      # ── 18. Release APK artifact ─────────────────────────
+      # ── 20. Release APK artifact ──────────────────────────
       - name: 📤 Upload Release APK
         uses: actions/upload-artifact@v4
         with:
@@ -202,7 +204,7 @@ jobs:
           path: release-output/HashNode-V9-Release.apk
           retention-days: 30
 
-      # ── 19. Özet ─────────────────────────────────────────
+      # ── 21. Özet ─────────────────────────────────────────
       - name: 📋 Summary
         run: |
           echo "======================================="
