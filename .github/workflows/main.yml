@@ -1,4 +1,4 @@
-name: HashNode Global Fixed
+name: HashNode Global Final Fix
 
 on:
   push:
@@ -20,15 +20,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11' # Java 17 yerine 11 kullanarak imza hatasını gideriyoruz
 
       - name: Fix Directories and Config
         run: |
           npm install
-          # WWW klasörü yoksa oluştur ve içini doldur
           mkdir -p www
           cp index.html www/ 2>/dev/null || echo "<html><body>Hashnode Global</body></html>" > www/index.html
-          # Paket adını zorla ayarla
           echo '{"appId": "com.minersimstudio.hashnodeglobal", "appName": "Hashnode Global", "webDir": "www", "bundledWebRuntime": false}' > capacitor.config.json
           npx cap add android || true
           npx cap sync android
@@ -46,6 +44,8 @@ jobs:
           alias: ${{ secrets.ANDROID_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
 
       - name: Upload
         uses: actions/upload-artifact@v4
