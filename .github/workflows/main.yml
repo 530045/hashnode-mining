@@ -1,4 +1,4 @@
-name: HashNode Global Final Fix
+name: HashNode Global Final Victory
 
 on:
   push:
@@ -16,13 +16,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '11' # Java 17 yerine 11 kullanarak imza hatasını gideriyoruz
+          java-version: '17'
 
-      - name: Fix Directories and Config
+      - name: Fix Everything
         run: |
           npm install
           mkdir -p www
@@ -36,16 +36,11 @@ jobs:
           cd android
           ./gradlew bundleRelease
 
-      - name: Sign App Bundle
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: android/app/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
+      - name: Sign AAB (Manual Fix)
+        run: |
+          # Bu kısım o "Tag number" hatasını çözen manuel imzalamadır
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.jks
+          jarsigner -keystore release.jks -storepass "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" -keypass "${{ secrets.ANDROID_KEY_PASSWORD }}" android/app/build/outputs/bundle/release/app-release.aab "${{ secrets.ANDROID_KEY_ALIAS }}"
 
       - name: Upload
         uses: actions/upload-artifact@v4
