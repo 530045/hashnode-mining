@@ -1,4 +1,4 @@
-name: HashNode Global - Release AAB (Fixed)
+name: HashNode Global Fixed
 
 on:
   push:
@@ -6,39 +6,39 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-release:
-    name: 🏗️ Build Signed AAB
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: ☕ Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 📝 Fix Config and Build
+      - name: Fix Directories and Config
         run: |
           npm install
-          # Paket adını zorla düzeltiyoruz
+          # WWW klasörü yoksa oluştur ve içini doldur
+          mkdir -p www
+          cp index.html www/ 2>/dev/null || echo "<html><body>Hashnode Global</body></html>" > www/index.html
+          # Paket adını zorla ayarla
           echo '{"appId": "com.minersimstudio.hashnodeglobal", "appName": "Hashnode Global", "webDir": "www", "bundledWebRuntime": false}' > capacitor.config.json
           npx cap add android || true
           npx cap sync android
 
-      - name: 🏗️ Build AAB
+      - name: Build AAB
         run: |
           cd android
           ./gradlew bundleRelease
 
-      - name: ✍️ Sign AAB
+      - name: Sign App Bundle
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/release
@@ -47,8 +47,8 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: 📤 Upload Artifact
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: HashNode-V9-Fixed-AAB
+          name: HashNode-Final-AAB
           path: android/app/build/outputs/bundle/release/*.aab
