@@ -1,6 +1,6 @@
 {
   "appId": "com.minersimstudio.hashnodeglobal",
-  "appName": "HashNode Pro",
-  "webDir": ".",
+  "appName": "Hashnode Global",
+  "webDir": "www",
   "bundledWebRuntime": false
 }
