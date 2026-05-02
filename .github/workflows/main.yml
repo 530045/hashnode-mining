@@ -39,7 +39,6 @@ jobs:
           else
             echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>HashNode Global</title></head><body><h1>HashNode Global</h1></body></html>" > www/index.html
           fi
-          echo "✅ www/index.html hazır"
 
       - name: 📝 Create package.json
         run: |
@@ -91,33 +90,70 @@ jobs:
       - name: 🔧 Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: 🔧 Fix build.gradle
+      # ── KRİTİK: build.gradle'ı tamamen yeniden yaz ────────
+      # rootProject null hatası Capacitor'ın ürettiği 3-5. satırlardan
+      # geliyor. Dosyayı sıfırdan yazarak bu sorunu ortadan kaldırıyoruz.
+      - name: 📝 Rewrite build.gradle from scratch
         run: |
-          GRADLE="android/app/build.gradle"
-          echo "=== Mevcut build.gradle ===" && cat "$GRADLE" && echo "==========================="
-          # targetSdk ve compileSdk → 35 (tüm formatlar)
-          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/g' "$GRADLE"
-          sed -i 's/targetSdk [0-9]*/targetSdk 35/g' "$GRADLE"
-          sed -i 's/targetSdk = [0-9]*/targetSdk = 35/g' "$GRADLE"
-          sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 35/g' "$GRADLE"
-          sed -i 's/compileSdk [0-9]*/compileSdk 35/g' "$GRADLE"
-          sed -i 's/compileSdk = [0-9]*/compileSdk = 35/g' "$GRADLE"
-          # debug signing kaldır
-          sed -i '/signingConfig signingConfigs.debug/d' "$GRADLE"
-          echo "=== Düzeltilmiş ===" && grep -E "targetSdk|compileSdk" "$GRADLE"
+          KEYSTORE="$GITHUB_WORKSPACE/hashnode-release.keystore"
+          RUN_NUMBER=${{ github.run_number }}
 
-      - name: 🔢 Bump versionCode
-        run: |
-          GRADLE="android/app/build.gradle"
-          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/g" "$GRADLE"
-          echo "✅ versionCode → ${{ github.run_number }}"
-          grep "versionCode" "$GRADLE" || true
+          cat > android/app/build.gradle << GRADLEOF
+          apply plugin: 'com.android.application'
+
+          android {
+              compileSdkVersion 35
+              defaultConfig {
+                  applicationId "com.minersimstudio.hashnodeglobal"
+                  minSdkVersion 22
+                  targetSdkVersion 35
+                  versionCode $RUN_NUMBER
+                  versionName "1.0.0"
+              }
+              signingConfigs {
+                  release {
+                      storeFile file("$KEYSTORE")
+                      storePassword "Hashnode2024"
+                      keyAlias "hashnodekey"
+                      keyPassword "Hashnode2024"
+                      v1SigningEnabled true
+                      v2SigningEnabled true
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                      shrinkResources false
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+
+          repositories {
+              google()
+              mavenCentral()
+          }
+
+          dependencies {
+              implementation project(':capacitor-android')
+              implementation project(':capacitor-cordova-android-plugins')
+              implementation fileTree(dir: 'libs', include: ['*.jar'])
+          }
+          GRADLEOF
+
+          echo "✅ build.gradle yeniden yazıldı"
+          cat android/app/build.gradle
 
       # ── Keystore kontrol ──────────────────────────────────
       - name: 🔑 Setup Keystore
         run: |
           if [ -f "$GITHUB_WORKSPACE/hashnode-release.keystore" ]; then
             echo "✅ Repodaki keystore kullanılıyor"
+            ls -lh "$GITHUB_WORKSPACE/hashnode-release.keystore"
           else
             echo "⚠️ Keystore yok, oluşturuluyor..."
             keytool -genkeypair \
@@ -131,20 +167,14 @@ jobs:
               -storepass "Hashnode2024" \
               -keypass "Hashnode2024" \
               -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
+            ls -lh "$GITHUB_WORKSPACE/hashnode-release.keystore"
           fi
-          ls -lh "$GITHUB_WORKSPACE/hashnode-release.keystore"
 
       # ── AAB derle ─────────────────────────────────────────
       - name: 🏗️ Build Release AAB
         working-directory: android
         run: |
-          KEYSTORE="$GITHUB_WORKSPACE/hashnode-release.keystore"
-          ./gradlew bundleRelease \
-            -Pandroid.injected.signing.store.file="$KEYSTORE" \
-            -Pandroid.injected.signing.store.password="Hashnode2024" \
-            -Pandroid.injected.signing.key.alias="hashnodekey" \
-            -Pandroid.injected.signing.key.password="Hashnode2024" \
-            --stacktrace
+          ./gradlew bundleRelease --stacktrace
           echo "✅ AAB build tamamlandı"
 
       - name: ✏️ Rename AAB
