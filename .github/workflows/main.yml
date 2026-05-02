@@ -122,6 +122,20 @@ jobs:
             -alias hashnodekey 2>/dev/null | grep "SHA1:" || true
 
       # ── versionCode artır ─────────────────────────────────
+      # ── targetSdk ve compileSdk 35 yap ──────────────────
+      - name: 🎯 Set targetSdk 35
+        run: |
+          GRADLE="android/app/build.gradle"
+          # targetSdk 35
+          sed -i 's/targetSdk[Vv]ersion [0-9]*/targetSdkVersion 35/' "$GRADLE" || true
+          sed -i 's/targetSdk = [0-9]*/targetSdk = 35/' "$GRADLE" || true
+          # compileSdk 35
+          sed -i 's/compileSdk[Vv]ersion [0-9]*/compileSdkVersion 35/' "$GRADLE" || true
+          sed -i 's/compileSdk = [0-9]*/compileSdk = 35/' "$GRADLE" || true
+          sed -i 's/compileSdk [0-9]*/compileSdk 35/' "$GRADLE" || true
+          echo "✅ targetSdk → 35, compileSdk → 35"
+          grep -E "targetSdk|compileSdk" "$GRADLE" || true
+
       - name: 🔢 Bump versionCode
         run: |
           GRADLE="android/app/build.gradle"
