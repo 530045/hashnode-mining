@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-release:
-    name: 🏗️ Build Signed AAB
+    name: 🏗️ Build AAB
     runs-on: ubuntu-latest
 
     steps:
@@ -92,71 +92,14 @@ jobs:
       - name: 🔧 Make gradlew executable
         run: chmod +x android/gradlew
 
-      # ── Keystore'u android/ kök dizinine yaz (app/ değil) ─
-      - name: 🔑 Generate PKCS12 Keystore
-        run: |
-          # Keystore'u android/ altına (app/ DEĞİL) kaydediyoruz
-          # Böylece build.gradle'dan rootProject.file() ile erişilir
-          keytool -genkeypair \
-            -v \
-            -storetype PKCS12 \
-            -keystore $GITHUB_WORKSPACE/hashnode-release.keystore \
-            -alias hashnodekey \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass "Hashnode2024" \
-            -keypass "Hashnode2024" \
-            -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
-          echo "✅ Keystore oluşturuldu: $GITHUB_WORKSPACE/hashnode-release.keystore"
-          ls -lh $GITHUB_WORKSPACE/hashnode-release.keystore
-
-      # ── build.gradle'a TAM YOL ile signing config ekle ────
-      - name: 📝 Patch build.gradle — signing config
-        run: |
-          GRADLE="android/app/build.gradle"
-          KEYSTORE_PATH="$GITHUB_WORKSPACE/hashnode-release.keystore"
-
-          echo "=== Keystore yolu: $KEYSTORE_PATH ==="
-          ls -lh "$KEYSTORE_PATH"
-
-          # debug imza referansını temizle
-          sed -i 's/signingConfig signingConfigs\.debug//g' "$GRADLE" || true
-
-          # Tam yol ile signing config ekle
-          cat >> "$GRADLE" << GROOVYEOF
-
-          // HashNode Signing Config
-          android {
-              signingConfigs {
-                  release {
-                      storeFile file("$KEYSTORE_PATH")
-                      storePassword "Hashnode2024"
-                      keyAlias "hashnodekey"
-                      keyPassword "Hashnode2024"
-                      v1SigningEnabled true
-                      v2SigningEnabled true
-                  }
-              }
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                      minifyEnabled false
-                      shrinkResources false
-                  }
-              }
-          }
-          GROOVYEOF
-
-          echo "✅ build.gradle güncellendi"
-          echo "=== Son 20 satır ==="
-          tail -20 "$GRADLE"
-
-      # ── AAB derle ─────────────────────────────────────────
-      - name: 🏗️ Build Release AAB
+      # ── İmzasız Release AAB derle ─────────────────────────
+      # Google Play kendi anahtarıyla otomatik imzalar
+      - name: 🏗️ Build Release AAB (unsigned)
         working-directory: android
         run: |
-          ./gradlew bundleRelease --stacktrace
+          ./gradlew bundleRelease \
+            -x lintVitalRelease \
+            --stacktrace
           echo "✅ AAB build tamamlandı"
 
       # ── AAB yeniden adlandır ───────────────────────────────
@@ -168,14 +111,6 @@ jobs:
           cp "$AAB" release-output/HashNode-V9-Release.aab
           ls -lh release-output/
           echo "✅ HashNode-V9-Release.aab hazır"
-
-      # ── Keystore yedek ────────────────────────────────────
-      - name: 💾 Upload Keystore Backup
-        uses: actions/upload-artifact@v4
-        with:
-          name: HashNode-Keystore-Backup
-          path: ${{ github.workspace }}/hashnode-release.keystore
-          retention-days: 90
 
       # ── AAB artifact ──────────────────────────────────────
       - name: 📤 Upload Release AAB
@@ -192,6 +127,6 @@ jobs:
           echo "============================================"
           echo "  Dosya : HashNode-V9-Release.aab"
           echo "  Boyut : $(du -sh release-output/HashNode-V9-Release.aab | cut -f1)"
-          echo "  Format: Android App Bundle (Google Play)"
-          echo "  İmza  : PKCS12 Signed"
+          echo "  Paket : com.minersimstudio.hashnodeglobal"
+          echo "  İmza  : Google Play tarafından imzalanacak"
           echo "============================================"
