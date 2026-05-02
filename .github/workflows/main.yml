@@ -49,11 +49,11 @@ jobs:
             "version": "9.0.0",
             "scripts": { "build": "echo ok" },
             "dependencies": {
-              "@capacitor/core": "5.7.0",
-              "@capacitor/android": "5.7.0"
+              "@capacitor/core": "5.5.1",
+              "@capacitor/android": "5.5.1"
             },
             "devDependencies": {
-              "@capacitor/cli": "5.7.0"
+              "@capacitor/cli": "5.5.1"
             }
           }
           EOF
@@ -91,13 +91,68 @@ jobs:
       - name: 🔧 Make gradlew executable
         run: chmod +x android/gradlew
 
-      # ── Keystore'u kontrol et ─────────────────────────────
+      # ── build.gradle 5. satır hatasını düzelt ─────────────
+      # Capacitor 5.5.1 bazen rootProject erken çağırıyor
+      # apply plugin satırından önce gelirse düzeltiyoruz
+      - name: 🔧 Fix build.gradle rootProject issue
+        run: |
+          GRADLE="android/app/build.gradle"
+          echo "=== Mevcut build.gradle ==="
+          cat "$GRADLE"
+          echo "==========================="
+
+          # Eğer dosya 'rootProject' ile başlıyorsa veya ilk satırlarda varsa
+          # apply plugin satırından önce gelirse taşı
+          python3 << 'PYEOF'
+          import re
+
+          with open('android/app/build.gradle', 'r') as f:
+              content = f.read()
+
+          # apply plugin satırı yoksa ekle
+          if 'apply plugin' not in content and 'plugins {' not in content:
+              content = "apply plugin: 'com.android.application'\n" + content
+
+          # targetSdkVersion ve compileSdkVersion 35 yap
+          content = re.sub(r'targetSdkVersion\s+\d+', 'targetSdkVersion 35', content)
+          content = re.sub(r'compileSdkVersion\s+\d+', 'compileSdkVersion 35', content)
+          content = re.sub(r'targetSdk\s*=\s*\d+', 'targetSdk = 35', content)
+          content = re.sub(r'compileSdk\s*=\s*\d+', 'compileSdk = 35', content)
+          content = re.sub(r'compileSdk\s+\d+', 'compileSdk 35', content)
+
+          # signingConfig debug kaldır
+          content = re.sub(r'\s*signingConfig\s+signingConfigs\.debug', '', content)
+
+          with open('android/app/build.gradle', 'w') as f:
+              f.write(content)
+
+          print("✅ build.gradle düzeltildi")
+          PYEOF
+
+          echo "=== Düzeltilmiş build.gradle ==="
+          cat "$GRADLE"
+
+      # ── versionCode artır ─────────────────────────────────
+      - name: 🔢 Bump versionCode
+        run: |
+          GRADLE="android/app/build.gradle"
+          python3 << PYEOF
+          import re
+          with open('$GRADLE', 'r') as f:
+              content = f.read()
+          content = re.sub(r'versionCode\s+\d+', 'versionCode ${{ github.run_number }}', content)
+          with open('$GRADLE', 'w') as f:
+              f.write(content)
+          print("✅ versionCode → ${{ github.run_number }}")
+          PYEOF
+
+      # ── Keystore kontrol ──────────────────────────────────
       - name: 🔑 Setup Keystore
         run: |
           if [ -f "$GITHUB_WORKSPACE/hashnode-release.keystore" ]; then
             echo "✅ Repodaki keystore kullanılıyor"
           else
-            echo "⚠️ Keystore bulunamadı, yeni oluşturuluyor..."
+            echo "⚠️ Keystore yok, oluşturuluyor..."
             keytool -genkeypair \
               -v \
               -storetype PKCS12 \
@@ -112,29 +167,7 @@ jobs:
           fi
           ls -lh "$GITHUB_WORKSPACE/hashnode-release.keystore"
 
-      # ── targetSdk ve versionCode güncelle ─────────────────
-      - name: 🎯 Update build.gradle values
-        run: |
-          GRADLE="android/app/build.gradle"
-          echo "=== Mevcut build.gradle ==="
-          cat "$GRADLE"
-          echo "==========================="
-
-          # targetSdkVersion → 35
-          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/g' "$GRADLE"
-          # compileSdkVersion → 35
-          sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 35/g' "$GRADLE"
-          # versionCode → github run number
-          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/g" "$GRADLE"
-          # debug signingConfig'i kaldır
-          sed -i '/signingConfig signingConfigs.debug/d' "$GRADLE"
-
-          echo "=== Güncel değerler ==="
-          grep -E "targetSdk|compileSdk|versionCode|versionName" "$GRADLE" || true
-
-      # ── AAB derle — imzalama -P parametreleriyle ──────────
-      # build.gradle'a hiçbir şey eklemiyoruz
-      # Signing bilgileri direkt gradle komutuna geçiliyor
+      # ── AAB derle ─────────────────────────────────────────
       - name: 🏗️ Build Release AAB
         working-directory: android
         run: |
@@ -154,7 +187,6 @@ jobs:
           echo "Bulunan AAB: $AAB"
           cp "$AAB" release-output/HashNode-V9-Release.aab
           ls -lh release-output/
-          echo "✅ HashNode-V9-Release.aab hazır"
 
       - name: 💾 Upload Keystore Backup
         uses: actions/upload-artifact@v4
