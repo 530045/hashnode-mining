@@ -102,6 +102,7 @@ jobs:
           apply plugin: 'com.android.application'
 
           android {
+              namespace 'com.minersimstudio.hashnodeglobal'
               compileSdkVersion 35
               defaultConfig {
                   applicationId "com.minersimstudio.hashnodeglobal"
