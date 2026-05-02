@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-release:
-    name: 🏗️ Build AAB
+    name: 🏗️ Build Signed AAB
     runs-on: ubuntu-latest
 
     steps:
@@ -92,28 +92,85 @@ jobs:
       - name: 🔧 Make gradlew executable
         run: chmod +x android/gradlew
 
-      # ── İmzasız Release AAB derle ─────────────────────────
-      # Google Play kendi anahtarıyla otomatik imzalar
-      # ── versionCode'u artır ───────────────────────────
+      # ── KRİTİK: Keystore repoda varsa kullan, yoksa oluştur ──
+      # hashnode-release.keystore dosyasını repona yüklediysen
+      # her build aynı keystore'u kullanır → SHA1 hep aynı kalır
+      - name: 🔑 Setup Keystore
+        run: |
+          if [ -f "$GITHUB_WORKSPACE/hashnode-release.keystore" ]; then
+            echo "✅ Repodaki keystore kullanılıyor"
+            ls -lh "$GITHUB_WORKSPACE/hashnode-release.keystore"
+          else
+            echo "⚠️ Repoda keystore yok, yeni oluşturuluyor..."
+            keytool -genkeypair \
+              -v \
+              -storetype PKCS12 \
+              -keystore "$GITHUB_WORKSPACE/hashnode-release.keystore" \
+              -alias hashnodekey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass "Hashnode2024" \
+              -keypass "Hashnode2024" \
+              -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
+            echo "✅ Yeni keystore oluşturuldu"
+          fi
+          # SHA1 parmak izini göster (Google Play ile karşılaştır)
+          keytool -list -v \
+            -keystore "$GITHUB_WORKSPACE/hashnode-release.keystore" \
+            -storepass "Hashnode2024" \
+            -alias hashnodekey 2>/dev/null | grep "SHA1:" || true
+
+      # ── versionCode artır ─────────────────────────────────
       - name: 🔢 Bump versionCode
         run: |
           GRADLE="android/app/build.gradle"
-          # Mevcut versionCode'u bul ve 10 yap (önceki 1 kullanılmıştı)
           if grep -q "versionCode" "$GRADLE"; then
-            sed -i 's/versionCode [0-9]*/versionCode 10/' "$GRADLE"
-            echo "✅ versionCode → 10"
+            # Her build'de github run number kullan — benzersiz olur
+            sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" "$GRADLE"
+            echo "✅ versionCode → ${{ github.run_number }}"
           fi
-          # versionName güncelle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.0"/' "$GRADLE"
-          echo "✅ versionName → 1.0.0"
-          grep "versionCode\|versionName" "$GRADLE"
+          grep "versionCode\|versionName" "$GRADLE" || true
 
-      - name: 🏗️ Build Release AAB (unsigned)
+      # ── build.gradle'a signing config ekle ────────────────
+      - name: 📝 Patch build.gradle
+        run: |
+          GRADLE="android/app/build.gradle"
+          KEYSTORE_PATH="$GITHUB_WORKSPACE/hashnode-release.keystore"
+
+          # debug imza referansını temizle
+          sed -i 's/signingConfig signingConfigs\.debug//g' "$GRADLE" || true
+
+          cat >> "$GRADLE" << GROOVYEOF
+
+          // HashNode Signing Config
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("$KEYSTORE_PATH")
+                      storePassword "Hashnode2024"
+                      keyAlias "hashnodekey"
+                      keyPassword "Hashnode2024"
+                      v1SigningEnabled true
+                      v2SigningEnabled true
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                      shrinkResources false
+                  }
+              }
+          }
+          GROOVYEOF
+          echo "✅ Signing config eklendi"
+
+      # ── AAB derle ─────────────────────────────────────────
+      - name: 🏗️ Build Release AAB
         working-directory: android
         run: |
-          ./gradlew bundleRelease \
-            -x lintVitalRelease \
-            --stacktrace
+          ./gradlew bundleRelease --stacktrace
           echo "✅ AAB build tamamlandı"
 
       # ── AAB yeniden adlandır ───────────────────────────────
@@ -124,7 +181,14 @@ jobs:
           echo "Bulunan AAB: $AAB"
           cp "$AAB" release-output/HashNode-V9-Release.aab
           ls -lh release-output/
-          echo "✅ HashNode-V9-Release.aab hazır"
+
+      # ── Keystore yedek ────────────────────────────────────
+      - name: 💾 Upload Keystore Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNode-Keystore-Backup
+          path: ${{ github.workspace }}/hashnode-release.keystore
+          retention-days: 90
 
       # ── AAB artifact ──────────────────────────────────────
       - name: 📤 Upload Release AAB
@@ -139,8 +203,9 @@ jobs:
           echo "============================================"
           echo "  ✅  HashNode Global v9 — AAB BUILD OK"
           echo "============================================"
-          echo "  Dosya : HashNode-V9-Release.aab"
-          echo "  Boyut : $(du -sh release-output/HashNode-V9-Release.aab | cut -f1)"
-          echo "  Paket : com.minersimstudio.hashnodeglobal"
-          echo "  İmza  : Google Play tarafından imzalanacak"
+          echo "  Dosya  : HashNode-V9-Release.aab"
+          echo "  Boyut  : $(du -sh release-output/HashNode-V9-Release.aab | cut -f1)"
+          echo "  vCode  : ${{ github.run_number }}"
+          echo "  Paket  : com.minersimstudio.hashnodeglobal"
+          echo "  İmza   : PKCS12 — Hashnode2024"
           echo "============================================"
