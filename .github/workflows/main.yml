@@ -162,6 +162,37 @@ jobs:
           echo "✅ build.gradle yeniden yazıldı"
           cat android/app/build.gradle
 
+      # ── Splash screen ve eksik kaynakları oluştur ───────────
+      - name: 🎨 Create missing Android resources
+        run: |
+          # styles.xml
+          mkdir -p android/app/src/main/res/values
+          cat > android/app/src/main/res/values/styles.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="colorPrimary">@color/colorPrimary</item>
+                  <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+                  <item name="colorAccent">@color/colorAccent</item>
+              </style>
+              <style name="Theme.SplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="android:windowBackground">@color/colorPrimary</item>
+              </style>
+          </resources>
+          EOF
+
+          # colors.xml
+          cat > android/app/src/main/res/values/colors.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="colorPrimary">#00ff88</color>
+              <color name="colorPrimaryDark">#00cc66</color>
+              <color name="colorAccent">#0ff</color>
+          </resources>
+          EOF
+
+          echo "✅ styles.xml ve colors.xml oluşturuldu"
+
       # ── Keystore kontrol ──────────────────────────────────
       - name: 🔑 Setup Keystore
         run: |
