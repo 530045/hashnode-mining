@@ -1,198 +1,197 @@
-‎name: HashNode Global — Release AAB (Google Play)
-‎
-‎on:
-‎  push:
-‎    branches: [ main ]
-‎  workflow_dispatch:
-‎
-‎jobs:
-‎  build-release:
-‎    name: 🏗️ Build Signed AAB
-‎    runs-on: ubuntu-latest
-‎
-‎    steps:
-‎
-‎      - name: 📥 Checkout
-‎        uses: actions/checkout@v4
-‎
-‎      - name: 🟢 Setup Node.js 20
-‎        uses: actions/setup-node@v4
-‎        with:
-‎          node-version: '20'
-‎
-‎      - name: ☕ Setup Java 17
-‎        uses: actions/setup-java@v4
-‎        with:
-‎          java-version: '17'
-‎          distribution: 'temurin'
-‎
-‎      - name: 🤖 Setup Android SDK
-‎        uses: android-actions/setup-android@v3
-‎
-‎      # ── www + index.html ──────────────────────────────────
-‎      - name: 🌐 Create www + index.html
-‎        run: |
-‎          mkdir -p www
-‎          if [ -f HASHNODE_GLOBAL_FINAL.html ]; then
-‎            cp HASHNODE_GLOBAL_FINAL.html www/index.html
-‎            echo "✅ HASHNODE_GLOBAL_FINAL.html → www/index.html"
-‎          elif [ -f index.html ]; then
-‎            cp index.html www/index.html
-‎          else
-‎            echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>HashNode Global</title></head><body><h1>HashNode Global</h1></body></html>" > www/index.html
-‎          fi
-‎
-‎      - name: 📝 Create package.json
-‎        run: |
-‎          cat > package.json << 'EOF'
-‎          {
-‎            "name": "hashnode-global",
-‎            "version": "9.0.0",
-‎            "scripts": { "build": "echo ok" },
-‎            "dependencies": {
-‎              "@capacitor/core": "5.7.0",
-‎              "@capacitor/android": "5.7.0"
-‎            },
-‎            "devDependencies": {
-‎              "@capacitor/cli": "5.7.0"
-‎            }
-‎          }
-‎          EOF
-‎
-‎      - name: 📝 Create capacitor.config.json
-‎        run: |
-‎          cat > capacitor.config.json << 'EOF'
-‎          {
-‎            "appId": "com.hashnode.global",
-‎            "appName": "HashNode Global",
-‎            "webDir": "www"
-‎          }
-‎          EOF
-‎
-‎      - name: 📦 npm install
-‎        run: npm install
-‎
-‎      - name: 🤖 Add Android platform
-‎        run: |
-‎          if [ ! -d android ]; then
-‎            npx cap add android
-‎          else
-‎            echo "Android zaten var"
-‎          fi
-‎
-‎      - name: 📁 Ensure assets folder
-‎        run: mkdir -p android/app/src/main/assets
-‎
-‎      - name: 📋 Capacitor copy
-‎        run: npx cap copy android
-‎
-‎      - name: 🔄 Capacitor update
-‎        run: npx cap update android
-‎
-‎      - name: 🔧 Make gradlew executable
-‎        run: chmod +x android/gradlew
-‎
-‎      # ── Keystore'u android/ kök dizinine yaz (app/ değil) ─
-‎      - name: 🔑 Generate PKCS12 Keystore
-‎        run: |
-‎          # Keystore'u android/ altına (app/ DEĞİL) kaydediyoruz
-‎          # Böylece build.gradle'dan rootProject.file() ile erişilir
-‎          keytool -genkeypair \
-‎            -v \
-‎            -storetype PKCS12 \
-‎            -keystore $GITHUB_WORKSPACE/hashnode-release.keystore \
-‎            -alias hashnodekey \
-‎            -keyalg RSA \
-‎            -keysize 2048 \
-‎            -validity 10000 \
-‎            -storepass "Hashnode2024" \
-‎            -keypass "Hashnode2024" \
-‎            -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
-‎          echo "✅ Keystore oluşturuldu: $GITHUB_WORKSPACE/hashnode-release.keystore"
-‎          ls -lh $GITHUB_WORKSPACE/hashnode-release.keystore
-‎
-‎      # ── build.gradle'a TAM YOL ile signing config ekle ────
-‎      - name: 📝 Patch build.gradle — signing config
-‎        run: |
-‎          GRADLE="android/app/build.gradle"
-‎          KEYSTORE_PATH="$GITHUB_WORKSPACE/hashnode-release.keystore"
-‎
-‎          echo "=== Keystore yolu: $KEYSTORE_PATH ==="
-‎          ls -lh "$KEYSTORE_PATH"
-‎
-‎          # debug imza referansını temizle
-‎          sed -i 's/signingConfig signingConfigs\.debug//g' "$GRADLE" || true
-‎
-‎          # Tam yol ile signing config ekle
-‎          cat >> "$GRADLE" << GROOVYEOF
-‎
-‎          // HashNode Signing Config
-‎          android {
-‎              signingConfigs {
-‎                  release {
-‎                      storeFile file("$KEYSTORE_PATH")
-‎                      storePassword "Hashnode2024"
-‎                      keyAlias "hashnodekey"
-‎                      keyPassword "Hashnode2024"
-‎                      v1SigningEnabled true
-‎                      v2SigningEnabled true
-‎                  }
-‎              }
-‎              buildTypes {
-‎                  release {
-‎                      signingConfig signingConfigs.release
-‎                      minifyEnabled false
-‎                      shrinkResources false
-‎                  }
-‎              }
-‎          }
-‎          GROOVYEOF
-‎
-‎          echo "✅ build.gradle güncellendi"
-‎          echo "=== Son 20 satır ==="
-‎          tail -20 "$GRADLE"
-‎
-‎      # ── AAB derle ─────────────────────────────────────────
-‎      - name: 🏗️ Build Release AAB
-‎        working-directory: android
-‎        run: |
-‎          ./gradlew bundleRelease --stacktrace
-‎          echo "✅ AAB build tamamlandı"
-‎
-‎      # ── AAB yeniden adlandır ───────────────────────────────
-‎      - name: ✏️ Rename AAB
-‎        run: |
-‎          mkdir -p release-output
-‎          AAB=$(find android/app/build/outputs/bundle/release/ -name "*.aab" | head -1)
-‎          echo "Bulunan AAB: $AAB"
-‎          cp "$AAB" release-output/HashNode-V9-Release.aab
-‎          ls -lh release-output/
-‎          echo "✅ HashNode-V9-Release.aab hazır"
-‎
-‎      # ── Keystore yedek ────────────────────────────────────
-‎      - name: 💾 Upload Keystore Backup
-‎        uses: actions/upload-artifact@v4
-‎        with:
-‎          name: HashNode-Keystore-Backup
-‎          path: ${{ github.workspace }}/hashnode-release.keystore
-‎          retention-days: 90
-‎
-‎      # ── AAB artifact ──────────────────────────────────────
-‎      - name: 📤 Upload Release AAB
-‎        uses: actions/upload-artifact@v4
-‎        with:
-‎          name: HashNode-V9-Release-AAB
-‎          path: release-output/HashNode-V9-Release.aab
-‎          retention-days: 30
-‎
-‎      - name: 📋 Build Summary
-‎        run: |
-‎          echo "============================================"
-‎          echo "  ✅  HashNode Global v9 — AAB BUILD OK"
-‎          echo "============================================"
-‎          echo "  Dosya : HashNode-V9-Release.aab"
-‎          echo "  Boyut : $(du -sh release-output/HashNode-V9-Release.aab | cut -f1)"
-‎          echo "  Format: Android App Bundle (Google Play)"
-‎          echo "  İmza  : PKCS12 Signed"
-‎          echo "============================================"
-‎
+name: HashNode Global — Release AAB (Google Play)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    name: 🏗️ Build Signed AAB
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ── www + index.html ──────────────────────────────────
+      - name: 🌐 Create www + index.html
+        run: |
+          mkdir -p www
+          if [ -f HASHNODE_GLOBAL_FINAL.html ]; then
+            cp HASHNODE_GLOBAL_FINAL.html www/index.html
+            echo "✅ HASHNODE_GLOBAL_FINAL.html → www/index.html"
+          elif [ -f index.html ]; then
+            cp index.html www/index.html
+          else
+            echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>HashNode Global</title></head><body><h1>HashNode Global</h1></body></html>" > www/index.html
+          fi
+
+      - name: 📝 Create package.json
+        run: |
+          cat > package.json << 'EOF'
+          {
+            "name": "hashnode-global",
+            "version": "9.0.0",
+            "scripts": { "build": "echo ok" },
+            "dependencies": {
+              "@capacitor/core": "5.7.0",
+              "@capacitor/android": "5.7.0"
+            },
+            "devDependencies": {
+              "@capacitor/cli": "5.7.0"
+            }
+          }
+          EOF
+
+      - name: 📝 Create capacitor.config.json
+        run: |
+          cat > capacitor.config.json << 'EOF'
+          {
+            "appId": "com.minersimstudio.hashnodeglobal",
+            "appName": "HashNode Global",
+            "webDir": "www"
+          }
+          EOF
+
+      - name: 📦 npm install
+        run: npm install
+
+      - name: 🤖 Add Android platform
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          else
+            echo "Android zaten var"
+          fi
+
+      - name: 📁 Ensure assets folder
+        run: mkdir -p android/app/src/main/assets
+
+      - name: 📋 Capacitor copy
+        run: npx cap copy android
+
+      - name: 🔄 Capacitor update
+        run: npx cap update android
+
+      - name: 🔧 Make gradlew executable
+        run: chmod +x android/gradlew
+
+      # ── Keystore'u android/ kök dizinine yaz (app/ değil) ─
+      - name: 🔑 Generate PKCS12 Keystore
+        run: |
+          # Keystore'u android/ altına (app/ DEĞİL) kaydediyoruz
+          # Böylece build.gradle'dan rootProject.file() ile erişilir
+          keytool -genkeypair \
+            -v \
+            -storetype PKCS12 \
+            -keystore $GITHUB_WORKSPACE/hashnode-release.keystore \
+            -alias hashnodekey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass "Hashnode2024" \
+            -keypass "Hashnode2024" \
+            -dname "CN=HashNode Global, OU=Mobile, O=HashNode, L=Istanbul, ST=Istanbul, C=TR"
+          echo "✅ Keystore oluşturuldu: $GITHUB_WORKSPACE/hashnode-release.keystore"
+          ls -lh $GITHUB_WORKSPACE/hashnode-release.keystore
+
+      # ── build.gradle'a TAM YOL ile signing config ekle ────
+      - name: 📝 Patch build.gradle — signing config
+        run: |
+          GRADLE="android/app/build.gradle"
+          KEYSTORE_PATH="$GITHUB_WORKSPACE/hashnode-release.keystore"
+
+          echo "=== Keystore yolu: $KEYSTORE_PATH ==="
+          ls -lh "$KEYSTORE_PATH"
+
+          # debug imza referansını temizle
+          sed -i 's/signingConfig signingConfigs\.debug//g' "$GRADLE" || true
+
+          # Tam yol ile signing config ekle
+          cat >> "$GRADLE" << GROOVYEOF
+
+          // HashNode Signing Config
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("$KEYSTORE_PATH")
+                      storePassword "Hashnode2024"
+                      keyAlias "hashnodekey"
+                      keyPassword "Hashnode2024"
+                      v1SigningEnabled true
+                      v2SigningEnabled true
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                      shrinkResources false
+                  }
+              }
+          }
+          GROOVYEOF
+
+          echo "✅ build.gradle güncellendi"
+          echo "=== Son 20 satır ==="
+          tail -20 "$GRADLE"
+
+      # ── AAB derle ─────────────────────────────────────────
+      - name: 🏗️ Build Release AAB
+        working-directory: android
+        run: |
+          ./gradlew bundleRelease --stacktrace
+          echo "✅ AAB build tamamlandı"
+
+      # ── AAB yeniden adlandır ───────────────────────────────
+      - name: ✏️ Rename AAB
+        run: |
+          mkdir -p release-output
+          AAB=$(find android/app/build/outputs/bundle/release/ -name "*.aab" | head -1)
+          echo "Bulunan AAB: $AAB"
+          cp "$AAB" release-output/HashNode-V9-Release.aab
+          ls -lh release-output/
+          echo "✅ HashNode-V9-Release.aab hazır"
+
+      # ── Keystore yedek ────────────────────────────────────
+      - name: 💾 Upload Keystore Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNode-Keystore-Backup
+          path: ${{ github.workspace }}/hashnode-release.keystore
+          retention-days: 90
+
+      # ── AAB artifact ──────────────────────────────────────
+      - name: 📤 Upload Release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNode-V9-Release-AAB
+          path: release-output/HashNode-V9-Release.aab
+          retention-days: 30
+
+      - name: 📋 Build Summary
+        run: |
+          echo "============================================"
+          echo "  ✅  HashNode Global v9 — AAB BUILD OK"
+          echo "============================================"
+          echo "  Dosya : HashNode-V9-Release.aab"
+          echo "  Boyut : $(du -sh release-output/HashNode-V9-Release.aab | cut -f1)"
+          echo "  Format: Android App Bundle (Google Play)"
+          echo "  İmza  : PKCS12 Signed"
+          echo "============================================"
