@@ -90,6 +90,19 @@ jobs:
       - name: 🔧 Make gradlew executable
         run: chmod +x android/gradlew
 
+      # AGP 8.0 → 8.2 yükselt (compileSdk 34 destekler)
+      - name: ⬆️ Upgrade Android Gradle Plugin
+        run: |
+          # build.gradle sürümünü güncelle
+          sed -i "s/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.2.2/" android/build.gradle || true
+          # gradle-wrapper.properties'i güncelle
+          sed -i "s|gradle-[0-9.]*-all.zip|gradle-8.2.1-all.zip|" android/gradle/wrapper/gradle-wrapper.properties || true
+          sed -i "s|gradle-[0-9.]*-bin.zip|gradle-8.2.1-all.zip|" android/gradle/wrapper/gradle-wrapper.properties || true
+          echo "=== gradle-wrapper.properties ==="
+          cat android/gradle/wrapper/gradle-wrapper.properties || true
+          echo "=== android/build.gradle ==="
+          cat android/build.gradle || true
+
       # ── KRİTİK: build.gradle'ı tamamen yeniden yaz ────────
       # rootProject null hatası Capacitor'ın ürettiği 3-5. satırlardan
       # geliyor. Dosyayı sıfırdan yazarak bu sorunu ortadan kaldırıyoruz.
@@ -103,11 +116,11 @@ jobs:
 
           android {
               namespace 'com.minersimstudio.hashnodeglobal'
-              compileSdkVersion 35
+              compileSdkVersion 34
               defaultConfig {
                   applicationId "com.minersimstudio.hashnodeglobal"
                   minSdkVersion 22
-                  targetSdkVersion 35
+                  targetSdkVersion 34
                   versionCode $RUN_NUMBER
                   versionName "1.0.0"
               }
