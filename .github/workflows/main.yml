@@ -94,6 +94,20 @@ jobs:
 
       # ── İmzasız Release AAB derle ─────────────────────────
       # Google Play kendi anahtarıyla otomatik imzalar
+      # ── versionCode'u artır ───────────────────────────
+      - name: 🔢 Bump versionCode
+        run: |
+          GRADLE="android/app/build.gradle"
+          # Mevcut versionCode'u bul ve 10 yap (önceki 1 kullanılmıştı)
+          if grep -q "versionCode" "$GRADLE"; then
+            sed -i 's/versionCode [0-9]*/versionCode 10/' "$GRADLE"
+            echo "✅ versionCode → 10"
+          fi
+          # versionName güncelle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.0"/' "$GRADLE"
+          echo "✅ versionName → 1.0.0"
+          grep "versionCode\|versionName" "$GRADLE"
+
       - name: 🏗️ Build Release AAB (unsigned)
         working-directory: android
         run: |
